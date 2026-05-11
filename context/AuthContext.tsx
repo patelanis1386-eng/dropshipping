@@ -50,14 +50,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const ADMIN_EMAIL = 'patelanis5304@gmail.com';
+
+const signUp = async (email: string, password: string, name: string) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
+    const role = email === ADMIN_EMAIL ? 'admin' : 'user';
     try {
       await setDoc(doc(db, 'users', cred.user.uid), {
         name,
         email,
-        role: 'user',
+        role,
         createdAt: new Date().toISOString(),
       });
     } catch {
