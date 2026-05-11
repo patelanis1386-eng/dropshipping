@@ -54,7 +54,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 const signUp = async (email: string, password: string, name: string) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(cred.user, { displayName: name });
+    try {
+      await updateProfile(cred.user, { displayName: name });
+    } catch {
+      console.warn('Profile update failed, user created without display name');
+    }
     const role = email === ADMIN_EMAIL ? 'admin' : 'user';
     try {
       await setDoc(doc(db, 'users', cred.user.uid), {
