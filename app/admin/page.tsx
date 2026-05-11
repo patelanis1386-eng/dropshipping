@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import AdminRoute from "@/components/AdminRoute";
 import { useAuth } from "@/context/AuthContext";
@@ -103,9 +102,9 @@ export default function AdminPage() {
         </div>
         <nav className="p-4 space-y-1">
           {adminNav.map((item) => (
-            <button
+            <a
               key={item.label}
-              onClick={() => router.push(item.href)}
+              href={item.href}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 isActive(item.href)
                   ? "gradient-bg text-white shadow-md"
@@ -114,7 +113,7 @@ export default function AdminPage() {
             >
               {item.icon}
               {item.label}
-            </button>
+            </a>
           ))}
           <div className="pt-4 mt-4 border-t border-gray-200">
             <button onClick={() => { signOut(); router.push("/"); }} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all">
