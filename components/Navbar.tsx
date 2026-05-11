@@ -1,23 +1,37 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingCart, User, Menu, X, Moon, Sun, Heart } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X, Moon, Sun, Heart, LogOut, Settings } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useThemeStore } from '@/store/themeStore';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const itemCount = useCartStore((s) => s.getItemCount());
   const { isDark, toggle } = useThemeStore();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const navLinks = [
@@ -88,9 +102,37 @@ export default function Navbar() {
                 )}
               </Link>
 
-              <Link href="/login" className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <User className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-              </Link>
+              <div className="relative" ref={userMenuRef}>
+                {user ? (
+                  <>
+                    <button onClick={() => setUserMenuOpen(!userMenuOpen)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                      <div className="w-6 h-6 rounded-full gradient-bg flex items-center justify-center text-white text-xs font-bold">
+                        {user.displayName?.[0] || user.email?.[0] || 'U'}
+                      </div>
+                    </button>
+                    <AnimatePresence>
+                      {userMenuOpen && (
+                        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-premium-lg border border-gray-100 dark:border-gray-700 py-2">
+                          <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.displayName || 'User'}</p>
+                            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                          </div>
+                          <Link href="/admin" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <Settings className="w-4 h-4" /> Dashboard
+                          </Link>
+                          <button onClick={() => { signOut(); setUserMenuOpen(false); }} className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors w-full text-left">
+                            <LogOut className="w-4 h-4" /> Sign Out
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </>
+                ) : (
+                  <Link href="/login" className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <User className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                  </Link>
+                )}
+              </div>
 
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
