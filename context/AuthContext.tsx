@@ -31,9 +31,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
-        const docRef = doc(db, 'users', u.uid);
-        const snap = await getDoc(docRef);
-        setUserRole(snap.exists() ? snap.data().role : 'user');
+        try {
+          const docRef = doc(db, 'users', u.uid);
+          const snap = await getDoc(docRef);
+          setUserRole(snap.exists() ? snap.data().role : 'user');
+        } catch {
+          setUserRole('user');
+        }
       } else {
         setUserRole(null);
       }
@@ -49,12 +53,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, name: string) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
-    await setDoc(doc(db, 'users', cred.user.uid), {
-      name,
-      email,
-      role: 'user',
-      createdAt: new Date().toISOString(),
-    });
+    try {
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        name,
+        email,
+        role: 'user',
+        createdAt: new Date().toISOString(),
+      });
+    } catch {
+      console.warn('Firestore unavailable, auth works without role storage');
+    }
   };
 
   const signOut = async () => {
