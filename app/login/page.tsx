@@ -24,12 +24,12 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signIn(email, password);
-      router.push("/");
+      router.replace("/");
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("Failed to sign in");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

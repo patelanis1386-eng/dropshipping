@@ -46,12 +46,12 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await signUp(email, password, name);
-      router.push("/");
+      router.replace("/");
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("Failed to create account");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
