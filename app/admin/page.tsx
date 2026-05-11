@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import AdminRoute from "@/components/AdminRoute";
 import {
   LayoutDashboard,
   Package,
@@ -66,6 +67,7 @@ export default function AdminPage() {
   const [dateTime] = useState(new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" }));
 
   return (
+    <AdminRoute>
     <div className="min-h-screen bg-gray-50 flex">
       <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-auto ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
@@ -238,5 +240,6 @@ export default function AdminPage() {
         </main>
       </div>
     </div>
+    </AdminRoute>
   );
 }

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { products as staticProducts, formatPrice, truncate } from "@/lib/utils";
 import { useCartStore } from "@/store/cartStore";
+import AdminRoute from "@/components/AdminRoute";
 
 interface Product {
   id: number;
@@ -137,6 +138,7 @@ export default function AdminProductsPage() {
   };
 
   return (
+    <AdminRoute>
     <div className="min-h-screen bg-gray-50 flex">
       <aside
         className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-auto ${
@@ -473,5 +475,6 @@ export default function AdminProductsPage() {
         )}
       </AnimatePresence>
     </div>
+    </AdminRoute>
   );
 }
