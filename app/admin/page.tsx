@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import AdminRoute from "@/components/AdminRoute";
+import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard,
   Package,
@@ -63,8 +66,24 @@ function getStatusColor(status: string) {
 }
 
 export default function AdminPage() {
+  const router = useRouter();
+  const { signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dateTime] = useState(new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" }));
+
+  const adminNav = [
+    { label: "Dashboard", icon: <LayoutDashboard size={20} />, href: "/admin" },
+    { label: "Products", icon: <Package size={20} />, href: "/admin/products" },
+    { label: "Orders", icon: <ShoppingCart size={20} />, href: "/admin/orders" },
+    { label: "Customers", icon: <Users size={20} />, href: "/admin/customers" },
+    { label: "Analytics", icon: <BarChart3 size={20} />, href: "/admin/analytics" },
+    { label: "Settings", icon: <SettingsIcon size={20} />, href: "/admin/settings" },
+  ];
+
+  const isActive = (href: string) => {
+    if (href === "/admin") return window.location.pathname === "/admin";
+    return window.location.pathname.startsWith(href);
+  };
 
   return (
     <AdminRoute>
@@ -82,11 +101,12 @@ export default function AdminPage() {
           </button>
         </div>
         <nav className="p-4 space-y-1">
-          {navItems.map((item) => (
+          {adminNav.map((item) => (
             <button
               key={item.label}
+              onClick={() => router.push(item.href)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                item.active
+                isActive(item.href)
                   ? "gradient-bg text-white shadow-md"
                   : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
               }`}
@@ -96,7 +116,7 @@ export default function AdminPage() {
             </button>
           ))}
           <div className="pt-4 mt-4 border-t border-gray-200">
-            <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all">
+            <button onClick={() => { signOut(); router.push("/"); }} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all">
               <LogOut size={20} />
               Logout
             </button>
