@@ -16,7 +16,7 @@ export default function Navbar() {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const itemCount = useCartStore((s) => s.getItemCount());
   const { isDark, toggle } = useThemeStore();
-  const { user, signOut } = useAuth();
+  const { user, userRole, signOut } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -117,9 +117,11 @@ export default function Navbar() {
                             <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.displayName || 'User'}</p>
                             <p className="text-xs text-gray-500 truncate">{user.email}</p>
                           </div>
-                          <Link href="/admin" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <Settings className="w-4 h-4" /> Dashboard
-                          </Link>
+                          {userRole === 'admin' && (
+                            <Link href="/admin" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                              <Settings className="w-4 h-4" /> Dashboard
+                            </Link>
+                          )}
                           <button onClick={() => { signOut(); setUserMenuOpen(false); }} className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors w-full text-left">
                             <LogOut className="w-4 h-4" /> Sign Out
                           </button>
