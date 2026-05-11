@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { User, Mail, Lock, Eye, EyeOff, Loader } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -32,7 +31,6 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
-  const router = useRouter();
 
   const strength = getPasswordStrength(password);
 
@@ -46,7 +44,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await signUp(email, password, name);
-      router.replace("/");
+      window.location.href = "/";
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("Failed to create account");
