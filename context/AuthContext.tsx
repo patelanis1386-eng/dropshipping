@@ -31,12 +31,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
+        const isAdmin = u.email === ADMIN_EMAIL;
         try {
           const docRef = doc(db, 'users', u.uid);
           const snap = await getDoc(docRef);
-          setUserRole(snap.exists() ? snap.data().role : 'user');
+          setUserRole(snap.exists() ? snap.data().role : (isAdmin ? 'admin' : 'user'));
         } catch {
-          setUserRole('user');
+          setUserRole(isAdmin ? 'admin' : 'user');
         }
       } else {
         setUserRole(null);
