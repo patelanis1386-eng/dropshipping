@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import AdminRoute from "@/components/AdminRoute";
@@ -67,6 +67,7 @@ function getStatusColor(status: string) {
 
 export default function AdminPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dateTime] = useState(new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" }));
@@ -81,8 +82,8 @@ export default function AdminPage() {
   ];
 
   const isActive = (href: string) => {
-    if (href === "/admin") return window.location.pathname === "/admin";
-    return window.location.pathname.startsWith(href);
+    if (href === "/admin") return pathname === "/admin";
+    return pathname.startsWith(href);
   };
 
   return (
