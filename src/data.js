@@ -1,39 +1,30 @@
-const PRODUCTS = [
-  { id: 1, name: "AirPods Pro Max Elite", category: "electronics", price: 189.99, original: 299.99, rating: 4.8, reviews: 2341, badge: "Best Seller", shipping: "Free Shipping", stock: 342, desc: "Premium wireless earbuds with active noise cancellation, spatial audio, and up to 30 hours of battery life. Features adaptive EQ and a custom-fit design.", img: "https://images.unsplash.com/photo-1588156979435-379b21e48341?w=600&q=80" },
-  { id: 2, name: "Silk Glow Serum Set", category: "beauty", price: 42.99, original: 79.99, rating: 4.9, reviews: 1892, badge: "Editor's Pick", shipping: "Free Shipping", stock: 178, desc: "Luxury vitamin C serum set with hyaluronic acid and retinol. Dermatologist-tested, cruelty-free formula for radiant skin.", img: "https://images.unsplash.com/photo-1570194065650-d99fb4ee8e39?w=600&q=80" },
-  { id: 3, name: "Minimalist Linen Blazer", category: "fashion", price: 67.99, original: 120.00, rating: 4.7, reviews: 934, badge: "Trending", shipping: "Free Shipping", stock: 89, desc: "European linen blazer with a relaxed fit. Perfect for layering — breathable, wrinkle-resistant, and sustainably sourced.", img: "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=600&q=80" },
-  { id: 4, name: "Smart LED Desk Lamp", category: "electronics", price: 54.99, original: 89.99, rating: 4.6, reviews: 1567, badge: "Hot Deal", shipping: "Free Shipping", stock: 215, desc: "Qi-enabled wireless charging desk lamp with 5 color temperatures, touch dimmer, and 25-year LED lifespan.", img: "https://images.unsplash.com/photo-1507473885765-e6ed057ab6fe?w=600&q=80" },
-  { id: 5, name: "Ceramic Pour-Over Set", category: "home", price: 38.99, original: 65.00, rating: 4.9, reviews: 743, badge: "Top Rated", shipping: "Free Shipping", stock: 64, desc: "Handcrafted ceramic pour-over coffee set with double-wall carafe. Brew the perfect cup every morning.", img: "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=600&q=80" },
-  { id: 6, name: "Gold Hoop Earring Pack", category: "fashion", price: 24.99, original: 49.99, rating: 4.8, reviews: 2109, badge: "Best Seller", shipping: "Free Shipping", stock: 456, desc: "Set of 5 gold-plated hoop earrings in varying sizes. Hypoallergenic, tarnish-resistant, and arrives in a gift box.", img: "https://images.unsplash.com/photo-1635767798638-3665ea302b6d?w=600&q=80" },
-  { id: 7, name: "Portable Blender Pro", category: "home", price: 44.99, original: 79.99, rating: 4.7, reviews: 1234, badge: "Trending", shipping: "Free Shipping", stock: 198, desc: "USB-C rechargeable portable blender. Crushes ice, 6 blades, 20oz capacity. Perfect for smoothies on the go.", img: "https://images.unsplash.com/photo-1570222094111-d2b1d10f6e09?w=600&q=80" },
-  { id: 8, name: "Retinol Night Cream", category: "beauty", price: 35.99, original: 68.00, rating: 4.8, reviews: 889, badge: "Editor's Pick", shipping: "Free Shipping", stock: 132, desc: "Clinical-strength retinol night cream with peptides and ceramides. Reduces fine lines while you sleep.", img: "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=600&q=80" },
-  { id: 9, name: "Oversized Cargo Trousers", category: "fashion", price: 59.99, original: 99.00, rating: 4.6, reviews: 678, badge: "New Arrival", shipping: "Free Shipping", stock: 73, desc: "Utility-inspired cargo trousers in heavyweight cotton twill. 6 pockets, adjustable waist, YKK zippers.", img: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&q=80" },
-  { id: 10, name: "Wireless Charging Pad", category: "electronics", price: 29.99, original: 49.99, rating: 4.5, reviews: 3201, badge: "Best Seller", shipping: "Free Shipping", stock: 567, desc: "15W fast wireless charger with LED indicator. Compatible with all Qi devices. Ultra-slim design.", img: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=600&q=80" },
-  { id: 11, name: "Velvet Throw Blanket", category: "home", price: 32.99, original: 60.00, rating: 4.9, reviews: 1102, badge: "Top Rated", shipping: "Free Shipping", stock: 89, desc: "Ultra-soft double-sided velvet throw. Machine washable, anti-pilling, available in 12 rich colors.", img: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80" },
-  { id: 12, name: "Lip Gloss Collection", category: "beauty", price: 18.99, original: 35.00, rating: 4.7, reviews: 2567, badge: "Trending", shipping: "Free Shipping", stock: 234, desc: "Set of 6 high-shine lip glosses. Vitamin E enriched, non-sticky formula. Cruelty-free and vegan.", img: "https://images.unsplash.com/photo-1631214524020-7e18db9a8f92?w=600&q=80" },
+export const SEED_PRODUCTS = [
+  { id: "seed-1", name: "AirPods Pro Max Elite", category: "electronics", price: 189.99, original: 299.99, rating: 4.8, reviews: 2341, badge: "Best Seller", shipping: "Free Shipping", stock: 342, desc: "Premium wireless earbuds with active noise cancellation, spatial audio, and up to 30 hours of battery life. Features adaptive EQ and a custom-fit design.", img: "https://images.unsplash.com/photo-1588156979435-379b21e48341?w=600&q=80" },
+  { id: "seed-2", name: "Silk Glow Serum Set", category: "beauty", price: 42.99, original: 79.99, rating: 4.9, reviews: 1892, badge: "Editor's Pick", shipping: "Free Shipping", stock: 178, desc: "Luxury vitamin C serum set with hyaluronic acid and retinol. Dermatologist-tested, cruelty-free formula for radiant skin.", img: "https://images.unsplash.com/photo-1570194065650-d99fb4ee8e39?w=600&q=80" },
+  { id: "seed-3", name: "Minimalist Linen Blazer", category: "fashion", price: 67.99, original: 120.00, rating: 4.7, reviews: 934, badge: "Trending", shipping: "Free Shipping", stock: 89, desc: "European linen blazer with a relaxed fit. Perfect for layering \u2014 breathable, wrinkle-resistant, and sustainably sourced.", img: "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=600&q=80" },
+  { id: "seed-4", name: "Smart LED Desk Lamp", category: "electronics", price: 54.99, original: 89.99, rating: 4.6, reviews: 1567, badge: "Hot Deal", shipping: "Free Shipping", stock: 215, desc: "Qi-enabled wireless charging desk lamp with 5 color temperatures, touch dimmer, and 25-year LED lifespan.", img: "https://images.unsplash.com/photo-1507473885765-e6ed057ab6fe?w=600&q=80" },
+  { id: "seed-5", name: "Ceramic Pour-Over Set", category: "home", price: 38.99, original: 65.00, rating: 4.9, reviews: 743, badge: "Top Rated", shipping: "Free Shipping", stock: 64, desc: "Handcrafted ceramic pour-over coffee set with double-wall carafe. Brew the perfect cup every morning.", img: "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=600&q=80" },
+  { id: "seed-6", name: "Gold Hoop Earring Pack", category: "fashion", price: 24.99, original: 49.99, rating: 4.8, reviews: 2109, badge: "Best Seller", shipping: "Free Shipping", stock: 456, desc: "Set of 5 gold-plated hoop earrings in varying sizes. Hypoallergenic, tarnish-resistant, and arrives in a gift box.", img: "https://images.unsplash.com/photo-1635767798638-3665ea302b6d?w=600&q=80" },
+  { id: "seed-7", name: "Portable Blender Pro", category: "home", price: 44.99, original: 79.99, rating: 4.7, reviews: 1234, badge: "Trending", shipping: "Free Shipping", stock: 198, desc: "USB-C rechargeable portable blender. Crushes ice, 6 blades, 20oz capacity. Perfect for smoothies on the go.", img: "https://images.unsplash.com/photo-1570222094111-d2b1d10f6e09?w=600&q=80" },
+  { id: "seed-8", name: "Retinol Night Cream", category: "beauty", price: 35.99, original: 68.00, rating: 4.8, reviews: 889, badge: "Editor's Pick", shipping: "Free Shipping", stock: 132, desc: "Clinical-strength retinol night cream with peptides and ceramides. Reduces fine lines while you sleep.", img: "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=600&q=80" },
+  { id: "seed-9", name: "Oversized Cargo Trousers", category: "fashion", price: 59.99, original: 99.00, rating: 4.6, reviews: 678, badge: "New Arrival", shipping: "Free Shipping", stock: 73, desc: "Utility-inspired cargo trousers in heavyweight cotton twill. 6 pockets, adjustable waist, YKK zippers.", img: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&q=80" },
+  { id: "seed-10", name: "Wireless Charging Pad", category: "electronics", price: 29.99, original: 49.99, rating: 4.5, reviews: 3201, badge: "Best Seller", shipping: "Free Shipping", stock: 567, desc: "15W fast wireless charger with LED indicator. Compatible with all Qi devices. Ultra-slim design.", img: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=600&q=80" },
+  { id: "seed-11", name: "Velvet Throw Blanket", category: "home", price: 32.99, original: 60.00, rating: 4.9, reviews: 1102, badge: "Top Rated", shipping: "Free Shipping", stock: 89, desc: "Ultra-soft double-sided velvet throw. Machine washable, anti-pilling, available in 12 rich colors.", img: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80" },
+  { id: "seed-12", name: "Lip Gloss Collection", category: "beauty", price: 18.99, original: 35.00, rating: 4.7, reviews: 2567, badge: "Trending", shipping: "Free Shipping", stock: 234, desc: "Set of 6 high-shine lip glosses. Vitamin E enriched, non-sticky formula. Cruelty-free and vegan.", img: "https://images.unsplash.com/photo-1631214524020-7e18db9a8f92?w=600&q=80" },
 ]
-
-const REVIEWS = [
-  { name: "Amara Johnson", avatar: "AJ", rating: 5, text: "Absolutely obsessed with this store. The quality exceeded my expectations — everything feels premium. The shipping was faster than Amazon! Will definitely be ordering again.", product: "Silk Glow Serum Set", date: "May 8, 2026" },
+export const SEED_REVIEWS = [
+  { name: "Amara Johnson", avatar: "AJ", rating: 5, text: "Absolutely obsessed with this store. The quality exceeded my expectations \u2014 everything feels premium. The shipping was faster than Amazon! Will definitely be ordering again.", product: "Silk Glow Serum Set", date: "May 8, 2026" },
   { name: "Daniel Park", avatar: "DP", rating: 5, text: "Ordered twice already. The product photos are 100% accurate, packaging was impeccable, and customer service responded within 10 minutes.", product: "AirPods Pro Max Elite", date: "May 6, 2026" },
-  { name: "Sofia Reyes", avatar: "SR", rating: 5, text: "My skin has never looked better! The serum set actually works — I can see a noticeable difference in just 2 weeks. Worth every penny.", product: "Retinol Night Cream", date: "May 3, 2026" },
+  { name: "Sofia Reyes", avatar: "SR", rating: 5, text: "My skin has never looked better! The serum set actually works \u2014 I can see a noticeable difference in just 2 weeks. Worth every penny.", product: "Retinol Night Cream", date: "May 3, 2026" },
   { name: "Marcus Webb", avatar: "MW", rating: 5, text: "Premium store, premium experience. The checkout was smooth, tracking updates were accurate, and the blanket is incredibly soft. 10/10.", product: "Velvet Throw Blanket", date: "Apr 29, 2026" },
 ]
-
-const CATEGORIES = [
-  { name: "Fashion", icon: "\u25A0", color: "#e8b4b8", count: 156 },
-  { name: "Electronics", icon: "\u25A0", color: "#a8d8ea", count: 89 },
-  { name: "Beauty", icon: "\u25A0", color: "#f7d6e0", count: 124 },
-  { name: "Home", icon: "\u25A0", color: "#c8e6c9", count: 97 },
-  { name: "Trending", icon: "\u25A0", color: "#ffe0b2", count: 43 },
+export const SEED_CATEGORIES = [
+  { name: "Fashion", color: "#e8b4b8", count: 156 },
+  { name: "Electronics", color: "#a8d8ea", count: 89 },
+  { name: "Beauty", color: "#f7d6e0", count: 124 },
+  { name: "Home", color: "#c8e6c9", count: 97 },
+  { name: "Trending", color: "#ffe0b2", count: 43 },
 ]
 
-const ORDERS_DATA = [
-  { id: "ORD-9821", status: "Delivered", date: "May 10", items: 2, total: "$227.98", tracking: "OUT FOR DELIVERY" },
-  { id: "ORD-9820", status: "Shipped", date: "May 12", items: 1, total: "$42.99", tracking: "IN TRANSIT" },
-  { id: "ORD-9819", status: "Processing", date: "May 14", items: 3, total: "$134.97", tracking: "PROCESSING" },
-]
-
-export { PRODUCTS, REVIEWS, CATEGORIES, ORDERS_DATA }
 export const fmt = (n) => "$" + Number(n).toFixed(2)
 export const disc = (p, o) => Math.round(((o - p) / o) * 100)

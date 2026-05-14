@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react"
-import { PRODUCTS, REVIEWS, CATEGORIES, ORDERS_DATA, fmt, disc } from "./data"
+import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers } from "./firebase"
+import { SEED_PRODUCTS, SEED_REVIEWS, SEED_CATEGORIES, fmt, disc } from "./data"
+import { addDoc, collection, serverTimestamp } from "firebase/firestore"
 
 const Stars = ({ n }) => "\u2605".repeat(Math.floor(n)) + (n % 1 >= 0.5 ? "\u00BD" : "") + "\u25A0".repeat(5 - Math.ceil(n))
 
@@ -18,6 +20,49 @@ export default function App() {
   const [authMode, setAuthMode] = useState("login")
   const [newsletter, setNewsletter] = useState("")
   const [newsletterDone, setNewsletterDone] = useState(false)
+  const [orders, setOrders] = useState([])
+  const [authLoading, setAuthLoading] = useState(true)
+
+  const [products, setProducts] = useState(SEED_PRODUCTS)
+  const [reviews, setReviews] = useState(SEED_REVIEWS)
+  const [categories, setCategories] = useState(SEED_CATEGORIES)
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (fbUser) => {
+      if (fbUser) {
+        setUser({ name: fbUser.displayName || fbUser.email.split("@")[0], email: fbUser.email })
+      } else {
+        setUser(null)
+      }
+      setAuthLoading(false)
+    })
+    return () => unsub()
+  }, [])
+
+  const handleLogout = async () => {
+    await logOut()
+    setCart([])
+    setWishlist([])
+    setOrders([])
+    showToast("Signed out")
+  }
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [fp, fr, fc] = await Promise.all([getProducts(), getReviews(), getCategories()])
+        if (fp.length) setProducts(fp)
+        if (fr.length) setReviews(fr)
+        if (fc.length) setCategories(fc)
+      } catch (_) {}
+    }
+    load()
+  }, [])
+
+  useEffect(() => {
+    if (!user) { setOrders([]); return }
+    getOrders().then(setOrders).catch(() => setOrders([]))
+  }, [user])
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type })
@@ -48,7 +93,7 @@ export default function App() {
     if (extra.product) setSelectedProduct(extra.product)
   }
 
-  const filteredProducts = PRODUCTS
+  const filteredProducts = products
     .filter(p => catFilter === "all" || p.category === catFilter.toLowerCase())
     .filter(p => !searchQ || p.name.toLowerCase().includes(searchQ.toLowerCase()))
     .sort((a, b) =>
@@ -86,20 +131,21 @@ export default function App() {
         }
       `}</style>
 
-      <Navbar cart={cart} cartCount={cartCount} user={user} nav={nav} page={page} searchQ={searchQ} setSearchQ={setSearchQ} />
+      {authLoading && <div style={{ position: "fixed", inset: 0, background: "#faf9f7", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cormorant Garamond',serif", fontSize: 20, color: "#c8956c" }}>Loading...</div>}
+      <Navbar cart={cart} cartCount={cartCount} user={user} nav={nav} page={page} searchQ={searchQ} setSearchQ={setSearchQ} handleLogout={handleLogout} />
 
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
-      {page === "home"     && <HomePage products={PRODUCTS} reviews={REVIEWS} categories={CATEGORIES} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} setSearchQ={setSearchQ} newsletter={newsletter} setNewsletter={setNewsletter} newsletterDone={newsletterDone} setNewsletterDone={setNewsletterDone} showToast={showToast} />}
-      {page === "shop"     && <ShopPage products={filteredProducts} allProducts={PRODUCTS} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} catFilter={catFilter} setCatFilter={setCatFilter} searchQ={searchQ} setSearchQ={setSearchQ} sortBy={sortBy} setSortBy={setSortBy} />}
-      {page === "product"  && <ProductPage product={selectedProduct} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} products={PRODUCTS} showToast={showToast} />}
+      {page === "home"     && <HomePage products={products} reviews={reviews} categories={categories} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} setSearchQ={setSearchQ} newsletter={newsletter} setNewsletter={setNewsletter} newsletterDone={newsletterDone} setNewsletterDone={setNewsletterDone} showToast={showToast} />}
+      {page === "shop"     && <ShopPage products={filteredProducts} allProducts={products} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} catFilter={catFilter} setCatFilter={setCatFilter} searchQ={searchQ} setSearchQ={setSearchQ} sortBy={sortBy} setSortBy={setSortBy} />}
+      {page === "product"  && <ProductPage product={selectedProduct} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} products={products} showToast={showToast} />}
       {page === "cart"     && <CartPage cart={cart} setCart={setCart} removeCart={removeCart} cartTotal={cartTotal} nav={nav} />}
-      {page === "checkout" && <CheckoutPage cart={cart} cartTotal={cartTotal} payMethod={payMethod} setPayMethod={setPayMethod} nav={nav} showToast={showToast} setCart={setCart} />}
+      {page === "checkout" && <CheckoutPage cart={cart} cartTotal={cartTotal} payMethod={payMethod} setPayMethod={setPayMethod} nav={nav} showToast={showToast} setCart={setCart} user={user} orders={orders} setOrders={setOrders} />}
       {page === "wishlist" && <WishlistPage wishlist={wishlist} toggleWish={toggleWish} addCart={addCart} nav={nav} />}
-      {page === "auth"     && <AuthPage authMode={authMode} setAuthMode={setAuthMode} setUser={setUser} nav={nav} showToast={showToast} />}
-      {page === "orders"   && <OrdersPage orders={ORDERS_DATA} nav={nav} />}
+      {page === "auth"     && <AuthPage authMode={authMode} setAuthMode={setAuthMode} nav={nav} showToast={showToast} signUp={signUp} signIn={signIn} resetPassword={resetPassword} signInWithGoogle={signInWithGoogle} />}
+      {page === "orders"   && <OrdersPage orders={orders} nav={nav} user={user} />}
       {page === "tracking" && <TrackingPage nav={nav} />}
-      {page === "admin"    && <AdminPage products={PRODUCTS} orders={ORDERS_DATA} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} />}
+      {page === "admin"    && <AdminPage products={products} orders={orders} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} />}
       {page === "about"    && <StaticPage title="About Us" nav={nav}><AboutContent /></StaticPage>}
       {page === "contact"  && <StaticPage title="Contact Us" nav={nav}><ContactContent showToast={showToast} /></StaticPage>}
       {page === "privacy"  && <StaticPage title="Privacy Policy" nav={nav}><PrivacyContent /></StaticPage>}
@@ -112,13 +158,21 @@ export default function App() {
   )
 }
 
-function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ }) {
+function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleLogout }) {
   const [scrolled, setScrolled] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40)
     window.addEventListener("scroll", h)
     return () => window.removeEventListener("scroll", h)
   }, [])
+  useEffect(() => { if (!user) setShowUserMenu(false) }, [user])
+  useEffect(() => {
+    if (!showUserMenu) return
+    const close = (e) => { if (!e.target.closest("#user-menu-btn") && !e.target.closest("#user-menu-dropdown")) setShowUserMenu(false) }
+    document.addEventListener("click", close)
+    return () => document.removeEventListener("click", close)
+  }, [showUserMenu])
 
   return (
     <nav style={{ position: "sticky", top: 0, zIndex: 200, background: scrolled ? "rgba(250,249,247,0.97)" : "#faf9f7", borderBottom: scrolled ? "1px solid #ede8e0" : "none", transition: "all 0.3s" }}>
@@ -144,9 +198,29 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ }) {
             &#x1F6D2;
             {cartCount > 0 && <span style={{ position: "absolute", top: -6, right: -8, background: "#c8956c", color: "#fff", fontSize: 10, fontWeight: 700, width: 18, height: 18, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>{cartCount}</span>}
           </span>
-          <span className="nav-link" onClick={() => nav("auth")} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600, background: "#1a1a1a", color: "#fff", padding: "8px 18px", borderRadius: 8 }}>
-            {user ? user.name.split(" ")[0] : "Sign In"}
-          </span>
+          {user ? (
+            <div style={{ position: "relative" }}>
+              <div id="user-menu-btn" onClick={() => setShowUserMenu(!showUserMenu)} className="hover-btn" style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600, background: "#1a1a1a", color: "#fff", padding: "8px 18px", borderRadius: 8, cursor: "pointer" }}>
+                {user.name.split(" ")[0]} <span style={{ fontSize: 10 }}>{showUserMenu ? "\u25B2" : "\u25BC"}</span>
+              </div>
+              {showUserMenu && (
+                <div id="user-menu-dropdown" style={{ position: "absolute", top: "100%", right: 0, marginTop: 8, background: "#fff", borderRadius: 12, boxShadow: "0 8px 32px rgba(0,0,0,0.12)", minWidth: 180, overflow: "hidden", zIndex: 300 }}>
+                  <div style={{ padding: "14px 18px", borderBottom: "1px solid #f0ede8", fontFamily: "'Jost',sans-serif" }}>
+                    <div style={{ fontWeight: 600, fontSize: 14, color: "#1a1a1a" }}>{user.name}</div>
+                    <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{user.email}</div>
+                  </div>
+                  {[["My Orders", "orders"], ["Wishlist", "wishlist"], ["Admin", "admin"]].map(([l, p]) => (
+                    <div key={l} onClick={() => { setShowUserMenu(false); nav(p) }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#555", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#f8f5f0"} onMouseLeave={e => e.target.style.background = "transparent"}>{l}</div>
+                  ))}
+                  <div onClick={() => { setShowUserMenu(false); handleLogout() }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#ef4444", borderTop: "1px solid #f0ede8", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#fef2f2"} onMouseLeave={e => e.target.style.background = "transparent"}>Sign Out</div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <span className="nav-link" onClick={() => nav("auth")} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600, background: "#1a1a1a", color: "#fff", padding: "8px 18px", borderRadius: 8 }}>
+              Sign In
+            </span>
+          )}
         </div>
       </div>
     </nav>
@@ -542,16 +616,35 @@ function CartPage({ cart, setCart, removeCart, cartTotal, nav }) {
   )
 }
 
-function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast, setCart }) {
+function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast, setCart, user }) {
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({ name: "", email: "", address: "", city: "", zip: "", country: "US" })
+  const [placing, setPlacing] = useState(false)
   const upd = (k, v) => setForm(prev => ({ ...prev, [k]: v }))
   const total = cartTotal + cartTotal * 0.08
 
-  const placeOrder = () => {
+  const placeOrder = async () => {
     if (!form.name || !form.email || !form.address) return showToast("Please fill all fields", "info")
-    setStep(3)
-    setTimeout(() => { setCart([]); nav("orders"); showToast("Order placed successfully!") }, 2000)
+    setPlacing(true)
+    try {
+      await createOrder({
+        userId: user?.email || "guest",
+        customerName: form.name,
+        email: form.email,
+        address: `${form.address}, ${form.city}, ${form.zip}, ${form.country}`,
+        items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
+        total,
+        status: "Processing",
+        paymentMethod: payMethod,
+        tracking: "PROCESSING",
+      })
+      setCart([])
+      showToast("Order placed successfully!")
+      nav("orders")
+    } catch (e) {
+      showToast("Failed to place order. Try again.", "info")
+    }
+    setPlacing(false)
   }
 
   if (step === 3) return (
@@ -624,7 +717,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
               )}
               <div style={{ display: "flex", gap: 12 }}>
                 <button onClick={() => setStep(1)} style={{ flex: 1, background: "#f0ede8", color: "#555", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>&#x2190; Back</button>
-                <button onClick={() => setStep(3)} className="hover-btn" style={{ flex: 2, background: "#c8956c", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Review Order &#x2192;</button>
+                <button onClick={placeOrder} disabled={placing} className="hover-btn" style={{ flex: 2, background: placing ? "#ccc" : "#c8956c", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: placing ? "not-allowed" : "pointer" }}>{placing ? "Placing Order..." : "Place Order &#x2192;"}</button>
               </div>
             </div>
           )}
@@ -669,16 +762,69 @@ function WishlistPage({ wishlist, toggleWish, addCart, nav }) {
   )
 }
 
-function AuthPage({ authMode, setAuthMode, setUser, nav, showToast }) {
+function AuthPage({ authMode, setAuthMode, nav, showToast, signUp, signIn, resetPassword, signInWithGoogle }) {
   const [form, setForm] = useState({ name: "", email: "", password: "" })
+  const [submitting, setSubmitting] = useState(false)
+  const [showPw, setShowPw] = useState(false)
+  const [err, setErr] = useState("")
   const upd = (k, v) => setForm(p => ({ ...p, [k]: v }))
 
-  const submit = () => {
-    if (!form.email || !form.password) return showToast("Fill all fields", "info")
-    if (authMode === "signup" && !form.name) return showToast("Enter your name", "info")
-    setUser({ name: form.name || form.email.split("@")[0], email: form.email })
-    showToast(authMode === "login" ? "Welcome back!" : "Account created!")
-    nav("home")
+  const validate = () => {
+    if (!form.email.trim()) return "Email is required"
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return "Invalid email format"
+    if (authMode !== "forgot") {
+      if (!form.password) return "Password is required"
+      if (form.password.length < 6) return "Password must be at least 6 characters"
+    }
+    if (authMode === "signup" && !form.name.trim()) return "Full name is required"
+    return ""
+  }
+
+  const submit = async () => {
+    const v = validate()
+    if (v) return showToast(v, "info")
+    setSubmitting(true)
+    setErr("")
+    try {
+      if (authMode === "login") {
+        await signIn(form.email, form.password)
+        showToast("Welcome back!")
+      } else if (authMode === "signup") {
+        await signUp(form.email, form.password, form.name)
+        showToast("Account created! You're now signed in.")
+      } else {
+        await resetPassword(form.email)
+        showToast("Password reset link sent to your email", "info")
+        setAuthMode("login")
+        setSubmitting(false)
+        return
+      }
+      nav("home")
+    } catch (e) {
+      const msg = e.code === "auth/email-already-in-use" ? "This email is already registered. Try signing in." :
+                  e.code === "auth/user-not-found" ? "No account found with this email" :
+                  e.code === "auth/wrong-password" || e.code === "auth/invalid-credential" ? "Incorrect password" :
+                  e.code === "auth/too-many-requests" ? "Too many attempts. Try again later." :
+                  e.code === "auth/weak-password" ? "Password must be 6+ characters" :
+                  e.code === "auth/invalid-email" ? "Invalid email address" :
+                  e.code === "auth/network-request-failed" ? "Network error. Check your connection." :
+                  e.code === "auth/popup-closed-by-user" ? "" :
+                  e.code?.includes("auth/popup") ? "" :
+                  e.message || "Something went wrong"
+      if (msg) showToast(msg, "info")
+      setErr(msg)
+    }
+    setSubmitting(false)
+  }
+
+  const handleGoogle = async () => {
+    try {
+      await signInWithGoogle()
+      showToast("Signed in with Google")
+      nav("home")
+    } catch (e) {
+      if (!e.code?.includes("popup")) showToast("Google sign-in failed. Try again.", "info")
+    }
   }
 
   return (
@@ -694,53 +840,58 @@ function AuthPage({ authMode, setAuthMode, setUser, nav, showToast }) {
         {authMode === "signup" && (
           <div style={{ marginBottom: 16 }}>
             <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>Full Name</label>
-            <input value={form.name} onChange={e => upd("name", e.target.value)} placeholder="Your full name" style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />
+            <input value={form.name} onChange={e => upd("name", e.target.value)} placeholder="John Doe" autoFocus={authMode === "signup"} style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />
           </div>
         )}
-        {[["Email Address", "email", "email"], ["Password", "password", "password"]].map(([l, k, t]) => (
-          authMode !== "forgot" || k === "email" ? (
-            <div key={k} style={{ marginBottom: 16 }}>
-              <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>{l}</label>
-              <input type={t} value={form[k]} onChange={e => upd(k, e.target.value)} placeholder={l} style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>Email Address</label>
+          <input type="email" value={form.email} onChange={e => upd("email", e.target.value)} placeholder="you@example.com" autoFocus={authMode !== "signup"} style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />
+        </div>
+        {authMode !== "forgot" && (
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>Password</label>
+            <div style={{ position: "relative" }}>
+              <input type={showPw ? "text" : "password"} value={form.password} onChange={e => upd("password", e.target.value)} placeholder="Min 6 characters" style={{ width: "100%", padding: "11px 14px", paddingRight: 44, border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />
+              <span onClick={() => setShowPw(!showPw)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#999", fontSize: 18, userSelect: "none" }}>{showPw ? "\u25C9" : "\u25CE"}</span>
             </div>
-          ) : null
-        ))}
+          </div>
+        )}
         {authMode === "login" && (
           <div style={{ textAlign: "right", marginBottom: 20 }}>
-            <span onClick={() => setAuthMode("forgot")} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Forgot password?</span>
+            <span onClick={() => { setAuthMode("forgot"); setErr("") }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Forgot password?</span>
           </div>
         )}
-        <button onClick={submit} className="hover-btn" style={{ width: "100%", background: "#c8956c", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer", marginBottom: 16 }}>
-          {authMode === "login" ? "Sign In" : authMode === "signup" ? "Create Account" : "Send Reset Link"}
+        <button onClick={submit} disabled={submitting} className="hover-btn" style={{ width: "100%", background: submitting ? "#ccc" : "#c8956c", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: submitting ? "not-allowed" : "pointer", marginBottom: 16 }}>
+          {submitting ? "Please wait..." : authMode === "login" ? "Sign In" : authMode === "signup" ? "Create Account" : "Send Reset Link"}
         </button>
         <div style={{ textAlign: "center", fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#888" }}>
-          {authMode === "login" ? <>Don't have an account? <span onClick={() => setAuthMode("signup")} style={{ color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Sign up</span></> :
-           authMode === "signup" ? <>Already a member? <span onClick={() => setAuthMode("login")} style={{ color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Sign in</span></> :
-           <span onClick={() => setAuthMode("login")} style={{ color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Back to Sign In</span>}
+          {authMode === "login" ? <>Don't have an account? <span onClick={() => { setAuthMode("signup"); setErr("") }} style={{ color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Sign up</span></> :
+           authMode === "signup" ? <>Already a member? <span onClick={() => { setAuthMode("login"); setErr("") }} style={{ color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Sign in</span></> :
+           <span onClick={() => { setAuthMode("login"); setErr("") }} style={{ color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Back to Sign In</span>}
         </div>
-        <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #f0ede8", display: "flex", gap: 12 }}>
-          {[["G", "Continue with Google", "#ea4335"], ["f", "Continue with Facebook", "#1877f2"]].map(([icon, label, color]) => (
-            <button key={label} onClick={() => { setUser({ name: "Social User", email: "user@social.com" }); showToast("Signed in with " + (icon === "G" ? "Google" : "Facebook")); nav("home") }} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px", borderRadius: 10, border: "1px solid #e0d8ce", background: "#fff", cursor: "pointer", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600 }}>
-              <span style={{ fontWeight: 800, color }}>{icon}</span> {icon === "G" ? "Google" : "Facebook"}
-            </button>
-          ))}
+        <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #f0ede8", display: "flex", flexDirection: "column", gap: 12 }}>
+          <button onClick={handleGoogle} disabled={submitting} className="hover-btn" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "11px", borderRadius: 10, border: "1px solid #e0d8ce", background: "#fff", cursor: submitting ? "not-allowed" : "pointer", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600, opacity: submitting ? 0.6 : 1 }}>
+            <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.54 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.77.87 7.35 2.56 10.56l7.98-5.97z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 5.97C6.51 42.62 14.62 48 24 48z"/></svg>
+            Continue with Google
+          </button>
         </div>
       </div>
     </div>
   )
 }
 
-function OrdersPage({ orders, nav }) {
+function OrdersPage({ orders, nav, user }) {
+  const myOrders = user ? orders.filter(o => o.email === user.email || o.userId === user.email) : orders
   const STATUS_COLOR = { Delivered: "#10b981", Shipped: "#3b82f6", Processing: "#f59e0b" }
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px" }}>
-      <h1 style={{ fontSize: 36, fontWeight: 600, marginBottom: 32 }}>My Orders</h1>
-      {orders.map(o => (
+      <h1 style={{ fontSize: 36, fontWeight: 600, marginBottom: 32 }}>My Orders ({myOrders.length})</h1>
+      {myOrders.map(o => (
         <div key={o.id} style={{ background: "#fff", borderRadius: 16, padding: 24, marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
             <div>
-              <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 16 }}>{o.id}</div>
-              <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#999", marginTop: 4 }}>{o.date} &middot; {o.items} items &middot; {o.total}</div>
+              <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 16 }}>{o.id?.slice(0, 12)}</div>
+              <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#999", marginTop: 4 }}>{(o.date || "Just now")} &middot; {(o.items?.length || o.items || 0)} items &middot; {typeof o.total === "number" ? fmt(o.total) : o.total}</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <span style={{ background: STATUS_COLOR[o.status] + "22", color: STATUS_COLOR[o.status], fontFamily: "'Jost',sans-serif", fontSize: 12, fontWeight: 700, padding: "4px 14px", borderRadius: 20 }}>{o.status}</span>
@@ -809,12 +960,46 @@ function TrackingPage({ nav }) {
 
 function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
   const tabs = ["dashboard", "products", "orders", "customers", "analytics"]
-  const stats = [
-    { label: "Revenue", value: "$12,847", change: "+18%", icon: "\uD83D\uDCC8", color: "#10b981" },
-    { label: "Orders", value: "347", change: "+12%", icon: "\uD83D\uDCCB", color: "#3b82f6" },
-    { label: "Products", value: products.length, change: "+3", icon: "\uD83D\uDCE6", color: "#8b5cf6" },
-    { label: "Customers", value: "2,891", change: "+8%", icon: "\uD83D\uDC65", color: "#f59e0b" },
-  ]
+  const [showForm, setShowForm] = useState(false)
+  const [editProd, setEditProd] = useState(null)
+  const [form, setForm] = useState({ name: "", category: "electronics", price: "", original: "", stock: "", desc: "", img: "", badge: "New Arrival" })
+  const [customers, setCustomers] = useState([])
+  const [subs, setSubs] = useState([])
+  const [uploading, setUploading] = useState(false)
+
+  useEffect(() => {
+    if (adminTab === "customers") { getUsers().then(setCustomers).catch(() => {}); getNewsletterSubscribers().then(setSubs).catch(() => {}) }
+  }, [adminTab])
+
+  const openForm = (p) => {
+    setEditProd(p)
+    setForm(p ? { name: p.name, category: p.category, price: String(p.price), original: String(p.original), stock: String(p.stock), desc: p.desc, img: p.img, badge: p.badge } : { name: "", category: "electronics", price: "", original: "", stock: "", desc: "", img: "", badge: "New Arrival" })
+    setShowForm(true)
+  }
+
+  const save = async () => {
+    if (!form.name || !form.price) return
+    const data = { name: form.name, category: form.category, price: Number(form.price), original: Number(form.original) || Number(form.price), stock: Number(form.stock) || 0, desc: form.desc, img: form.img || "https://images.unsplash.com/photo-1505740420928-5e560c06d30a?w=600&q=80", badge: form.badge }
+    if (editProd) await updateProduct(editProd.id, data); else await addProduct(data)
+    setShowForm(false)
+    window.location.reload()
+  }
+
+  const del = async (id) => { if (confirm("Delete this product?")) { await deleteProduct(id); window.location.reload() } }
+
+  const uploadImg = async (e) => {
+    const file = e.target.files[0]; if (!file) return
+    setUploading(true)
+    try {
+      const fd = new FormData(); fd.append("file", file); fd.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET)
+      const r = await fetch(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, { method: "POST", body: fd })
+      const d = await r.json(); setForm(p => ({ ...p, img: d.secure_url }))
+    } catch (_) { alert("Upload failed. Make sure VITE_CLOUDINARY_UPLOAD_PRESET is set in .env") }
+    setUploading(false)
+  }
+
+  const ordTotal = orders.reduce((s, o) => s + (typeof o.total === "number" ? o.total : 0), 0)
+
   return (
     <div style={{ display: "flex", minHeight: "80vh" }}>
       <aside style={{ width: 220, background: "#1a1a1a", color: "#fff", padding: "28px 0", flexShrink: 0 }}>
@@ -831,7 +1016,12 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
           <div className="fade-in">
             <h2 style={{ fontSize: 28, fontWeight: 600, marginBottom: 28 }}>Dashboard Overview</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 32 }}>
-              {stats.map(s => (
+              {[
+                { label: "Revenue", value: fmt(ordTotal), change: "+" + orders.length + " orders", icon: "\uD83D\uDCC8", color: "#10b981" },
+                { label: "Orders", value: orders.length, change: "+" + orders.filter(o => o.status === "Processing").length + " pending", icon: "\uD83D\uDCCB", color: "#3b82f6" },
+                { label: "Products", value: products.length, change: "in Firestore", icon: "\uD83D\uDCE6", color: "#8b5cf6" },
+                { label: "Customers", value: customers.length || "2+", change: "registered users", icon: "\uD83D\uDC65", color: "#f59e0b" },
+              ].map(s => (
                 <div key={s.label} style={{ background: "#fff", borderRadius: 16, padding: "22px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
@@ -840,20 +1030,21 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
                     </div>
                     <div style={{ fontSize: 28 }}>{s.icon}</div>
                   </div>
-                  <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: s.color, fontWeight: 600, marginTop: 10 }}>{s.change} this month</div>
+                  <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: s.color, fontWeight: 600, marginTop: 10 }}>{s.change}</div>
                 </div>
               ))}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
               <div style={{ background: "#fff", borderRadius: 16, padding: 24 }}>
                 <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 20 }}>Recent Orders</h3>
-                {orders.map(o => (
+                {orders.slice(0, 5).map(o => (
                   <div key={o.id} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid #f0ede8", fontFamily: "'Jost',sans-serif", fontSize: 13 }}>
-                    <span style={{ fontWeight: 600 }}>{o.id}</span>
-                    <span style={{ color: "#888" }}>{o.total}</span>
+                    <span style={{ fontWeight: 600 }}>{o.id?.slice(0, 8) + "..."}</span>
+                    <span style={{ color: "#888" }}>{fmt(o.total)}</span>
                     <span style={{ color: o.status === "Delivered" ? "#10b981" : o.status === "Shipped" ? "#3b82f6" : "#f59e0b", fontWeight: 600 }}>{o.status}</span>
                   </div>
                 ))}
+                {orders.length === 0 && <p style={{ fontFamily: "'Jost',sans-serif", color: "#aaa", fontSize: 13 }}>No orders yet</p>}
               </div>
               <div style={{ background: "#fff", borderRadius: 16, padding: 24 }}>
                 <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 20 }}>Top Products</h3>
@@ -874,13 +1065,13 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
         {adminTab === "products" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-              <h2 style={{ fontSize: 28, fontWeight: 600 }}>Products</h2>
-              <button style={{ background: "#c8956c", color: "#fff", border: "none", padding: "12px 24px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>+ Add Product</button>
+              <h2 style={{ fontSize: 28, fontWeight: 600 }}>Products ({products.length})</h2>
+              <button onClick={() => openForm(null)} style={{ background: "#c8956c", color: "#fff", border: "none", padding: "12px 24px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>+ Add Product</button>
             </div>
             <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead style={{ background: "#f8f5f0" }}>
-                  <tr>{["Image", "Name", "Category", "Price", "Stock", "Margin", "Status"].map(h => <th key={h} style={{ padding: "14px 16px", fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 1, color: "#888", textAlign: "left" }}>{h}</th>)}</tr>
+                  <tr>{["Image", "Name", "Category", "Price", "Stock", "Margin", "Actions"].map(h => <th key={h} style={{ padding: "14px 16px", fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 1, color: "#888", textAlign: "left" }}>{h}</th>)}</tr>
                 </thead>
                 <tbody>
                   {products.map(p => (
@@ -893,8 +1084,8 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#10b981", fontWeight: 600 }}>{disc(p.price, p.original)}%</td>
                       <td style={{ padding: "12px 16px" }}>
                         <div style={{ display: "flex", gap: 8 }}>
-                          <button style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#3b82f6", background: "#eff6ff", border: "none", padding: "4px 12px", borderRadius: 6, cursor: "pointer" }}>Edit</button>
-                          <button style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#ef4444", background: "#fef2f2", border: "none", padding: "4px 12px", borderRadius: 6, cursor: "pointer" }}>Delete</button>
+                          <button onClick={() => openForm(p)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#3b82f6", background: "#eff6ff", border: "none", padding: "4px 12px", borderRadius: 6, cursor: "pointer" }}>Edit</button>
+                          <button onClick={() => del(p.id)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#ef4444", background: "#fef2f2", border: "none", padding: "4px 12px", borderRadius: 6, cursor: "pointer" }}>Delete</button>
                         </div>
                       </td>
                     </tr>
@@ -902,31 +1093,73 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
                 </tbody>
               </table>
             </div>
+            {showForm && (
+              <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999 }} onClick={() => setShowForm(false)}>
+                <div style={{ background: "#fff", borderRadius: 20, padding: 32, width: "90%", maxWidth: 500, maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+                  <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 20 }}>{editProd ? "Edit Product" : "Add Product"}</h3>
+                  {[["name", "Product Name"], ["price", "Price"], ["original", "Original Price"], ["stock", "Stock"], ["desc", "Description"]].map(([k, l]) => (
+                    <div key={k} style={{ marginBottom: 12 }}>
+                      <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>{l}</label>
+                      {k === "desc" ? <textarea value={form[k]} onChange={e => setForm(p => ({ ...p, [k]: e.target.value }))} rows={3} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", resize: "vertical" }} />
+                       : <input value={form[k]} onChange={e => setForm(p => ({ ...p, [k]: e.target.value }))} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />}
+                    </div>
+                  ))}
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>Category</label>
+                    <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", background: "#fff" }}>
+                      {["electronics", "fashion", "beauty", "home"].map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>Badge</label>
+                    <select value={form.badge} onChange={e => setForm(p => ({ ...p, badge: e.target.value }))} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", background: "#fff" }}>
+                      {["Best Seller", "Trending", "New Arrival", "Hot Deal", "Editor's Pick", "Top Rated"].map(b => <option key={b} value={b}>{b}</option>)}
+                    </select>
+                  </div>
+                  <div style={{ marginBottom: 20 }}>
+                    <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>Image</label>
+                    {form.img && <img src={form.img} alt="" style={{ width: 80, height: 80, borderRadius: 8, objectFit: "cover", marginBottom: 8, display: "block" }} />}
+                    <label className="hover-btn" style={{ display: "inline-block", background: "#f0ede8", color: "#555", padding: "10px 18px", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer" }}>
+                      {uploading ? "Uploading..." : "Upload to Cloudinary"}
+                      <input type="file" accept="image/*" onChange={uploadImg} style={{ display: "none" }} />
+                    </label>
+                    <input value={form.img} onChange={e => setForm(p => ({ ...p, img: e.target.value }))} placeholder="Or paste image URL" style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none", marginTop: 8 }} />
+                  </div>
+                  <div style={{ display: "flex", gap: 12 }}>
+                    <button onClick={() => setShowForm(false)} style={{ flex: 1, background: "#f0ede8", color: "#555", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
+                    <button onClick={save} className="hover-btn" style={{ flex: 1, background: "#c8956c", color: "#fff", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>{editProd ? "Update" : "Create"}</button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
         {adminTab === "orders" && (
           <div className="fade-in">
-            <h2 style={{ fontSize: 28, fontWeight: 600, marginBottom: 24 }}>All Orders</h2>
+            <h2 style={{ fontSize: 28, fontWeight: 600, marginBottom: 24 }}>All Orders ({orders.length})</h2>
             <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead style={{ background: "#f8f5f0" }}>
-                  <tr>{["Order ID", "Date", "Items", "Total", "Status", "Action"].map(h => <th key={h} style={{ padding: "14px 16px", fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 1, color: "#888", textAlign: "left" }}>{h}</th>)}</tr>
+                  <tr>{["Order ID", "Customer", "Items", "Total", "Status", "Action"].map(h => <th key={h} style={{ padding: "14px 16px", fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 1, color: "#888", textAlign: "left" }}>{h}</th>)}</tr>
                 </thead>
                 <tbody>
                   {orders.map(o => (
                     <tr key={o.id} style={{ borderBottom: "1px solid #f8f5f0" }}>
-                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontWeight: 700 }}>{o.id}</td>
-                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", color: "#888", fontSize: 13 }}>{o.date}</td>
-                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontSize: 13 }}>{o.items}</td>
-                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontWeight: 700 }}>{o.total}</td>
+                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 13 }}>{o.id?.slice(0, 8)}...</td>
+                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", color: "#888", fontSize: 13 }}>{o.customerName || o.email || "Guest"}</td>
+                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontSize: 13 }}>{o.items?.length || 0}</td>
+                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 13 }}>{fmt(o.total)}</td>
                       <td style={{ padding: "12px 16px" }}>
                         <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 20, background: o.status === "Delivered" ? "#d1fae5" : o.status === "Shipped" ? "#dbeafe" : "#fef3c7", color: o.status === "Delivered" ? "#10b981" : o.status === "Shipped" ? "#3b82f6" : "#f59e0b" }}>{o.status}</span>
                       </td>
                       <td style={{ padding: "12px 16px" }}>
-                        <button style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#c8956c", background: "#fff8f3", border: "none", padding: "4px 12px", borderRadius: 6, cursor: "pointer" }}>View</button>
+                        <select value={o.status} onChange={async e => { await updateOrderStatus(o.id, e.target.value); window.location.reload() }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, padding: "4px 8px", borderRadius: 6, border: "1px solid #e0d8ce", background: "#fff", cursor: "pointer" }}>
+                          {["Processing", "Shipped", "Delivered"].map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
                       </td>
                     </tr>
                   ))}
+                  {orders.length === 0 && <tr><td colSpan={6} style={{ padding: 32, textAlign: "center", color: "#aaa", fontFamily: "'Jost',sans-serif" }}>No orders yet</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -934,27 +1167,37 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
         )}
         {adminTab === "customers" && (
           <div className="fade-in">
-            <h2 style={{ fontSize: 28, fontWeight: 600, marginBottom: 24 }}>Customer Management</h2>
-            {[{ name: "Amara Johnson", email: "amara@email.com", orders: 4, spent: "$427.92", joined: "Jan 2026" }, { name: "Daniel Park", email: "daniel@email.com", orders: 2, spent: "$232.98", joined: "Feb 2026" }, { name: "Sofia Reyes", email: "sofia@email.com", orders: 6, spent: "$841.50", joined: "Mar 2026" }, { name: "Marcus Webb", email: "marcus@email.com", orders: 3, spent: "$349.97", joined: "Dec 2025" }].map(c => (
-              <div key={c.name} style={{ background: "#fff", borderRadius: 16, padding: "20px 24px", marginBottom: 12, display: "flex", alignItems: "center", gap: 16 }}>
-                <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#c8956c", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "'Jost',sans-serif" }}>{c.name.split(" ").map(n => n[0]).join("")}</div>
+            <h2 style={{ fontSize: 28, fontWeight: 600, marginBottom: 24 }}>Customers ({customers.length})</h2>
+            {customers.map(c => (
+              <div key={c.id} style={{ background: "#fff", borderRadius: 16, padding: "20px 24px", marginBottom: 12, display: "flex", alignItems: "center", gap: 16 }}>
+                <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#c8956c", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "'Jost',sans-serif" }}>{c.name?.split(" ").map(n => n[0]).join("") || "?"}</div>
                 <div style={{ flex: 1, fontFamily: "'Jost',sans-serif" }}>
-                  <div style={{ fontWeight: 600, fontSize: 15 }}>{c.name}</div>
-                  <div style={{ fontSize: 13, color: "#999" }}>{c.email} &middot; Joined {c.joined}</div>
-                </div>
-                <div style={{ textAlign: "right", fontFamily: "'Jost',sans-serif" }}>
-                  <div style={{ fontWeight: 700, fontSize: 15 }}>{c.spent}</div>
-                  <div style={{ fontSize: 13, color: "#999" }}>{c.orders} orders</div>
+                  <div style={{ fontWeight: 600, fontSize: 15 }}>{c.name || "Unknown"}</div>
+                  <div style={{ fontSize: 13, color: "#999" }}>{c.email}</div>
                 </div>
               </div>
             ))}
+            {customers.length === 0 && <p style={{ fontFamily: "'Jost',sans-serif", color: "#aaa", fontSize: 14 }}>No registered users yet.</p>}
+            {subs.length > 0 && (
+              <div style={{ marginTop: 40 }}>
+                <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>Newsletter Subscribers ({subs.length})</h3>
+                {subs.map(s => (
+                  <div key={s.id} style={{ background: "#fff", borderRadius: 12, padding: "12px 18px", marginBottom: 8, fontFamily: "'Jost',sans-serif", fontSize: 14 }}>{s.email}</div>
+                ))}
+              </div>
+            )}
           </div>
         )}
         {adminTab === "analytics" && (
           <div className="fade-in">
             <h2 style={{ fontSize: 28, fontWeight: 600, marginBottom: 28 }}>Analytics</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 32 }}>
-              {[["Conversion Rate", "3.8%", "+0.4%", "#10b981"], ["Avg Order Value", "$82.14", "+$7.20", "#3b82f6"], ["Return Rate", "2.1%", "-0.3%", "#10b981"], ["Customer LTV", "$340.50", "+$28", "#8b5cf6"]].map(([l, v, c, col]) => (
+              {[
+                ["Conversion Rate", orders.length > 0 ? ((orders.length / 100) * 100).toFixed(1) + "%" : "0%", "based on visits", "#10b981"],
+                ["Avg Order Value", orders.length > 0 ? fmt(ordTotal / orders.length) : "$0", "per order", "#3b82f6"],
+                ["Total Revenue", fmt(ordTotal), "from " + orders.length + " orders", "#8b5cf6"],
+                ["Products", String(products.length), "in catalog", "#f59e0b"],
+              ].map(([l, v, c, col]) => (
                 <div key={l} style={{ background: "#fff", borderRadius: 16, padding: 24 }}>
                   <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#999", letterSpacing: 1, marginBottom: 8 }}>{l.toUpperCase()}</div>
                   <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 30, fontWeight: 700 }}>{v}</div>
@@ -963,18 +1206,22 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
               ))}
             </div>
             <div style={{ background: "#fff", borderRadius: 16, padding: 24 }}>
-              <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 20 }}>Revenue by Category</h3>
-              {[["Electronics", 72], ["Fashion", 58], ["Beauty", 91], ["Home", 44]].map(([cat, pct]) => (
-                <div key={cat} style={{ marginBottom: 16 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'Jost',sans-serif", fontSize: 13, marginBottom: 6 }}>
-                    <span style={{ fontWeight: 600 }}>{cat}</span>
-                    <span style={{ color: "#888" }}>{pct}%</span>
+              <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 20 }}>Orders by Status</h3>
+              {["Processing", "Shipped", "Delivered"].map(s => {
+                const count = orders.filter(o => o.status === s).length
+                const pct = orders.length ? (count / orders.length * 100).toFixed(0) : 0
+                return (
+                  <div key={s} style={{ marginBottom: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'Jost',sans-serif", fontSize: 13, marginBottom: 6 }}>
+                      <span style={{ fontWeight: 600 }}>{s}</span>
+                      <span style={{ color: "#888" }}>{count} ({pct}%)</span>
+                    </div>
+                    <div style={{ height: 10, background: "#f0ede8", borderRadius: 10, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: pct + "%", background: "linear-gradient(90deg,#c8956c,#e8b48c)", borderRadius: 10 }} />
+                    </div>
                   </div>
-                  <div style={{ height: 10, background: "#f0ede8", borderRadius: 10, overflow: "hidden" }}>
-                    <div style={{ height: "100%", width: pct + "%", background: "linear-gradient(90deg,#c8956c,#e8b48c)", borderRadius: 10 }} />
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}
@@ -1076,10 +1323,15 @@ function TermsContent() {
 }
 
 function Footer({ nav, newsletter, setNewsletter, newsletterDone, setNewsletterDone, showToast }) {
-  const subscribeNewsletter = () => {
+  const onSubscribe = async () => {
     if (!newsletter.includes("@")) return showToast("Enter a valid email", "info")
-    setNewsletterDone(true)
-    showToast("Subscribed! 10% off code sent to your email")
+    try {
+      await subscribeNewsletter(newsletter)
+      setNewsletterDone(true)
+      showToast("Subscribed! 10% off code sent to your email")
+    } catch (e) {
+      showToast(e.message === "Already subscribed" ? "You're already subscribed!" : "Subscription failed", "info")
+    }
   }
   return (
     <footer style={{ background: "#1a1a1a", color: "#fff", padding: "60px 24px 0" }}>
@@ -1120,7 +1372,7 @@ function Footer({ nav, newsletter, setNewsletter, newsletterDone, setNewsletterD
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <input value={newsletter} onChange={e => setNewsletter(e.target.value)} placeholder="your@email.com" style={{ padding: "11px 14px", borderRadius: 8, border: "1px solid #333", background: "rgba(255,255,255,0.05)", color: "#fff", fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none" }} />
-                <button onClick={subscribeNewsletter} style={{ background: "#c8956c", color: "#fff", border: "none", padding: "11px", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Subscribe</button>
+                <button onClick={onSubscribe} style={{ background: "#c8956c", color: "#fff", border: "none", padding: "11px", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Subscribe</button>
               </div>
             )}
           </div>
