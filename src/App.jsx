@@ -28,19 +28,9 @@ export default function App() {
   const [categories, setCategories] = useState(SEED_CATEGORIES)
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (fbUser) => {
+    const unsub = onAuthStateChanged(auth, (fbUser) => {
       if (fbUser) {
-        const base = { name: fbUser.displayName || fbUser.email.split("@")[0], email: fbUser.email }
-        try {
-          const snap = await getDoc(doc(db, "users", fbUser.uid))
-          if (snap.exists() && snap.data().isAdmin) {
-            setUser({ ...base, isAdmin: true })
-          } else {
-            setUser(base)
-          }
-        } catch (_) {
-          setUser(base)
-        }
+        setUser({ name: fbUser.displayName || fbUser.email.split("@")[0], email: fbUser.email })
       } else {
         setUser(null)
       }
@@ -48,6 +38,20 @@ export default function App() {
     })
     return () => unsub()
   }, [])
+
+  useEffect(() => {
+    if (!user?.email) return
+    ;(async () => {
+      try {
+        const u = auth.currentUser
+        if (!u) return
+        const snap = await getDoc(doc(db, "users", u.uid))
+        if (snap.exists() && snap.data().isAdmin) {
+          setUser(prev => prev ? { ...prev, isAdmin: true } : prev)
+        }
+      } catch (_) {}
+    })()
+  }, [user?.email])
 
   window.makeMeAdmin = async () => {
     const u = auth.currentUser
