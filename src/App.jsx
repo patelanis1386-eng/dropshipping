@@ -281,19 +281,19 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
       <section style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #2d2418 50%, #3d2f20 100%)", color: "#fff", padding: "80px 24px", position: "relative", overflow: "hidden" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", alignItems: "center", gap: 60 }} className="mobile-col">
           <div style={{ flex: 1 }} className="hero-text">
-            <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "#8b6644", marginBottom: 16 }}>PREMIUM DROPSHIPPING</div>
+            <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "#8b6644", marginBottom: 16 }}>INDIAN DROPSHIPPING</div>
             <h1 style={{ fontSize: "clamp(40px,6vw,72px)", fontWeight: 300, lineHeight: 1.1, marginBottom: 20, letterSpacing: -1 }}>
-              Discover<br /><em style={{ fontStyle: "italic", color: "#8b6644" }}>Premium</em><br />Products
+              Discover<br /><em style={{ fontStyle: "italic", color: "#8b6644" }}>Bharat's</em><br />Finest
             </h1>
             <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, color: "#ccc", maxWidth: 440, lineHeight: 1.7, marginBottom: 32 }}>
-              Curated selections from the world's best suppliers. Quality guaranteed, delivered to your door.
+              Premium products from across India. Handpicked for quality, delivered to your doorstep.
             </p>
             <div style={{ display: "flex", gap: 16 }}>
               <button onClick={() => nav("shop")} className="hover-btn" style={{ background: "#8b6644", color: "#fff", border: "none", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Shop Now &#x2192;</button>
               <button onClick={() => nav("tracking")} className="hover-btn" style={{ background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 500, fontSize: 14, cursor: "pointer" }}>Track Order</button>
             </div>
             <div style={{ display: "flex", gap: 40, marginTop: 48 }}>
-              {[["50K+", "Happy Customers"], ["4.9\u2605", "Average Rating"], ["Free", "Shipping Always"]].map(([v, l]) => (
+              {[["50K+", "Happy Customers"], ["4.9\u2605", "Average Rating"], ["Free", "Shipping Across India"]].map(([v, l]) => (
                 <div key={l}>
                   <div style={{ fontSize: 22, fontWeight: 700, color: "#8b6644", fontFamily: "'Jost',sans-serif" }}>{v}</div>
                   <div style={{ fontSize: 12, color: "#aaa", fontFamily: "'Jost',sans-serif", marginTop: 2 }}>{l}</div>
@@ -313,7 +313,7 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
 
       <section style={{ background: "#fff", borderBottom: "1px solid #ede8e0" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "20px 24px", display: "flex", justifyContent: "center", gap: "clamp(20px,4vw,60px)", flexWrap: "wrap" }}>
-          {[["\uD83D\uDE9A", "Free Shipping", "On all orders"], ["\uD83D\uDD04", "Easy Returns", "30-day policy"], ["\uD83D\uDD12", "Secure Pay", "SSL encrypted"], ["\uD83C\uDF1F", "Premium Quality", "Vetted suppliers"]].map(([icon, t, s]) => (
+          {[["\uD83D\uDE9A", "Free Shipping", "Across India"], ["\uD83D\uDD04", "Easy Returns", "7-day policy"], ["\uD83D\uDD12", "Secure Pay", "UPI & Cards"], ["\uD83C\uDF1F", "Premium Quality", "Vetted artisans"]].map(([icon, t, s]) => (
             <div key={t} style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 22 }}>{icon}</span>
               <div>
@@ -344,9 +344,9 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
       </section>
 
       <section style={{ background: "linear-gradient(135deg, #8b6644, #e8a87c)", margin: "0 24px", borderRadius: 24, padding: "48px 40px", textAlign: "center" }}>
-        <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "rgba(255,255,255,0.8)", marginBottom: 12 }}>LIMITED TIME OFFER</div>
-        <h2 style={{ fontSize: "clamp(28px,4vw,48px)", color: "#fff", fontWeight: 300, marginBottom: 12 }}>Up to <strong>60% Off</strong> Select Items</h2>
-        <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, color: "rgba(255,255,255,0.85)", marginBottom: 28 }}>Use code <strong>LUXE50</strong> for an extra 10% off</p>
+        <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "rgba(255,255,255,0.8)", marginBottom: 12 }}>MEGA FESTIVE SALE</div>
+        <h2 style={{ fontSize: "clamp(28px,4vw,48px)", color: "#fff", fontWeight: 300, marginBottom: 12 }}>Up to <strong>60% Off</strong> on Indian Brands</h2>
+        <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, color: "rgba(255,255,255,0.85)", marginBottom: 28 }}>Use code <strong>LUXE50</strong> for extra 10% off</p>
         <button onClick={() => nav("shop")} className="hover-btn" style={{ background: "#fff", color: "#8b6644", border: "none", padding: "14px 36px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Shop Sale &#x2192;</button>
       </section>
 
@@ -377,7 +377,7 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
       </section>
 
       <section style={{ padding: "60px 24px", maxWidth: 1280, margin: "0 auto" }}>
-        <SectionHeader title="AI Picks For You" sub="Personalized recommendations based on trending data" />
+        <SectionHeader title="AI Picks For You" sub="Personalized recommendations based on trending in India" />
         <ProductGrid products={products.slice(4, 8)} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} />
       </section>
     </div>
@@ -577,9 +577,9 @@ function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products,
         )}
         {tab === "shipping" && (
           <div style={{ fontFamily: "'Jost',sans-serif", color: "#555", lineHeight: 2 }}>
-            <p><strong>Standard Shipping:</strong> 3-7 business days &#x2022; FREE on all orders</p>
-            <p><strong>Express Shipping:</strong> 1-2 business days &#x2022; $9.99</p>
-            <p><strong>International:</strong> 7-14 business days &#x2022; $14.99</p>
+            <p><strong>Standard Shipping:</strong> 3-7 business days &#x2022; FREE across India</p>
+            <p><strong>Express Shipping:</strong> 1-2 business days &#x2022; ₹99</p>
+            <p><strong>International:</strong> 7-14 business days &#x2022; ₹999</p>
             <p><strong>Returns:</strong> 30-day hassle-free returns. Items must be unused and in original packaging.</p>
             <p><strong>Tracking:</strong> Real-time tracking via our <span style={{ color: "#8b6644", cursor: "pointer" }} onClick={() => nav("tracking")}>tracking portal</span>.</p>
           </div>
@@ -641,7 +641,7 @@ function CartPage({ cart, setCart, removeCart, cartTotal, nav }) {
               <span>Total</span><span>{fmt(cartTotal + cartTotal * 0.08)}</span>
             </div>
             <div style={{ background: "#f3efe9", border: "1px solid #e0d8ce", borderRadius: 10, padding: "10px 14px", display: "flex", marginBottom: 16 }}>
-              <input placeholder="Promo code (try LUXE50)" style={{ flex: 1, border: "none", background: "none", fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none" }} />
+              <input placeholder="Promo code (try BHARAT50)" style={{ flex: 1, border: "none", background: "none", fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none" }} />
               <button style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#8b6644", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>Apply</button>
             </div>
             <button onClick={() => nav("checkout")} className="hover-btn" style={{ width: "100%", background: "#8b6644", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Proceed to Checkout &#x2192;</button>
@@ -727,9 +727,9 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
             <div className="fade-in">
               <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 20 }}>Payment Method</h3>
               {[
-                { id: "stripe", label: "Credit / Debit Card", icon: "\uD83D\uDCB3", sub: "Visa, Mastercard, Amex" },
+                { id: "stripe", label: "Credit / Debit Card", icon: "\uD83D\uDCB3", sub: "Visa, Mastercard, RuPay" },
                 { id: "razorpay", label: "Razorpay", icon: "\uD83C\uDFE6", sub: "UPI, Cards, Netbanking, Wallets" },
-                { id: "paypal", label: "PayPal", icon: "\uD83D\uDCB1", sub: "Pay with your PayPal account" },
+                { id: "paypal", label: "PayPal", icon: "\uD83D\uDCB1", sub: "International payments" },
                 { id: "cod", label: "Cash on Delivery", icon: "\uD83D\uDCB5", sub: "Pay when you receive" },
               ].map(pm => (
                 <div key={pm.id} onClick={() => setPayMethod(pm.id)} style={{ display: "flex", alignItems: "center", gap: 16, padding: "14px 18px", borderRadius: 12, border: "2px solid " + (payMethod === pm.id ? "#8b6644" : "#e0d8ce"), marginBottom: 12, cursor: "pointer", background: payMethod === pm.id ? "#fff8f3" : "#fff" }}>
@@ -1296,12 +1296,12 @@ function StaticPage({ title, nav, children }) {
 function AboutContent() {
   return (
     <>
-      <p style={{ fontSize: 17, color: "#333", marginBottom: 24 }}>LuxeDrop was founded in 2023 with a simple mission: make premium products accessible to everyone. We partner directly with the world's best manufacturers and suppliers to bring you carefully curated products at prices that don't break the bank.</p>
-      <p>We partner directly with the world's best manufacturers and suppliers to bring you carefully curated products at prices that don't break the bank.</p>
+      <p style={{ fontSize: 17, color: "#333", marginBottom: 24 }}>LuxeDrop was founded in 2023 in Mumbai with a simple mission: bring India's finest products to every home. We work directly with skilled artisans, weavers, and manufacturers across India — from Banaras to Kashmir, from Moradabad to Jaipur — to bring you carefully curated products at honest prices.</p>
+      <p>We believe in celebrating India's rich craftsmanship while making quality accessible to everyone. Every product on LuxeDrop is vetted for quality, authenticity, and fair pricing.</p>
       <h3 style={{ fontSize: 22, fontWeight: 600, color: "#1a1a1a", margin: "32px 0 12px" }}>Our Values</h3>
-      <p><strong>Quality First:</strong> Every product must pass our 28-point quality check.<br /><strong>Fast Shipping:</strong> Free shipping worldwide on all orders.<br /><strong>Customer Happiness:</strong> 30-day no-questions-asked returns.<br /><strong>Sustainable:</strong> Eco-friendly packaging and carbon-neutral shipping.</p>
+      <p><strong>Made in India:</strong> Every product celebrates Indian craftsmanship.<br /><strong>Quality First:</strong> Each item passes our 28-point quality check.<br /><strong>Fast Shipping:</strong> Free shipping across India on all orders.<br /><strong>Customer Happiness:</strong> 7-day easy returns, no questions asked.<br /><strong>Supporting Artisans:</strong> Fair wages for craftsmen and weavers nationwide.</p>
       <h3 style={{ fontSize: 22, fontWeight: 600, color: "#1a1a1a", margin: "32px 0 12px" }}>By the Numbers</h3>
-      <p>50,000+ happy customers &middot; 4.9&#x2605; average rating &middot; 98% on-time delivery &middot; 30-day no-questions-asked returns.</p>
+      <p>50,000+ happy customers &middot; 4.9&#x2605; average rating &middot; 98% on-time delivery &middot; 500+ Indian artisans supported.</p>
     </>
   )
 }
@@ -1326,7 +1326,7 @@ function ContactContent({ showToast }) {
           <button onClick={() => { showToast("Message sent! We'll reply within 24h."); setForm({ name: "", email: "", msg: "" }) }} style={{ background: "#8b6644", color: "#fff", border: "none", padding: "12px 28px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Send Message &#x2192;</button>
         </div>
         <div>
-          {[["\u2709\uFE0F", "Email", "support@luxedrop.com"], ["\uD83D\uDCF1", "WhatsApp", "+1 (800) LUXEDROP"], ["\uD83D\uDD52", "Hours", "Mon-Fri 9am-8pm EST"], ["\uD83D\uDCCD", "Address", "123 Luxury Lane, New York, NY 10001"]].map(([icon, l, v]) => (
+          {[["\u2709\uFE0F", "Email", "support@luxedrop.in"], ["\uD83D\uDCF1", "WhatsApp", "+91 80058 93767"], ["\uD83D\uDD52", "Hours", "Mon-Sat 9am-9pm IST"], ["\uD83D\uDCCD", "Address", "B-101, Andheri East, Mumbai, Maharashtra 400093"]].map(([icon, l, v]) => (
             <div key={l} style={{ display: "flex", gap: 14, marginBottom: 24 }}>
               <div style={{ fontSize: 24 }}>{icon}</div>
               <div><div style={{ fontWeight: 600, fontSize: 14, color: "#333" }}>{l}</div><div style={{ color: "#767676", fontSize: 14 }}>{v}</div></div>
@@ -1343,11 +1343,11 @@ function PrivacyContent() {
     <>
       <p><strong>Last updated: May 14, 2026</strong></p><br />
       <h3 style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", marginBottom: 8 }}>Information We Collect</h3>
-      <p>We collect information you provide directly (name, email, address, payment info) and usage data (browsing behavior, device info).</p>
+      <p>We collect information you provide directly (name, email, address, payment info) and usage data (browsing behavior, device info). All data is stored securely in compliance with Indian IT Act 2000.</p>
       <h3 style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", marginBottom: 8 }}>How We Use Your Information</h3>
-      <p>To process orders, send shipping updates, personalize your experience, send marketing (with consent), and improve our services.</p>
+      <p>To process orders, send shipping updates via SMS/WhatsApp, personalize your experience, send offers (with consent), and improve our services.</p>
       <h3 style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", marginBottom: 8 }}>Data Security</h3>
-      <p>All data is encrypted with AES-256. We never sell your personal information. Payment data is handled by PCI-compliant processors.</p>
+      <p>All data is encrypted with AES-256. We never sell your personal information. Payment data is handled by RBI-compliant processors in India.</p>
     </>
   )
 }
@@ -1358,9 +1358,9 @@ function RefundContent() {
       <p><strong>30-Day No-Questions-Asked Return Policy</strong></p><br />
       <p>If you're not 100% satisfied, return any item within 30 days of delivery for a full refund. Items must be in original condition.</p>
       <h3 style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", marginBottom: 8 }}>How to Return</h3>
-      <p>1. Email support@luxedrop.com with your order ID<br />2. Receive a free prepaid return label within 24h<br />3. Drop off at any shipping location</p>
+      <p>1. Email support@luxedrop.in with your order ID<br />2. Receive a free return pickup within 24h<br />3. Hand the package to the pickup agent</p>
       <h3 style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", marginBottom: 8 }}>Refund Timeline</h3>
-      <p>Credit/debit cards: 5-7 business days &middot; PayPal: 3-5 days &middot; Store credit: instant</p>
+      <p>Credit/debit cards: 3-5 business days &middot; UPI/Netbanking: 24-48 hours &middot; Store credit: instant</p>
     </>
   )
 }
@@ -1371,7 +1371,7 @@ function TermsContent() {
       <p><strong>Terms &amp; Conditions — LuxeDrop</strong></p><br />
       <p>By using this site, you agree to these terms. We reserve the right to cancel orders, modify pricing, and update these terms at any time.</p>
       <p>All products are for personal use only. Resale requires prior written permission. We are not liable for delays caused by shipping carriers.</p>
-      <p>For full terms, contact legal@luxedrop.com</p>
+      <p>For full terms, contact legal@luxedrop.in</p>
     </>
   )
 }
@@ -1393,7 +1393,7 @@ function Footer({ nav, newsletter, setNewsletter, newsletterDone, setNewsletterD
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 40, marginBottom: 48 }}>
           <div>
             <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 26, fontWeight: 700, letterSpacing: 2, marginBottom: 16 }}>LUXEDROP</div>
-            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#aaa", lineHeight: 1.8, marginBottom: 20 }}>Premium products, curated for you. Free shipping worldwide.</p>
+            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#aaa", lineHeight: 1.8, marginBottom: 20 }}>India's premium marketplace for authentic products. Free shipping across India.</p>
             <div style={{ display: "flex", gap: 12 }}>
               {[["Instagram", "\u25A0"], ["TikTok", "\u25A0"], ["Pinterest", "\u25A0"], ["Twitter", "\u25A0"]].map(([s, i]) => (
                 <div key={s} style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 14, color: "#ccc" }}>{i}</div>
@@ -1420,7 +1420,7 @@ function Footer({ nav, newsletter, setNewsletter, newsletterDone, setNewsletterD
           </div>
           <div>
             <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 2, color: "#8b6644", marginBottom: 20 }}>NEWSLETTER</div>
-            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#bbb", marginBottom: 16, lineHeight: 1.7 }}>Get 10% off your first order. Subscribe for exclusive deals.</p>
+            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#bbb", marginBottom: 16, lineHeight: 1.7 }}>Get 10% off your first order. Subscribe for exclusive deals and new arrivals.</p>
             {newsletterDone ? (
               <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#10b981" }}>&#x2713; You're subscribed!</div>
             ) : (
@@ -1432,9 +1432,9 @@ function Footer({ nav, newsletter, setNewsletter, newsletterDone, setNewsletterD
           </div>
         </div>
         <div style={{ borderTop: "1px solid #2a2a2a", padding: "20px 0", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#aaa" }}>&copy; 2026 LuxeDrop. All rights reserved.</div>
+          <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#aaa" }}>&copy; 2026 LuxeDrop. Made in India, with love.</div>
           <div style={{ display: "flex", gap: 12 }}>
-            {["Visa", "Mastercard", "PayPal", "Razorpay", "COD"].map(p => (
+            {["Visa", "Mastercard", "RuPay", "UPI", "Paytm", "COD"].map(p => (
               <span key={p} style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#ccc", background: "#2a2a2a", padding: "4px 10px", borderRadius: 4 }}>{p}</span>
             ))}
           </div>
@@ -1446,7 +1446,7 @@ function Footer({ nav, newsletter, setNewsletter, newsletterDone, setNewsletterD
 
 function WhatsAppButton() {
   return (
-    <a href="https://wa.me/18005893767" target="_blank" rel="noopener" style={{ position: "fixed", bottom: 24, left: 24, width: 56, height: 56, borderRadius: "50%", background: "#25D366", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 28, boxShadow: "0 4px 20px rgba(37,211,102,0.4)", textDecoration: "none", zIndex: 100 }}>
+    <a href="https://wa.me/918005893767" target="_blank" rel="noopener" style={{ position: "fixed", bottom: 24, left: 24, width: 56, height: 56, borderRadius: "50%", background: "#25D366", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 28, boxShadow: "0 4px 20px rgba(37,211,102,0.4)", textDecoration: "none", zIndex: 100 }}>
       &#x1F4AC;
     </a>
   )
