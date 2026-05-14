@@ -795,8 +795,9 @@ function AuthPage({ setUser, authMode, setAuthMode, nav, showToast, signUp, sign
       } else if (authMode === "signup") {
         await signUp(form.email, form.password, form.name)
         setUser({ name: form.name, email: form.email })
-        showToast("Account created! You're now signed in.")
         setDone(true)
+        setSubmitting(false)
+        showToast("Account created! You're now signed in.")
         await new Promise(r => setTimeout(r, 800))
         nav("home")
       } else {

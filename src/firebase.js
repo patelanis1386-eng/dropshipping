@@ -43,7 +43,7 @@ const db = getFirestore(app)
 
 export { auth, db, onAuthStateChanged }
 
-const withTimeout = (promise, ms = 15000) => {
+const withTimeout = (promise, ms = 10000) => {
   return Promise.race([
     promise,
     new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out. Check your connection or Firebase configuration.")), ms)),
