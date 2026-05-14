@@ -193,7 +193,7 @@ export default function App() {
         {page === "auth"     && <AuthPage setUser={setUser} authMode={authMode} setAuthMode={setAuthMode} nav={nav} showToast={showToast} signUp={signUp} signIn={signIn} resetPassword={resetPassword} signInWithGoogle={signInWithGoogle} signInAsGuest={signInAsGuest} />}
         {page === "orders"   && <OrdersPage orders={orders} nav={nav} user={user} />}
         {page === "tracking" && <TrackingPage nav={nav} />}
-        {page === "admin"    && user?.isAdmin && <AdminPage products={products} orders={orders} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} />}
+        {page === "admin"    && user?.isAdmin && <AdminPage products={products} setProducts={setProducts} orders={orders} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} />}
         {page === "about"    && <StaticPage title="About Us" nav={nav}><AboutContent /></StaticPage>}
         {page === "contact"  && <StaticPage title="Contact Us" nav={nav}><ContactContent showToast={showToast} /></StaticPage>}
         {page === "privacy"  && <StaticPage title="Privacy Policy" nav={nav}><PrivacyContent /></StaticPage>}
@@ -1025,7 +1025,7 @@ function TrackingPage({ nav }) {
   )
 }
 
-function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
+function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav }) {
   const tabs = ["dashboard", "products", "orders", "customers", "analytics"]
   const [showForm, setShowForm] = useState(false)
   const [editProd, setEditProd] = useState(null)
@@ -1045,11 +1045,20 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
   }
 
   const save = async () => {
-    if (!form.name || !form.price) return
-    const data = { name: form.name, category: form.category, price: Number(form.price), original: Number(form.original) || Number(form.price), stock: Number(form.stock) || 0, desc: form.desc, img: form.img || "https://images.unsplash.com/photo-1505740420928-5e560c06d30a?w=600&q=80", badge: form.badge }
-    if (editProd) await updateProduct(editProd.id, data); else await addProduct(data)
-    setShowForm(false)
-    window.location.reload()
+    if (!form.name || !form.price) return alert("Fill in name and price")
+    try {
+      const data = { name: form.name, category: form.category, price: Number(form.price), original: Number(form.original) || Number(form.price), stock: Number(form.stock) || 0, desc: form.desc, img: form.img || "https://images.unsplash.com/photo-1505740420928-5e560c06d30a?w=600&q=80", badge: form.badge }
+      if (editProd) {
+        await updateProduct(editProd.id, data)
+        setProducts(prev => prev.map(p => p.id === editProd.id ? { ...p, ...data } : p))
+      } else {
+        const id = await addProduct(data)
+        setProducts(prev => [...prev, { id, ...data }])
+      }
+      setShowForm(false)
+    } catch (e) {
+      alert("Failed to save: " + e.message)
+    }
   }
 
   const del = async (id) => { if (confirm("Delete this product?")) { await deleteProduct(id); window.location.reload() } }
@@ -1161,7 +1170,6 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
                 </tbody>
               </table>
             </div>
-            )}
           </div>
         )}
         {adminTab === "orders" && (
