@@ -1160,44 +1160,6 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
                 </tbody>
               </table>
             </div>
-            {showForm && (
-              <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999 }} onClick={() => setShowForm(false)}>
-                <div style={{ background: "#fff", borderRadius: 20, padding: 32, width: "90%", maxWidth: 500, maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
-                  <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 20 }}>{editProd ? "Edit Product" : "Add Product"}</h3>
-                  {[["name", "Product Name"], ["price", "Price"], ["original", "Original Price"], ["stock", "Stock"], ["desc", "Description"]].map(([k, l]) => (
-                    <div key={k} style={{ marginBottom: 12 }}>
-                      <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>{l}</label>
-                      {k === "desc" ? <textarea value={form[k]} onChange={e => setForm(p => ({ ...p, [k]: e.target.value }))} rows={3} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", resize: "vertical" }} />
-                       : <input value={form[k]} onChange={e => setForm(p => ({ ...p, [k]: e.target.value }))} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />}
-                    </div>
-                  ))}
-                  <div style={{ marginBottom: 12 }}>
-                    <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>Category</label>
-                    <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", background: "#fff" }}>
-                      {["electronics", "fashion", "beauty", "home"].map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-                  <div style={{ marginBottom: 12 }}>
-                    <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>Badge</label>
-                    <select value={form.badge} onChange={e => setForm(p => ({ ...p, badge: e.target.value }))} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", background: "#fff" }}>
-                      {["Best Seller", "Trending", "New Arrival", "Hot Deal", "Editor's Pick", "Top Rated"].map(b => <option key={b} value={b}>{b}</option>)}
-                    </select>
-                  </div>
-                  <div style={{ marginBottom: 20 }}>
-                    <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>Image</label>
-                    {form.img && <img src={form.img} alt="" style={{ width: 80, height: 80, borderRadius: 8, objectFit: "cover", marginBottom: 8, display: "block" }} />}
-                    <label className="hover-btn" style={{ display: "inline-block", background: "#f0ede8", color: "#555", padding: "10px 18px", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer" }}>
-                      {uploading ? "Uploading..." : "Upload to Cloudinary"}
-                      <input type="file" accept="image/*" onChange={uploadImg} style={{ display: "none" }} />
-                    </label>
-                    <input value={form.img} onChange={e => setForm(p => ({ ...p, img: e.target.value }))} placeholder="Or paste image URL" style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none", marginTop: 8 }} />
-                  </div>
-                  <div style={{ display: "flex", gap: 12 }}>
-                    <button onClick={() => setShowForm(false)} style={{ flex: 1, background: "#f0ede8", color: "#555", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
-                    <button onClick={save} className="hover-btn" style={{ flex: 1, background: "#8b6644", color: "#fff", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>{editProd ? "Update" : "Create"}</button>
-                  </div>
-                </div>
-              </div>
             )}
           </div>
         )}
@@ -1294,6 +1256,45 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
         )}
       </main>
     </div>
+    {showForm && (
+      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }} onClick={() => setShowForm(false)}>
+        <div style={{ background: "#fff", borderRadius: 20, padding: 32, width: "90%", maxWidth: 500, maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+          <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 20 }}>{editProd ? "Edit Product" : "Add Product"}</h3>
+          {[["name", "Product Name"], ["price", "Price"], ["original", "Original Price"], ["stock", "Stock"], ["desc", "Description"]].map(([k, l]) => (
+            <div key={k} style={{ marginBottom: 12 }}>
+              <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>{l}</label>
+              {k === "desc" ? <textarea value={form[k]} onChange={e => setForm(p => ({ ...p, [k]: e.target.value }))} rows={3} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", resize: "vertical" }} />
+               : <input value={form[k]} onChange={e => setForm(p => ({ ...p, [k]: e.target.value }))} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />}
+            </div>
+          ))}
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>Category</label>
+            <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", background: "#fff" }}>
+              {["electronics", "fashion", "beauty", "home"].map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>Badge</label>
+            <select value={form.badge} onChange={e => setForm(p => ({ ...p, badge: e.target.value }))} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", background: "#fff" }}>
+              {["Best Seller", "Trending", "New Arrival", "Hot Deal", "Editor's Pick", "Top Rated"].map(b => <option key={b} value={b}>{b}</option>)}
+            </select>
+          </div>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>Image</label>
+            {form.img && <img src={form.img} alt="" style={{ width: 80, height: 80, borderRadius: 8, objectFit: "cover", marginBottom: 8, display: "block" }} />}
+            <label className="hover-btn" style={{ display: "inline-block", background: "#f0ede8", color: "#555", padding: "10px 18px", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer" }}>
+              {uploading ? "Uploading..." : "Upload to Cloudinary"}
+              <input type="file" accept="image/*" onChange={uploadImg} style={{ display: "none" }} />
+            </label>
+            <input value={form.img} onChange={e => setForm(p => ({ ...p, img: e.target.value }))} placeholder="Or paste image URL" style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none", marginTop: 8 }} />
+          </div>
+          <div style={{ display: "flex", gap: 12 }}>
+            <button onClick={() => setShowForm(false)} style={{ flex: 1, background: "#f0ede8", color: "#555", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
+            <button onClick={save} className="hover-btn" style={{ flex: 1, background: "#8b6644", color: "#fff", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>{editProd ? "Update" : "Create"}</button>
+          </div>
+        </div>
+      </div>
+    )}
   )
 }
 
