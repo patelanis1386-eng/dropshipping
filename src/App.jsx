@@ -100,11 +100,9 @@ export default function App() {
     if (!u) return
     try {
       await setDoc(doc(db, "users", u.uid), { isAdmin: true }, { merge: true })
-      setUser(prev => prev ? { ...prev, isAdmin: true } : prev)
-      showToast("Admin access granted! Reloading...")
-      setTimeout(() => window.location.reload(), 1000)
+      window.location.reload()
     } catch (e) {
-      showToast("Failed: " + e.message, "info")
+      alert("Admin claim failed: " + e.message + "\n\nTry running: makeMeAdmin() in console instead.")
     }
   }
 
