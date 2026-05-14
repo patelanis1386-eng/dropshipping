@@ -65,6 +65,19 @@ export default function App() {
     }
   }
 
+  const handleClaimAdmin = async () => {
+    const u = auth.currentUser
+    if (!u) return
+    try {
+      await setDoc(doc(db, "users", u.uid), { isAdmin: true }, { merge: true })
+      setUser(prev => prev ? { ...prev, isAdmin: true } : prev)
+      showToast("Admin access granted! Reloading...")
+      setTimeout(() => window.location.reload(), 1000)
+    } catch (e) {
+      showToast("Failed: " + e.message, "info")
+    }
+  }
+
   const handleLogout = async () => {
     await logOut()
     setCart([])
@@ -166,7 +179,7 @@ export default function App() {
       `}</style>
 
       {authLoading && <div style={{ position: "fixed", inset: 0, background: "#faf9f7", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cormorant Garamond',serif", fontSize: 20, color: "#8b6644" }}>Loading...</div>}
-      <Navbar cart={cart} cartCount={cartCount} user={user} nav={nav} page={page} searchQ={searchQ} setSearchQ={setSearchQ} handleLogout={handleLogout} />
+      <Navbar cart={cart} cartCount={cartCount} user={user} nav={nav} page={page} searchQ={searchQ} setSearchQ={setSearchQ} handleLogout={handleLogout} handleClaimAdmin={handleClaimAdmin} />
 
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
@@ -194,7 +207,7 @@ export default function App() {
   )
 }
 
-function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleLogout }) {
+function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleLogout, handleClaimAdmin }) {
   const [scrolled, setScrolled] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   useEffect(() => {
@@ -248,7 +261,7 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
                   {[["My Orders", "orders"], ["Wishlist", "wishlist"], ...(user?.isAdmin ? [["Admin", "admin"]] : [])].map(([l, p]) => (
                     <div key={l} onClick={() => { setShowUserMenu(false); nav(p) }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#555", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#f8f5f0"} onMouseLeave={e => e.target.style.background = "transparent"}>{l}</div>
                   ))}
-                  {user && !user.isAdmin && <div onClick={async () => { try { const u = auth.currentUser; if (!u) return; await setDoc(doc(db, "users", u.uid), { isAdmin: true }, { merge: true }); setUser(prev => prev ? { ...prev, isAdmin: true } : prev); setShowUserMenu(false) } catch (e) { alert("Failed: " + e.message) } }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#8b6644", borderTop: "1px solid #f0ede8", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#f8f5f0"} onMouseLeave={e => e.target.style.background = "transparent"}>Claim Admin</div>}
+                  {user && !user.isAdmin && <div onClick={async () => { handleClaimAdmin(); setShowUserMenu(false) }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#8b6644", borderTop: "1px solid #f0ede8", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#f8f5f0"} onMouseLeave={e => e.target.style.background = "transparent"}>Claim Admin</div>}
                   <div onClick={() => { setShowUserMenu(false); handleLogout() }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#dc2626", borderTop: "1px solid #f0ede8", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#fef2f2"} onMouseLeave={e => e.target.style.background = "transparent"}>Sign Out</div>
                 </div>
               )}
