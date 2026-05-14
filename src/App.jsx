@@ -65,19 +65,6 @@ export default function App() {
     }
   }
 
-  const handleClaimAdmin = async () => {
-    const u = auth.currentUser
-    if (!u) return
-    try {
-      await setDoc(doc(db, "users", u.uid), { isAdmin: true }, { merge: true })
-      setUser(prev => prev ? { ...prev, isAdmin: true } : prev)
-      showToast("Admin access granted! Reloading...")
-      setTimeout(() => window.location.reload(), 1000)
-    } catch (e) {
-      showToast("Failed: " + e.message, "info")
-    }
-  }
-
   const handleLogout = async () => {
     await logOut()
     setCart([])
@@ -106,6 +93,19 @@ export default function App() {
   const showToast = (msg, type = "success") => {
     setToast({ msg, type })
     setTimeout(() => setToast(null), 3000)
+  }
+
+  const handleClaimAdmin = async () => {
+    const u = auth.currentUser
+    if (!u) return
+    try {
+      await setDoc(doc(db, "users", u.uid), { isAdmin: true }, { merge: true })
+      setUser(prev => prev ? { ...prev, isAdmin: true } : prev)
+      showToast("Admin access granted! Reloading...")
+      setTimeout(() => window.location.reload(), 1000)
+    } catch (e) {
+      showToast("Failed: " + e.message, "info")
+    }
   }
 
   const addCart = (product, qty = 1) => {
