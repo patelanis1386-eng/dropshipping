@@ -4,6 +4,30 @@ import { SEED_REVIEWS, SEED_CATEGORIES, fmt, disc } from "./data"
 import { addDoc, collection, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore"
 
 const Stars = ({ n }) => "\u2605".repeat(Math.floor(n)) + (n % 1 >= 0.5 ? "\u00BD" : "") + "\u25A0".repeat(5 - Math.ceil(n))
+const LOCAL_PRODUCTS_KEY = "luxedrop_local_products"
+
+const readLocalProducts = () => {
+  if (typeof localStorage === "undefined") return []
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_PRODUCTS_KEY) || "[]")
+  } catch (_) {
+    return []
+  }
+}
+
+const writeLocalProducts = (products) => {
+  if (typeof localStorage === "undefined") return
+  localStorage.setItem(LOCAL_PRODUCTS_KEY, JSON.stringify(products))
+}
+
+const mergeProducts = (...groups) => {
+  const seen = new Set()
+  return groups.flat().filter((p) => {
+    if (!p?.id || seen.has(p.id)) return false
+    seen.add(p.id)
+    return true
+  })
+}
 
 export default function App() {
   const [page, setPage] = useState("home")
@@ -23,7 +47,7 @@ export default function App() {
   const [orders, setOrders] = useState([])
   const [authLoading, setAuthLoading] = useState(true)
 
-  const [products, setProducts] = useState([])
+  const [products, setProducts] = useState(() => readLocalProducts())
   const [reviews, setReviews] = useState(SEED_REVIEWS)
   const [categories, setCategories] = useState(SEED_CATEGORIES)
 
@@ -76,12 +100,15 @@ export default function App() {
 
   useEffect(() => {
     const load = async () => {
+      const localProducts = readLocalProducts()
       try {
         const [fp, fr, fc] = await Promise.all([getProducts(), getReviews(), getCategories()])
-        if (fp.length) setProducts(fp)
+        setProducts(mergeProducts(localProducts, fp))
         if (fr.length) setReviews(fr)
         if (fc.length) setCategories(fc)
-      } catch (_) {}
+      } catch (_) {
+        setProducts(localProducts)
+      }
     }
     load()
   }, [])
@@ -193,7 +220,7 @@ export default function App() {
         {page === "auth"     && <AuthPage setUser={setUser} authMode={authMode} setAuthMode={setAuthMode} nav={nav} showToast={showToast} signUp={signUp} signIn={signIn} resetPassword={resetPassword} signInWithGoogle={signInWithGoogle} signInAsGuest={signInAsGuest} />}
         {page === "orders"   && <OrdersPage orders={orders} nav={nav} user={user} />}
         {page === "tracking" && <TrackingPage nav={nav} />}
-        {page === "admin"    && user?.isAdmin && <AdminPage products={products} setProducts={setProducts} orders={orders} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} />}
+        {page === "admin"    && user?.isAdmin && <AdminPage products={products} setProducts={setProducts} orders={orders} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} showToast={showToast} />}
         {page === "about"    && <StaticPage title="About Us" nav={nav}><AboutContent /></StaticPage>}
         {page === "contact"  && <StaticPage title="Contact Us" nav={nav}><ContactContent showToast={showToast} /></StaticPage>}
         {page === "privacy"  && <StaticPage title="Privacy Policy" nav={nav}><PrivacyContent /></StaticPage>}
@@ -1033,7 +1060,7 @@ function TrackingPage({ nav }) {
   )
 }
 
-function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav }) {
+function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav, showToast }) {
   const tabs = ["dashboard", "products", "orders", "customers", "analytics"]
   const [showForm, setShowForm] = useState(false)
   const [editProd, setEditProd] = useState(null)
@@ -1079,8 +1106,18 @@ function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav }
         await updateProduct(editProd.id, data)
         setProducts(prev => prev.map(p => p.id === editProd.id ? { ...p, ...data } : p))
       } else {
-        const id = await addProduct(data)
-        setProducts(prev => [{ id, ...data }, ...prev])
+        const localProduct = { id: "local-" + Date.now(), ...data, localOnly: true }
+        const localProducts = [localProduct, ...readLocalProducts()]
+        writeLocalProducts(localProducts)
+        setProducts(prev => mergeProducts([localProduct], prev))
+        setShowForm(false)
+        setProductError("")
+        showToast("Product added. Firebase sync will continue in the background.", "info")
+        addProduct(data).then((id) => {
+          writeLocalProducts(readLocalProducts().filter(p => p.id !== localProduct.id))
+          setProducts(prev => prev.map(p => p.id === localProduct.id ? { id, ...data } : p))
+        }).catch(() => {})
+        return
       }
       setShowForm(false)
       setProductError("")
