@@ -102,7 +102,7 @@ export default function App() {
     if (u.email !== "patelanis5304@gmail.com") return
     try {
       await setDoc(doc(db, "users", u.uid), { isAdmin: true }, { merge: true })
-      window.location.reload()
+      setUser(prev => prev ? { ...prev, isAdmin: true } : prev)
     } catch (e) {
       alert("Admin claim failed: " + e.message + "\n\nTry running: makeMeAdmin() in console instead.")
     }
