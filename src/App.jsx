@@ -142,7 +142,7 @@ export default function App() {
       {page === "cart"     && <CartPage cart={cart} setCart={setCart} removeCart={removeCart} cartTotal={cartTotal} nav={nav} />}
       {page === "checkout" && <CheckoutPage cart={cart} cartTotal={cartTotal} payMethod={payMethod} setPayMethod={setPayMethod} nav={nav} showToast={showToast} setCart={setCart} user={user} orders={orders} setOrders={setOrders} />}
       {page === "wishlist" && <WishlistPage wishlist={wishlist} toggleWish={toggleWish} addCart={addCart} nav={nav} />}
-      {page === "auth"     && <AuthPage authMode={authMode} setAuthMode={setAuthMode} nav={nav} showToast={showToast} signUp={signUp} signIn={signIn} resetPassword={resetPassword} signInWithGoogle={signInWithGoogle} signInAsGuest={signInAsGuest} />}
+      {page === "auth"     && <AuthPage setUser={setUser} authMode={authMode} setAuthMode={setAuthMode} nav={nav} showToast={showToast} signUp={signUp} signIn={signIn} resetPassword={resetPassword} signInWithGoogle={signInWithGoogle} signInAsGuest={signInAsGuest} />}
       {page === "orders"   && <OrdersPage orders={orders} nav={nav} user={user} />}
       {page === "tracking" && <TrackingPage nav={nav} />}
       {page === "admin"    && <AdminPage products={products} orders={orders} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} />}
@@ -762,7 +762,7 @@ function WishlistPage({ wishlist, toggleWish, addCart, nav }) {
   )
 }
 
-function AuthPage({ authMode, setAuthMode, nav, showToast, signUp, signIn, resetPassword, signInWithGoogle, signInAsGuest }) {
+function AuthPage({ setUser, authMode, setAuthMode, nav, showToast, signUp, signIn, resetPassword, signInWithGoogle, signInAsGuest }) {
   const [form, setForm] = useState({ name: "", email: "", password: "" })
   const [submitting, setSubmitting] = useState(false)
   const [showPw, setShowPw] = useState(false)
@@ -789,9 +789,14 @@ function AuthPage({ authMode, setAuthMode, nav, showToast, signUp, signIn, reset
       if (authMode === "login") {
         await signIn(form.email, form.password)
         showToast("Welcome back!")
+        setSubmitting(false)
+        nav("home")
       } else if (authMode === "signup") {
         await signUp(form.email, form.password, form.name)
+        setUser({ name: form.name, email: form.email })
         showToast("Account created! You're now signed in.")
+        setSubmitting(false)
+        nav("home")
       } else {
         await resetPassword(form.email)
         showToast("Password reset link sent to your email", "info")
@@ -799,7 +804,6 @@ function AuthPage({ authMode, setAuthMode, nav, showToast, signUp, signIn, reset
         setSubmitting(false)
         return
       }
-      nav("home")
     } catch (e) {
       const msg = e.code === "auth/email-already-in-use" ? "This email is already registered. Try signing in." :
                   e.code === "auth/user-not-found" ? "No account found with this email" :
@@ -808,13 +812,14 @@ function AuthPage({ authMode, setAuthMode, nav, showToast, signUp, signIn, reset
                   e.code === "auth/weak-password" ? "Password must be 6+ characters" :
                   e.code === "auth/invalid-email" ? "Invalid email address" :
                   e.code === "auth/network-request-failed" ? "Network error. Check your connection." :
+                  e.code === "auth/operation-not-allowed" ? "Email/password sign-up is not enabled. Enable it in Firebase Console." :
                   e.code === "auth/popup-closed-by-user" ? "" :
                   e.code?.includes("auth/popup") ? "" :
                   e.message || "Something went wrong"
       if (msg) showToast(msg, "info")
       setErr(msg)
+      setSubmitting(false)
     }
-    setSubmitting(false)
   }
 
   const handleGoogle = async () => {
@@ -861,7 +866,7 @@ function AuthPage({ authMode, setAuthMode, nav, showToast, signUp, signIn, reset
             <span onClick={() => { setAuthMode("forgot"); setErr("") }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Forgot password?</span>
           </div>
         )}
-        <button onClick={submit} disabled={submitting} className="hover-btn" style={{ width: "100%", background: submitting ? "#ccc" : "#c8956c", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: submitting ? "not-allowed" : "pointer", marginBottom: 16 }}>
+        <button type="button" onClick={submit} disabled={submitting} className="hover-btn" style={{ width: "100%", background: submitting ? "#ccc" : "#c8956c", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: submitting ? "not-allowed" : "pointer", marginBottom: 16 }}>
           {submitting ? "Please wait..." : authMode === "login" ? "Sign In" : authMode === "signup" ? "Create Account" : "Send Reset Link"}
         </button>
         <div style={{ textAlign: "center", fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#888" }}>
@@ -870,11 +875,11 @@ function AuthPage({ authMode, setAuthMode, nav, showToast, signUp, signIn, reset
            <span onClick={() => { setAuthMode("login"); setErr("") }} style={{ color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Back to Sign In</span>}
         </div>
         <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #f0ede8", display: "flex", flexDirection: "column", gap: 12 }}>
-          <button onClick={handleGoogle} disabled={submitting} className="hover-btn" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "11px", borderRadius: 10, border: "1px solid #e0d8ce", background: "#fff", cursor: submitting ? "not-allowed" : "pointer", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600, opacity: submitting ? 0.6 : 1 }}>
+          <button type="button" onClick={handleGoogle} disabled={submitting} className="hover-btn" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "11px", borderRadius: 10, border: "1px solid #e0d8ce", background: "#fff", cursor: submitting ? "not-allowed" : "pointer", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600, opacity: submitting ? 0.6 : 1 }}>
             <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.54 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.77.87 7.35 2.56 10.56l7.98-5.97z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 5.97C6.51 42.62 14.62 48 24 48z"/></svg>
             Continue with Google
           </button>
-          <button onClick={async () => { try { await signInAsGuest(); showToast("Signed in as Guest"); nav("home") } catch (e) { showToast("Guest login unavailable", "info") } }} disabled={submitting} className="hover-btn" style={{ width: "100%", padding: "11px", borderRadius: 10, border: "1px dashed #ccc", background: "#faf9f7", cursor: submitting ? "not-allowed" : "pointer", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 500, color: "#888", opacity: submitting ? 0.6 : 1 }}>
+          <button type="button" onClick={async () => { try { await signInAsGuest(); showToast("Signed in as Guest"); nav("home") } catch (e) { showToast("Guest login unavailable", "info") } }} disabled={submitting} className="hover-btn" style={{ width: "100%", padding: "11px", borderRadius: 10, border: "1px dashed #ccc", background: "#faf9f7", cursor: submitting ? "not-allowed" : "pointer", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 500, color: "#888", opacity: submitting ? 0.6 : 1 }}>
             Continue as Guest
           </button>
         </div>

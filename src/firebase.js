@@ -29,12 +29,12 @@ import {
 } from "firebase/firestore"
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyBqRqi-MrWBHGSzJV_2mMaLuG1HwlQzzgg",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "dropshipping-9e718.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "dropshipping-9e718",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "dropshipping-9e718.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "35387797827",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:35387797827:web:49485f7ebb29874b957ff6",
 }
 
 const app = initializeApp(firebaseConfig)
