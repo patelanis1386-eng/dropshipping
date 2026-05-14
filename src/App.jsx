@@ -116,9 +116,17 @@ export default function App() {
         .hover-btn { transition: all 0.2s; cursor: pointer; }
         .hover-btn:hover { opacity: 0.88; transform: translateY(-1px); }
         .nav-link { cursor: pointer; transition: color 0.2s; }
-        .nav-link:hover { color: #c8956c; }
+        .nav-link:hover { color: #a67a54; }
         .product-card:hover .product-overlay { opacity: 1 !important; }
-        input:focus, select:focus, textarea:focus { outline: 2px solid #c8956c; outline-offset: 1px; }
+        input:focus, select:focus, textarea:focus { outline: 2px solid #a67a54; outline-offset: 1px; }
+        .brand-accent { color: #a67a54; }
+        .btn-primary { background: #a67a54; color: #fff; }
+        .btn-primary:hover { background: #8b6644; }
+        .text-muted { color: #767676; }
+        .text-muted-light { color: #767676; }
+        .rating-star { color: #a67a54; }
+        .price-old { color: #767676; }
+        .cat-label { color: #767676; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: none; } }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
@@ -131,26 +139,28 @@ export default function App() {
         }
       `}</style>
 
-      {authLoading && <div style={{ position: "fixed", inset: 0, background: "#faf9f7", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cormorant Garamond',serif", fontSize: 20, color: "#c8956c" }}>Loading...</div>}
+      {authLoading && <div style={{ position: "fixed", inset: 0, background: "#faf9f7", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cormorant Garamond',serif", fontSize: 20, color: "#8b6644" }}>Loading...</div>}
       <Navbar cart={cart} cartCount={cartCount} user={user} nav={nav} page={page} searchQ={searchQ} setSearchQ={setSearchQ} handleLogout={handleLogout} />
 
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
-      {page === "home"     && <HomePage products={products} reviews={reviews} categories={categories} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} setSearchQ={setSearchQ} newsletter={newsletter} setNewsletter={setNewsletter} newsletterDone={newsletterDone} setNewsletterDone={setNewsletterDone} showToast={showToast} />}
-      {page === "shop"     && <ShopPage products={filteredProducts} allProducts={products} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} catFilter={catFilter} setCatFilter={setCatFilter} searchQ={searchQ} setSearchQ={setSearchQ} sortBy={sortBy} setSortBy={setSortBy} />}
-      {page === "product"  && <ProductPage product={selectedProduct} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} products={products} reviews={reviews} showToast={showToast} />}
-      {page === "cart"     && <CartPage cart={cart} setCart={setCart} removeCart={removeCart} cartTotal={cartTotal} nav={nav} />}
-      {page === "checkout" && <CheckoutPage cart={cart} cartTotal={cartTotal} payMethod={payMethod} setPayMethod={setPayMethod} nav={nav} showToast={showToast} setCart={setCart} user={user} orders={orders} setOrders={setOrders} />}
-      {page === "wishlist" && <WishlistPage wishlist={wishlist} toggleWish={toggleWish} addCart={addCart} nav={nav} />}
-      {page === "auth"     && <AuthPage setUser={setUser} authMode={authMode} setAuthMode={setAuthMode} nav={nav} showToast={showToast} signUp={signUp} signIn={signIn} resetPassword={resetPassword} signInWithGoogle={signInWithGoogle} signInAsGuest={signInAsGuest} />}
-      {page === "orders"   && <OrdersPage orders={orders} nav={nav} user={user} />}
-      {page === "tracking" && <TrackingPage nav={nav} />}
-      {page === "admin"    && <AdminPage products={products} orders={orders} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} />}
-      {page === "about"    && <StaticPage title="About Us" nav={nav}><AboutContent /></StaticPage>}
-      {page === "contact"  && <StaticPage title="Contact Us" nav={nav}><ContactContent showToast={showToast} /></StaticPage>}
-      {page === "privacy"  && <StaticPage title="Privacy Policy" nav={nav}><PrivacyContent /></StaticPage>}
-      {page === "refund"   && <StaticPage title="Refund Policy" nav={nav}><RefundContent /></StaticPage>}
-      {page === "terms"    && <StaticPage title="Terms & Conditions" nav={nav}><TermsContent /></StaticPage>}
+      <main>
+        {page === "home"     && <HomePage products={products} reviews={reviews} categories={categories} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} setSearchQ={setSearchQ} newsletter={newsletter} setNewsletter={setNewsletter} newsletterDone={newsletterDone} setNewsletterDone={setNewsletterDone} showToast={showToast} />}
+        {page === "shop"     && <ShopPage products={filteredProducts} allProducts={products} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} catFilter={catFilter} setCatFilter={setCatFilter} searchQ={searchQ} setSearchQ={setSearchQ} sortBy={sortBy} setSortBy={setSortBy} />}
+        {page === "product"  && <ProductPage product={selectedProduct} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} products={products} reviews={reviews} showToast={showToast} />}
+        {page === "cart"     && <CartPage cart={cart} setCart={setCart} removeCart={removeCart} cartTotal={cartTotal} nav={nav} />}
+        {page === "checkout" && <CheckoutPage cart={cart} cartTotal={cartTotal} payMethod={payMethod} setPayMethod={setPayMethod} nav={nav} showToast={showToast} setCart={setCart} user={user} orders={orders} setOrders={setOrders} />}
+        {page === "wishlist" && <WishlistPage wishlist={wishlist} toggleWish={toggleWish} addCart={addCart} nav={nav} />}
+        {page === "auth"     && <AuthPage setUser={setUser} authMode={authMode} setAuthMode={setAuthMode} nav={nav} showToast={showToast} signUp={signUp} signIn={signIn} resetPassword={resetPassword} signInWithGoogle={signInWithGoogle} signInAsGuest={signInAsGuest} />}
+        {page === "orders"   && <OrdersPage orders={orders} nav={nav} user={user} />}
+        {page === "tracking" && <TrackingPage nav={nav} />}
+        {page === "admin"    && <AdminPage products={products} orders={orders} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} />}
+        {page === "about"    && <StaticPage title="About Us" nav={nav}><AboutContent /></StaticPage>}
+        {page === "contact"  && <StaticPage title="Contact Us" nav={nav}><ContactContent showToast={showToast} /></StaticPage>}
+        {page === "privacy"  && <StaticPage title="Privacy Policy" nav={nav}><PrivacyContent /></StaticPage>}
+        {page === "refund"   && <StaticPage title="Refund Policy" nav={nav}><RefundContent /></StaticPage>}
+        {page === "terms"    && <StaticPage title="Terms & Conditions" nav={nav}><TermsContent /></StaticPage>}
+      </main>
 
       <Footer nav={nav} newsletter={newsletter} setNewsletter={setNewsletter} newsletterDone={newsletterDone} setNewsletterDone={setNewsletterDone} showToast={showToast} />
       <WhatsAppButton />
@@ -178,11 +188,11 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
     <nav style={{ position: "sticky", top: 0, zIndex: 200, background: scrolled ? "rgba(250,249,247,0.97)" : "#faf9f7", borderBottom: scrolled ? "1px solid #ede8e0" : "none", transition: "all 0.3s" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", height: 68, gap: 24 }}>
         <div onClick={() => nav("home")} style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 26, fontWeight: 700, letterSpacing: 2, cursor: "pointer", whiteSpace: "nowrap" }}>
-          LUXE<span style={{ color: "#c8956c" }}>DROP</span>
+          LUXE<span style={{ color: "#a67a54" }}>DROP</span>
         </div>
 
         <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, background: "#f3efe9", borderRadius: 10, padding: "8px 14px", maxWidth: 400 }}>
-          <span style={{ color: "#999", fontSize: 14 }}>&#x1F50D;</span>
+          <span style={{ color: "#767676", fontSize: 14 }}>&#x1F50D;</span>
           <input value={searchQ} onChange={e => { setSearchQ(e.target.value); nav("shop") }} placeholder="Search products..." style={{ flex: 1, border: "none", background: "none", fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none", color: "#333" }} />
         </div>
 
@@ -196,7 +206,7 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
           <span className="nav-link" onClick={() => nav("wishlist")} style={{ fontSize: 20, position: "relative" }}>&#x2661;</span>
           <span className="nav-link" onClick={() => nav("cart")} style={{ fontSize: 20, position: "relative" }}>
             &#x1F6D2;
-            {cartCount > 0 && <span style={{ position: "absolute", top: -6, right: -8, background: "#c8956c", color: "#fff", fontSize: 10, fontWeight: 700, width: 18, height: 18, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>{cartCount}</span>}
+            {cartCount > 0 && <span style={{ position: "absolute", top: -6, right: -8, background: "#8b6644", color: "#fff", fontSize: 10, fontWeight: 700, width: 18, height: 18, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>{cartCount}</span>}
           </span>
           {user ? (
             <div style={{ position: "relative" }}>
@@ -207,12 +217,12 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
                 <div id="user-menu-dropdown" style={{ position: "absolute", top: "100%", right: 0, marginTop: 8, background: "#fff", borderRadius: 12, boxShadow: "0 8px 32px rgba(0,0,0,0.12)", minWidth: 180, overflow: "hidden", zIndex: 300 }}>
                   <div style={{ padding: "14px 18px", borderBottom: "1px solid #f0ede8", fontFamily: "'Jost',sans-serif" }}>
                     <div style={{ fontWeight: 600, fontSize: 14, color: "#1a1a1a" }}>{user.name}</div>
-                    <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{user.email}</div>
+                    <div style={{ fontSize: 12, color: "#767676", marginTop: 2 }}>{user.email}</div>
                   </div>
                   {[["My Orders", "orders"], ["Wishlist", "wishlist"], ["Admin", "admin"]].map(([l, p]) => (
                     <div key={l} onClick={() => { setShowUserMenu(false); nav(p) }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#555", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#f8f5f0"} onMouseLeave={e => e.target.style.background = "transparent"}>{l}</div>
                   ))}
-                  <div onClick={() => { setShowUserMenu(false); handleLogout() }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#ef4444", borderTop: "1px solid #f0ede8", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#fef2f2"} onMouseLeave={e => e.target.style.background = "transparent"}>Sign Out</div>
+                  <div onClick={() => { setShowUserMenu(false); handleLogout() }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#dc2626", borderTop: "1px solid #f0ede8", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#fef2f2"} onMouseLeave={e => e.target.style.background = "transparent"}>Sign Out</div>
                 </div>
               )}
             </div>
@@ -244,21 +254,21 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
       <section style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #2d2418 50%, #3d2f20 100%)", color: "#fff", padding: "80px 24px", position: "relative", overflow: "hidden" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", alignItems: "center", gap: 60 }} className="mobile-col">
           <div style={{ flex: 1 }} className="hero-text">
-            <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "#c8956c", marginBottom: 16 }}>PREMIUM DROPSHIPPING</div>
+            <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "#8b6644", marginBottom: 16 }}>PREMIUM DROPSHIPPING</div>
             <h1 style={{ fontSize: "clamp(40px,6vw,72px)", fontWeight: 300, lineHeight: 1.1, marginBottom: 20, letterSpacing: -1 }}>
-              Discover<br /><em style={{ fontStyle: "italic", color: "#c8956c" }}>Premium</em><br />Products
+              Discover<br /><em style={{ fontStyle: "italic", color: "#8b6644" }}>Premium</em><br />Products
             </h1>
             <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, color: "#ccc", maxWidth: 440, lineHeight: 1.7, marginBottom: 32 }}>
               Curated selections from the world's best suppliers. Quality guaranteed, delivered to your door.
             </p>
             <div style={{ display: "flex", gap: 16 }}>
-              <button onClick={() => nav("shop")} className="hover-btn" style={{ background: "#c8956c", color: "#fff", border: "none", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Shop Now &#x2192;</button>
+              <button onClick={() => nav("shop")} className="hover-btn" style={{ background: "#8b6644", color: "#fff", border: "none", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Shop Now &#x2192;</button>
               <button onClick={() => nav("tracking")} className="hover-btn" style={{ background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 500, fontSize: 14, cursor: "pointer" }}>Track Order</button>
             </div>
             <div style={{ display: "flex", gap: 40, marginTop: 48 }}>
               {[["50K+", "Happy Customers"], ["4.9\u2605", "Average Rating"], ["Free", "Shipping Always"]].map(([v, l]) => (
                 <div key={l}>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: "#c8956c", fontFamily: "'Jost',sans-serif" }}>{v}</div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: "#8b6644", fontFamily: "'Jost',sans-serif" }}>{v}</div>
                   <div style={{ fontSize: 12, color: "#aaa", fontFamily: "'Jost',sans-serif", marginTop: 2 }}>{l}</div>
                 </div>
               ))}
@@ -281,7 +291,7 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
               <span style={{ fontSize: 22 }}>{icon}</span>
               <div>
                 <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, color: "#1a1a1a" }}>{t}</div>
-                <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#999" }}>{s}</div>
+                <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#767676" }}>{s}</div>
               </div>
             </div>
           ))}
@@ -306,11 +316,11 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
         <ProductGrid products={featured} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} />
       </section>
 
-      <section style={{ background: "linear-gradient(135deg, #c8956c, #e8a87c)", margin: "0 24px", borderRadius: 24, padding: "48px 40px", textAlign: "center" }}>
+      <section style={{ background: "linear-gradient(135deg, #8b6644, #e8a87c)", margin: "0 24px", borderRadius: 24, padding: "48px 40px", textAlign: "center" }}>
         <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "rgba(255,255,255,0.8)", marginBottom: 12 }}>LIMITED TIME OFFER</div>
         <h2 style={{ fontSize: "clamp(28px,4vw,48px)", color: "#fff", fontWeight: 300, marginBottom: 12 }}>Up to <strong>60% Off</strong> Select Items</h2>
         <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, color: "rgba(255,255,255,0.85)", marginBottom: 28 }}>Use code <strong>LUXE50</strong> for an extra 10% off</p>
-        <button onClick={() => nav("shop")} className="hover-btn" style={{ background: "#fff", color: "#c8956c", border: "none", padding: "14px 36px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Shop Sale &#x2192;</button>
+        <button onClick={() => nav("shop")} className="hover-btn" style={{ background: "#fff", color: "#8b6644", border: "none", padding: "14px 36px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Shop Sale &#x2192;</button>
       </section>
 
       <section style={{ padding: "60px 24px", maxWidth: 1280, margin: "0 auto" }}>
@@ -324,13 +334,13 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
             {reviews.map(r => (
               <div key={r.name} style={{ background: "#fff", borderRadius: 20, padding: 28, boxShadow: "0 2px 16px rgba(0,0,0,0.06)" }}>
-                <div style={{ color: "#c8956c", fontSize: 16, marginBottom: 12 }}>{"\u2605".repeat(r.rating)}</div>
+                <div style={{ color: "#8b6644", fontSize: 16, marginBottom: 12 }}>{"\u2605".repeat(r.rating)}</div>
                 <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#555", lineHeight: 1.7, marginBottom: 16 }}>"{r.text}"</p>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 38, height: 38, borderRadius: "50%", background: "#c8956c", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 14, fontFamily: "'Jost',sans-serif" }}>{r.avatar}</div>
+                  <div style={{ width: 38, height: 38, borderRadius: "50%", background: "#8b6644", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 14, fontFamily: "'Jost',sans-serif" }}>{r.avatar}</div>
                   <div>
                     <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13 }}>{r.name}</div>
-                    <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#999" }}>Purchased: {r.product}</div>
+                    <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#767676" }}>Purchased: {r.product}</div>
                   </div>
                 </div>
               </div>
@@ -352,9 +362,9 @@ function SectionHeader({ title, sub, action }) {
     <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
       <div>
         <h2 style={{ fontSize: "clamp(24px,3vw,36px)", fontWeight: 600, letterSpacing: -0.5, marginBottom: 6 }}>{title}</h2>
-        <p style={{ fontFamily: "'Jost',sans-serif", color: "#888", fontSize: 14 }}>{sub}</p>
+        <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676", fontSize: 14 }}>{sub}</p>
       </div>
-      {action && <button onClick={action.fn} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#c8956c", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>{action.label} &#x2192;</button>}
+      {action && <button onClick={action.fn} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#8b6644", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>{action.label} &#x2192;</button>}
     </div>
   )
 }
@@ -373,22 +383,22 @@ function ProductCard({ product: p, nav, addCart, toggleWish, wishlist }) {
     <div className="hover-lift product-card" style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", cursor: "pointer" }}>
       <div style={{ position: "relative", aspectRatio: "1" }} onClick={() => nav("product", { product: p })}>
         <img src={p.img} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        <div style={{ position: "absolute", top: 12, left: 12, background: "#c8956c", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "'Jost',sans-serif", padding: "4px 10px", borderRadius: 6 }}>{p.badge}</div>
-        <div style={{ position: "absolute", top: 12, right: 12, background: "#fff2e8", color: "#c8956c", fontSize: 11, fontFamily: "'Jost',sans-serif", fontWeight: 700, padding: "4px 10px", borderRadius: 6 }}>-{disc(p.price, p.original)}%</div>
+        <div style={{ position: "absolute", top: 12, left: 12, background: "#8b6644", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "'Jost',sans-serif", padding: "4px 10px", borderRadius: 6 }}>{p.badge}</div>
+        <div style={{ position: "absolute", top: 12, right: 12, background: "#fff2e8", color: "#8b6644", fontSize: 11, fontFamily: "'Jost',sans-serif", fontWeight: 700, padding: "4px 10px", borderRadius: 6 }}>-{disc(p.price, p.original)}%</div>
         <div className="product-overlay" style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)", opacity: 0, transition: "opacity 0.3s", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <button onClick={e => { e.stopPropagation(); addCart(p) }} style={{ background: "#c8956c", color: "#fff", border: "none", padding: "12px 24px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Add to Cart &#x2192;</button>
+          <button onClick={e => { e.stopPropagation(); addCart(p) }} style={{ background: "#8b6644", color: "#fff", border: "none", padding: "12px 24px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Add to Cart &#x2192;</button>
         </div>
       </div>
       <div style={{ padding: 16 }}>
-        <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#bbb", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>{p.category}</div>
+        <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#767676", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>{p.category}</div>
         <div onClick={() => nav("product", { product: p })} style={{ fontWeight: 600, fontSize: 15, marginBottom: 6, lineHeight: 1.3 }}>{p.name}</div>
-        <div style={{ color: "#c8a882", fontSize: 12, fontFamily: "'Jost',sans-serif", marginBottom: 10 }}>{"\u2605".repeat(Math.floor(p.rating))} ({p.reviews.toLocaleString()})</div>
+        <div style={{ color: "#8b6644", fontSize: 12, fontFamily: "'Jost',sans-serif", marginBottom: 10 }}>{"\u2605".repeat(Math.floor(p.rating))} ({p.reviews.toLocaleString()})</div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 17, color: "#1a1a1a" }}>{fmt(p.price)}</span>
-            <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#ccc", textDecoration: "line-through" }}>{fmt(p.original)}</span>
+            <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", textDecoration: "line-through" }}>{fmt(p.original)}</span>
           </div>
-          <button onClick={() => toggleWish(p)} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: wishlisted ? "#e74c3c" : "#ccc" }}>
+          <button onClick={() => toggleWish(p)} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: wishlisted ? "#e74c3c" : "#767676" }}>
             {wishlisted ? "\u2665" : "\u2661"}
           </button>
         </div>
@@ -401,12 +411,12 @@ function ShopPage({ products, allProducts, nav, addCart, toggleWish, wishlist, c
   return (
     <div style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 24px" }}>
       <h1 style={{ fontSize: 36, fontWeight: 600, marginBottom: 8 }}>All Products</h1>
-      <p style={{ fontFamily: "'Jost',sans-serif", color: "#888", marginBottom: 32 }}>Showing {products.length} of {allProducts.length} products</p>
+      <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676", marginBottom: 32 }}>Showing {products.length} of {allProducts.length} products</p>
       <div style={{ display: "flex", gap: 24 }} className="mobile-col">
         <aside style={{ width: 200, flexShrink: 0 }} className="hide-mobile">
-          <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, letterSpacing: 1, marginBottom: 14, color: "#888" }}>CATEGORIES</div>
+          <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, letterSpacing: 1, marginBottom: 14, color: "#767676" }}>CATEGORIES</div>
           {["all", "fashion", "electronics", "beauty", "home"].map(cat => (
-            <div key={cat} onClick={() => setCatFilter(cat)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, padding: "8px 12px", borderRadius: 8, cursor: "pointer", background: catFilter === cat ? "#c8956c" : "transparent", color: catFilter === cat ? "#fff" : "#555", fontWeight: catFilter === cat ? 600 : 400, marginBottom: 4, textTransform: "capitalize" }}>{cat}</div>
+            <div key={cat} onClick={() => setCatFilter(cat)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, padding: "8px 12px", borderRadius: 8, cursor: "pointer", background: catFilter === cat ? "#8b6644" : "transparent", color: catFilter === cat ? "#fff" : "#555", fontWeight: catFilter === cat ? 600 : 400, marginBottom: 4, textTransform: "capitalize" }}>{cat}</div>
           ))}
         </aside>
         <div style={{ flex: 1 }}>
@@ -420,12 +430,12 @@ function ShopPage({ products, allProducts, nav, addCart, toggleWish, wishlist, c
             </select>
             <div style={{ display: "flex", gap: 6 }} className="hide-mobile">
               {["all", "fashion", "electronics", "beauty", "home"].map(cat => (
-                <button key={cat} onClick={() => setCatFilter(cat)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, padding: "6px 14px", borderRadius: 20, border: "none", cursor: "pointer", background: catFilter === cat ? "#c8956c" : "#f0ede8", color: catFilter === cat ? "#fff" : "#555", fontWeight: 600 }}>{cat}</button>
+                <button key={cat} onClick={() => setCatFilter(cat)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, padding: "6px 14px", borderRadius: 20, border: "none", cursor: "pointer", background: catFilter === cat ? "#8b6644" : "#f0ede8", color: catFilter === cat ? "#fff" : "#555", fontWeight: 600 }}>{cat}</button>
               ))}
             </div>
           </div>
           <ProductGrid products={products} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} />
-          {products.length === 0 && <div style={{ textAlign: "center", padding: "60px", color: "#aaa", fontFamily: "'Jost',sans-serif" }}>No products found. Try a different search.</div>}
+          {products.length === 0 && <div style={{ textAlign: "center", padding: "60px", color: "#767676", fontFamily: "'Jost',sans-serif" }}>No products found. Try a different search.</div>}
         </div>
       </div>
     </div>
@@ -443,8 +453,8 @@ function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products,
 
   return (
     <div style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 24px" }}>
-      <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#999", marginBottom: 24 }}>
-        <span style={{ cursor: "pointer", color: "#c8956c" }} onClick={() => nav("home")}>Home</span> / <span style={{ color: "#333" }}>{p.name}</span>
+      <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", marginBottom: 24 }}>
+        <span style={{ cursor: "pointer", color: "#8b6644" }} onClick={() => nav("home")}>Home</span> / <span style={{ color: "#333" }}>{p.name}</span>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48 }} className="mobile-col">
         <div>
@@ -453,23 +463,23 @@ function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products,
           </div>
           <div style={{ display: "flex", gap: 10 }}>
             {imgs.map((img, i) => (
-              <div key={i} onClick={() => setImgIdx(i)} style={{ width: 72, height: 72, borderRadius: 10, overflow: "hidden", cursor: "pointer", border: imgIdx === i ? "2px solid #c8956c" : "2px solid transparent" }}>
+              <div key={i} onClick={() => setImgIdx(i)} style={{ width: 72, height: 72, borderRadius: 10, overflow: "hidden", cursor: "pointer", border: imgIdx === i ? "2px solid #8b6644" : "2px solid transparent" }}>
                 <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
             ))}
           </div>
         </div>
         <div>
-          <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#c8956c", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>{p.category}</div>
+          <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#8b6644", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>{p.category}</div>
           <h1 style={{ fontSize: "clamp(24px,3vw,36px)", fontWeight: 600, marginBottom: 12, lineHeight: 1.2 }}>{p.name}</h1>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-            <span style={{ color: "#c8a882", fontSize: 18 }}>{"\u2605".repeat(Math.floor(p.rating))}</span>
-            <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#888" }}>{p.rating} ({p.reviews.toLocaleString()} reviews)</span>
+            <span style={{ color: "#8b6644", fontSize: 18 }}>{"\u2605".repeat(Math.floor(p.rating))}</span>
+            <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#767676" }}>{p.rating} ({p.reviews.toLocaleString()} reviews)</span>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginBottom: 24 }}>
             <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 36, fontWeight: 700, color: "#1a1a1a" }}>{fmt(p.price)}</span>
-            <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 18, color: "#bbb", textDecoration: "line-through" }}>{fmt(p.original)}</span>
-            <span style={{ background: "#ffece0", color: "#c8956c", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 700, padding: "4px 12px", borderRadius: 6 }}>Save {fmt(p.original - p.price)}</span>
+            <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 18, color: "#767676", textDecoration: "line-through" }}>{fmt(p.original)}</span>
+            <span style={{ background: "#ffece0", color: "#8b6644", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 700, padding: "4px 12px", borderRadius: 6 }}>Save {fmt(p.original - p.price)}</span>
           </div>
           <div style={{ background: "#f8f5f0", borderRadius: 12, padding: "14px 18px", marginBottom: 24, display: "flex", gap: 20, flexWrap: "wrap" }}>
             {[["\uD83D\uDE9A", "Free Shipping"], ["\uD83D\uDD04", "30-Day Returns"], ["\uD83D\uDD12", "Secure Checkout"], ["\u2713", p.stock + " in stock"]].map(([icon, text]) => (
@@ -489,7 +499,7 @@ function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products,
           </div>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }} className="mobile-col">
             <button onClick={() => addCart(p, qty)} className="hover-btn" style={{ flex: 1, background: "#1a1a1a", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Add to Cart &#x2192;</button>
-            <button onClick={() => { addCart(p, qty); nav("checkout") }} className="hover-btn" style={{ flex: 1, background: "#c8956c", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Buy Now &#x2192;</button>
+            <button onClick={() => { addCart(p, qty); nav("checkout") }} className="hover-btn" style={{ flex: 1, background: "#8b6644", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Buy Now &#x2192;</button>
           </div>
           <button onClick={() => toggleWish(p)} style={{ width: "100%", border: "2px solid " + (wishlisted ? "#e74c3c" : "#e0d8ce"), background: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer", color: wishlisted ? "#e74c3c" : "#666" }}>
             {wishlisted ? "\u2665 Remove from Wishlist" : "\u2661 Add to Wishlist"}
@@ -500,7 +510,7 @@ function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products,
       <div style={{ marginTop: 48, borderTop: "1px solid #e8e2da", paddingTop: 40 }}>
         <div style={{ display: "flex", gap: 0, marginBottom: 32, borderBottom: "1px solid #e8e2da" }}>
           {[["desc", "Description"], ["reviews", "Reviews"], ["shipping", "Shipping"]].map(([k, l]) => (
-            <button key={k} onClick={() => setTab(k)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, fontWeight: 600, padding: "14px 28px", border: "none", background: "none", cursor: "pointer", color: tab === k ? "#c8956c" : "#888", borderBottom: tab === k ? "2px solid #c8956c" : "2px solid transparent", marginBottom: -1 }}>{l}</button>
+            <button key={k} onClick={() => setTab(k)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, fontWeight: 600, padding: "14px 28px", border: "none", background: "none", cursor: "pointer", color: tab === k ? "#8b6644" : "#767676", borderBottom: tab === k ? "2px solid #8b6644" : "2px solid transparent", marginBottom: -1 }}>{l}</button>
           ))}
         </div>
         {tab === "desc" && <div style={{ fontFamily: "'Jost',sans-serif", color: "#555", lineHeight: 1.8, fontSize: 15, maxWidth: 700 }}>{p.desc}</div>}
@@ -509,15 +519,15 @@ function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products,
             <div style={{ display: "flex", alignItems: "center", gap: 24, marginBottom: 32 }}>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: 56, fontWeight: 300, lineHeight: 1 }}>{p.rating}</div>
-                <div style={{ color: "#c8a882", fontSize: 20 }}>{"\u2605".repeat(Math.floor(p.rating))}</div>
-                <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#999" }}>{p.reviews.toLocaleString()} reviews</div>
+                <div style={{ color: "#8b6644", fontSize: 20 }}>{"\u2605".repeat(Math.floor(p.rating))}</div>
+                <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676" }}>{p.reviews.toLocaleString()} reviews</div>
               </div>
               <div style={{ flex: 1 }}>
                 {[5, 4, 3, 2, 1].map(n => (
                   <div key={n} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                    <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#888", width: 8 }}>{n}</span>
+                    <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", width: 8 }}>{n}</span>
                     <div style={{ flex: 1, height: 8, background: "#f0ede8", borderRadius: 4, overflow: "hidden" }}>
-                      <div style={{ height: "100%", background: "#c8956c", width: n === 5 ? "72%" : n === 4 ? "18%" : n === 3 ? "6%" : "2%", borderRadius: 4 }} />
+                      <div style={{ height: "100%", background: "#8b6644", width: n === 5 ? "72%" : n === 4 ? "18%" : n === 3 ? "6%" : "2%", borderRadius: 4 }} />
                     </div>
                   </div>
                 ))}
@@ -526,12 +536,12 @@ function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products,
             {reviews.map(r => (
               <div key={r.name} style={{ borderBottom: "1px solid #f0ede8", paddingBottom: 20, marginBottom: 20 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#c8956c", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 13, fontFamily: "'Jost',sans-serif" }}>{r.avatar}</div>
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#8b6644", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 13, fontFamily: "'Jost',sans-serif" }}>{r.avatar}</div>
                   <div>
                     <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14 }}>{r.name}</div>
-                    <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#999" }}>{r.date} &#x2713; Verified Purchase</div>
+                    <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#767676" }}>{r.date} &#x2713; Verified Purchase</div>
                   </div>
-                  <div style={{ marginLeft: "auto", color: "#c8a882" }}>{"\u2605".repeat(r.rating)}</div>
+                  <div style={{ marginLeft: "auto", color: "#8b6644" }}>{"\u2605".repeat(r.rating)}</div>
                 </div>
                 <p style={{ fontFamily: "'Jost',sans-serif", color: "#555", fontSize: 14, lineHeight: 1.7 }}>{r.text}</p>
               </div>
@@ -544,7 +554,7 @@ function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products,
             <p><strong>Express Shipping:</strong> 1-2 business days &#x2022; $9.99</p>
             <p><strong>International:</strong> 7-14 business days &#x2022; $14.99</p>
             <p><strong>Returns:</strong> 30-day hassle-free returns. Items must be unused and in original packaging.</p>
-            <p><strong>Tracking:</strong> Real-time tracking via our <span style={{ color: "#c8956c", cursor: "pointer" }} onClick={() => nav("tracking")}>tracking portal</span>.</p>
+            <p><strong>Tracking:</strong> Real-time tracking via our <span style={{ color: "#8b6644", cursor: "pointer" }} onClick={() => nav("tracking")}>tracking portal</span>.</p>
           </div>
         )}
       </div>
@@ -568,8 +578,8 @@ function CartPage({ cart, setCart, removeCart, cartTotal, nav }) {
       {cart.length === 0 ? (
         <div style={{ textAlign: "center", padding: "80px 0" }}>
           <div style={{ fontSize: 64, marginBottom: 16 }}>&#x1F6D2;</div>
-          <p style={{ fontFamily: "'Jost',sans-serif", color: "#888", fontSize: 16, marginBottom: 24 }}>Your cart is empty</p>
-          <button onClick={() => nav("shop")} style={{ background: "#c8956c", color: "#fff", border: "none", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Start Shopping &#x2192;</button>
+          <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676", fontSize: 16, marginBottom: 24 }}>Your cart is empty</p>
+          <button onClick={() => nav("shop")} style={{ background: "#8b6644", color: "#fff", border: "none", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Start Shopping &#x2192;</button>
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 32 }} className="mobile-col">
@@ -579,14 +589,14 @@ function CartPage({ cart, setCart, removeCart, cartTotal, nav }) {
                 <img src={item.img} alt={item.name} style={{ width: 88, height: 88, borderRadius: 12, objectFit: "cover" }} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{item.name}</div>
-                  <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#999", marginBottom: 12 }}>{item.category}</div>
+                  <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", marginBottom: 12 }}>{item.category}</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     <div style={{ display: "flex", alignItems: "center", border: "1px solid #e0d8ce", borderRadius: 8, overflow: "hidden" }}>
                       <button onClick={() => updateQty(item.id, item.qty - 1)} style={{ width: 32, height: 32, border: "none", background: "#f8f5f0", cursor: "pointer", fontSize: 14, fontWeight: 600 }}>-</button>
                       <span style={{ width: 36, textAlign: "center", fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14 }}>{item.qty}</span>
                       <button onClick={() => updateQty(item.id, item.qty + 1)} style={{ width: 32, height: 32, border: "none", background: "#f8f5f0", cursor: "pointer", fontSize: 14, fontWeight: 600 }}>+</button>
                     </div>
-                    <button onClick={() => removeCart(item.id)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}>Remove</button>
+                    <button onClick={() => removeCart(item.id)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#dc2626", background: "none", border: "none", cursor: "pointer" }}>Remove</button>
                   </div>
                 </div>
                 <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 17 }}>{fmt(item.price * item.qty)}</div>
@@ -605,10 +615,10 @@ function CartPage({ cart, setCart, removeCart, cartTotal, nav }) {
             </div>
             <div style={{ background: "#f3efe9", border: "1px solid #e0d8ce", borderRadius: 10, padding: "10px 14px", display: "flex", marginBottom: 16 }}>
               <input placeholder="Promo code (try LUXE50)" style={{ flex: 1, border: "none", background: "none", fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none" }} />
-              <button style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#c8956c", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>Apply</button>
+              <button style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#8b6644", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>Apply</button>
             </div>
-            <button onClick={() => nav("checkout")} className="hover-btn" style={{ width: "100%", background: "#c8956c", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Proceed to Checkout &#x2192;</button>
-            <div style={{ textAlign: "center", marginTop: 16, fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#999" }}>Secure checkout &#x1F512;</div>
+            <button onClick={() => nav("checkout")} className="hover-btn" style={{ width: "100%", background: "#8b6644", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Proceed to Checkout &#x2192;</button>
+            <div style={{ textAlign: "center", marginTop: 16, fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#767676" }}>Secure checkout &#x1F512;</div>
           </div>
         </div>
       )}
@@ -651,7 +661,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
     <div style={{ maxWidth: 500, margin: "100px auto", textAlign: "center", padding: 24 }}>
       <div style={{ fontSize: 72, marginBottom: 24 }}>&#x2705;</div>
       <h2 style={{ fontSize: 28, fontWeight: 600, marginBottom: 12 }}>Order Placed!</h2>
-      <p style={{ fontFamily: "'Jost',sans-serif", color: "#888" }}>Redirecting you to your orders...</p>
+      <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676" }}>Redirecting you to your orders...</p>
     </div>
   )
 
@@ -662,8 +672,8 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
         {["Shipping", "Payment", "Review"].map((s, i) => (
           <div key={s} style={{ display: "flex", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ width: 28, height: 28, borderRadius: "50%", background: step > i + 1 ? "#10b981" : step === i + 1 ? "#c8956c" : "#e0d8ce", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 13, fontFamily: "'Jost',sans-serif" }}>{step > i + 1 ? "\u2713" : i + 1}</div>
-              <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, fontWeight: step === i + 1 ? 600 : 400, color: step === i + 1 ? "#1a1a1a" : "#888" }}>{s}</span>
+              <div style={{ width: 28, height: 28, borderRadius: "50%", background: step > i + 1 ? "#10b981" : step === i + 1 ? "#8b6644" : "#e0d8ce", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 13, fontFamily: "'Jost',sans-serif" }}>{step > i + 1 ? "\u2713" : i + 1}</div>
+              <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, fontWeight: step === i + 1 ? 600 : 400, color: step === i + 1 ? "#1a1a1a" : "#767676" }}>{s}</span>
             </div>
             {i < 2 && <div style={{ width: 40, height: 2, background: "#e0d8ce", margin: "0 12px" }} />}
           </div>
@@ -695,14 +705,14 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
                 { id: "paypal", label: "PayPal", icon: "\uD83D\uDCB1", sub: "Pay with your PayPal account" },
                 { id: "cod", label: "Cash on Delivery", icon: "\uD83D\uDCB5", sub: "Pay when you receive" },
               ].map(pm => (
-                <div key={pm.id} onClick={() => setPayMethod(pm.id)} style={{ display: "flex", alignItems: "center", gap: 16, padding: "14px 18px", borderRadius: 12, border: "2px solid " + (payMethod === pm.id ? "#c8956c" : "#e0d8ce"), marginBottom: 12, cursor: "pointer", background: payMethod === pm.id ? "#fff8f3" : "#fff" }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 8, background: payMethod === pm.id ? "#c8956c" : "#f0ede8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{pm.icon}</div>
+                <div key={pm.id} onClick={() => setPayMethod(pm.id)} style={{ display: "flex", alignItems: "center", gap: 16, padding: "14px 18px", borderRadius: 12, border: "2px solid " + (payMethod === pm.id ? "#8b6644" : "#e0d8ce"), marginBottom: 12, cursor: "pointer", background: payMethod === pm.id ? "#fff8f3" : "#fff" }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: payMethod === pm.id ? "#8b6644" : "#f0ede8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{pm.icon}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14 }}>{pm.label}</div>
-                    <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#999" }}>{pm.sub}</div>
+                    <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#767676" }}>{pm.sub}</div>
                   </div>
-                  <div style={{ width: 20, height: 20, borderRadius: "50%", border: "2px solid " + (payMethod === pm.id ? "#c8956c" : "#ccc"), display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {payMethod === pm.id && <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#c8956c" }} />}
+                  <div style={{ width: 20, height: 20, borderRadius: "50%", border: "2px solid " + (payMethod === pm.id ? "#8b6644" : "#ccc"), display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {payMethod === pm.id && <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#8b6644" }} />}
                   </div>
                 </div>
               ))}
@@ -717,7 +727,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
               )}
               <div style={{ display: "flex", gap: 12 }}>
                 <button onClick={() => setStep(1)} style={{ flex: 1, background: "#f0ede8", color: "#555", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>&#x2190; Back</button>
-                <button onClick={placeOrder} disabled={placing} className="hover-btn" style={{ flex: 2, background: placing ? "#ccc" : "#c8956c", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: placing ? "not-allowed" : "pointer" }}>{placing ? "Placing Order..." : "Place Order &#x2192;"}</button>
+                <button onClick={placeOrder} disabled={placing} className="hover-btn" style={{ flex: 2, background: placing ? "#ccc" : "#8b6644", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: placing ? "not-allowed" : "pointer" }}>{placing ? "Placing Order..." : "Place Order &#x2192;"}</button>
               </div>
             </div>
           )}
@@ -737,7 +747,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
             <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 16, paddingTop: 8, borderTop: "1px solid #e0d8ce" }}><span>Total</span><span>{fmt(total)}</span></div>
           </div>
           <div style={{ marginTop: 16, display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-            {["SSL Secure", "Trusted"].map(b => <span key={b} style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#999", background: "#f0ede8", padding: "4px 10px", borderRadius: 6 }}>{b}</span>)}
+            {["SSL Secure", "Trusted"].map(b => <span key={b} style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#767676", background: "#f0ede8", padding: "4px 10px", borderRadius: 6 }}>{b}</span>)}
           </div>
         </div>
       </div>
@@ -752,8 +762,8 @@ function WishlistPage({ wishlist, toggleWish, addCart, nav }) {
       {wishlist.length === 0 ? (
         <div style={{ textAlign: "center", padding: "80px 0" }}>
           <div style={{ fontSize: 64 }}>&#x2661;</div>
-          <p style={{ fontFamily: "'Jost',sans-serif", color: "#888", fontSize: 16, marginTop: 16, marginBottom: 24 }}>Your wishlist is empty</p>
-          <button onClick={() => nav("shop")} style={{ background: "#c8956c", color: "#fff", border: "none", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Discover Products &#x2192;</button>
+          <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676", fontSize: 16, marginTop: 16, marginBottom: 24 }}>Your wishlist is empty</p>
+          <button onClick={() => nav("shop")} style={{ background: "#8b6644", color: "#fff", border: "none", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Discover Products &#x2192;</button>
         </div>
       ) : (
         <ProductGrid products={wishlist} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} />
@@ -842,7 +852,7 @@ function AuthPage({ setUser, authMode, setAuthMode, nav, showToast, signUp, sign
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 28, fontWeight: 700, letterSpacing: 2, marginBottom: 8 }}>LUXEDROP</div>
           <h2 style={{ fontSize: 22, fontWeight: 600, marginBottom: 6 }}>{authMode === "login" ? "Welcome Back" : authMode === "signup" ? "Create Account" : "Reset Password"}</h2>
-          <p style={{ fontFamily: "'Jost',sans-serif", color: "#888", fontSize: 14 }}>
+          <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676", fontSize: 14 }}>
             {authMode === "login" ? "Sign in to your account" : authMode === "signup" ? "Join thousands of happy customers" : "We'll send you a reset link"}
           </p>
         </div>
@@ -861,29 +871,29 @@ function AuthPage({ setUser, authMode, setAuthMode, nav, showToast, signUp, sign
             <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>Password</label>
             <div style={{ position: "relative" }}>
               <input type={showPw ? "text" : "password"} value={form.password} onChange={e => upd("password", e.target.value)} placeholder="Min 6 characters" style={{ width: "100%", padding: "11px 14px", paddingRight: 44, border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />
-              <span onClick={() => setShowPw(!showPw)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#999", fontSize: 18, userSelect: "none" }}>{showPw ? "\u25C9" : "\u25CE"}</span>
+              <span onClick={() => setShowPw(!showPw)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#767676", fontSize: 18, userSelect: "none" }}>{showPw ? "\u25C9" : "\u25CE"}</span>
             </div>
           </div>
         )}
         {authMode === "login" && (
           <div style={{ textAlign: "right", marginBottom: 20 }}>
-            <span onClick={() => { setAuthMode("forgot"); setErr("") }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Forgot password?</span>
+            <span onClick={() => { setAuthMode("forgot"); setErr("") }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#8b6644", cursor: "pointer", fontWeight: 600 }}>Forgot password?</span>
           </div>
         )}
-        <button type="button" onClick={submit} disabled={submitting && !done} className="hover-btn" style={{ width: "100%", background: done ? "#10b981" : submitting ? "#ccc" : "#c8956c", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: submitting && !done ? "not-allowed" : "pointer", marginBottom: 16 }}>
+        <button type="button" onClick={submit} disabled={submitting && !done} className="hover-btn" style={{ width: "100%", background: done ? "#10b981" : submitting ? "#ccc" : "#8b6644", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: submitting && !done ? "not-allowed" : "pointer", marginBottom: 16 }}>
           {done ? "Done!" : submitting ? "Please wait..." : authMode === "login" ? "Sign In" : authMode === "signup" ? "Create Account" : "Send Reset Link"}
         </button>
-        <div style={{ textAlign: "center", fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#888" }}>
-          {authMode === "login" ? <>Don't have an account? <span onClick={() => { setAuthMode("signup"); setErr("") }} style={{ color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Sign up</span></> :
-           authMode === "signup" ? <>Already a member? <span onClick={() => { setAuthMode("login"); setErr("") }} style={{ color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Sign in</span></> :
-           <span onClick={() => { setAuthMode("login"); setErr("") }} style={{ color: "#c8956c", cursor: "pointer", fontWeight: 600 }}>Back to Sign In</span>}
+        <div style={{ textAlign: "center", fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#767676" }}>
+          {authMode === "login" ? <>Don't have an account? <span onClick={() => { setAuthMode("signup"); setErr("") }} style={{ color: "#8b6644", cursor: "pointer", fontWeight: 600 }}>Sign up</span></> :
+           authMode === "signup" ? <>Already a member? <span onClick={() => { setAuthMode("login"); setErr("") }} style={{ color: "#8b6644", cursor: "pointer", fontWeight: 600 }}>Sign in</span></> :
+           <span onClick={() => { setAuthMode("login"); setErr("") }} style={{ color: "#8b6644", cursor: "pointer", fontWeight: 600 }}>Back to Sign In</span>}
         </div>
         <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #f0ede8", display: "flex", flexDirection: "column", gap: 12 }}>
           <button type="button" onClick={handleGoogle} disabled={submitting} className="hover-btn" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "11px", borderRadius: 10, border: "1px solid #e0d8ce", background: "#fff", cursor: submitting ? "not-allowed" : "pointer", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600, opacity: submitting ? 0.6 : 1 }}>
             <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.54 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.77.87 7.35 2.56 10.56l7.98-5.97z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 5.97C6.51 42.62 14.62 48 24 48z"/></svg>
             Continue with Google
           </button>
-          <button type="button" onClick={async () => { try { await signInAsGuest(); showToast("Signed in as Guest"); nav("home") } catch (e) { showToast("Guest login unavailable", "info") } }} disabled={submitting} className="hover-btn" style={{ width: "100%", padding: "11px", borderRadius: 10, border: "1px dashed #ccc", background: "#faf9f7", cursor: submitting ? "not-allowed" : "pointer", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 500, color: "#888", opacity: submitting ? 0.6 : 1 }}>
+          <button type="button" onClick={async () => { try { await signInAsGuest(); showToast("Signed in as Guest"); nav("home") } catch (e) { showToast("Guest login unavailable", "info") } }} disabled={submitting} className="hover-btn" style={{ width: "100%", padding: "11px", borderRadius: 10, border: "1px dashed #ccc", background: "#faf9f7", cursor: submitting ? "not-allowed" : "pointer", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 500, color: "#767676", opacity: submitting ? 0.6 : 1 }}>
             Continue as Guest
           </button>
         </div>
@@ -903,14 +913,14 @@ function OrdersPage({ orders, nav, user }) {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
             <div>
               <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 16 }}>{o.id?.slice(0, 12)}</div>
-              <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#999", marginTop: 4 }}>{(o.date || "Just now")} &middot; {(o.items?.length || o.items || 0)} items &middot; {typeof o.total === "number" ? fmt(o.total) : o.total}</div>
+              <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", marginTop: 4 }}>{(o.date || "Just now")} &middot; {(o.items?.length || o.items || 0)} items &middot; {typeof o.total === "number" ? fmt(o.total) : o.total}</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <span style={{ background: STATUS_COLOR[o.status] + "22", color: STATUS_COLOR[o.status], fontFamily: "'Jost',sans-serif", fontSize: 12, fontWeight: 700, padding: "4px 14px", borderRadius: 20 }}>{o.status}</span>
-              <button onClick={() => nav("tracking")} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#c8956c", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>Track &#x2192;</button>
+              <button onClick={() => nav("tracking")} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#8b6644", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>Track &#x2192;</button>
             </div>
           </div>
-          <div style={{ marginTop: 16, fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#999", background: "#f8f5f0", borderRadius: 8, padding: "10px 14px" }}>{o.tracking}</div>
+          <div style={{ marginTop: 16, fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#767676", background: "#f8f5f0", borderRadius: 8, padding: "10px 14px" }}>{o.tracking}</div>
         </div>
       ))}
     </div>
@@ -936,17 +946,17 @@ function TrackingPage({ nav }) {
   return (
     <div style={{ maxWidth: 700, margin: "0 auto", padding: "60px 24px" }}>
       <h1 style={{ fontSize: 36, fontWeight: 600, marginBottom: 8, textAlign: "center" }}>Track Your Order</h1>
-      <p style={{ fontFamily: "'Jost',sans-serif", color: "#888", textAlign: "center", marginBottom: 40 }}>Enter your order ID to get real-time tracking updates</p>
+      <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676", textAlign: "center", marginBottom: 40 }}>Enter your order ID to get real-time tracking updates</p>
       <div style={{ display: "flex", gap: 12, marginBottom: 40 }}>
         <input value={orderId} onChange={e => setOrderId(e.target.value)} placeholder="Enter Order ID (e.g. ORD-9820)" style={{ flex: 1, padding: "12px 18px", border: "1px solid #e0d8ce", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />
-        <button onClick={track} className="hover-btn" style={{ background: "#c8956c", color: "#fff", border: "none", padding: "14px 28px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Track</button>
+        <button onClick={track} className="hover-btn" style={{ background: "#8b6644", color: "#fff", border: "none", padding: "14px 28px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Track</button>
       </div>
       {tracked && (
         <div style={{ background: "#fff", borderRadius: 20, padding: 32, boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }} className="fade-in">
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
             <div>
               <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 18 }}>{tracked.id}</div>
-              <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#888" }}>Estimated Delivery: {tracked.eta}</div>
+              <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#767676" }}>Estimated Delivery: {tracked.eta}</div>
             </div>
             <span style={{ background: "#dbeafe", color: "#3b82f6", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 700, padding: "4px 16px", borderRadius: 20 }}>{tracked.status}</span>
           </div>
@@ -954,12 +964,12 @@ function TrackingPage({ nav }) {
             {tracked.steps.map((step, i) => (
               <div key={step.label} style={{ display: "flex", gap: 20, marginBottom: 24 }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: step.done ? "#c8956c" : "#f0ede8", display: "flex", alignItems: "center", justifyContent: "center", color: step.done ? "#fff" : "#ccc", fontWeight: 700, fontSize: 14, fontFamily: "'Jost',sans-serif" }}>{step.done ? "\u2713" : i + 1}</div>
-                  {i < tracked.steps.length - 1 && <div style={{ width: 2, flex: 1, background: step.done ? "#c8956c" : "#f0ede8", minHeight: 24 }} />}
+                   <div style={{ width: 32, height: 32, borderRadius: "50%", background: step.done ? "#8b6644" : "#e0d8ce", display: "flex", alignItems: "center", justifyContent: "center", color: step.done ? "#fff" : "#555", fontWeight: 700, fontSize: 14, fontFamily: "'Jost',sans-serif" }}>{step.done ? "\u2713" : i + 1}</div>
+                  {i < tracked.steps.length - 1 && <div style={{ width: 2, flex: 1, background: step.done ? "#8b6644" : "#f0ede8", minHeight: 24 }} />}
                 </div>
                 <div style={{ paddingTop: 4 }}>
-                  <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: step.done ? 600 : 400, color: step.done ? "#1a1a1a" : "#bbb", fontSize: 14 }}>{step.label}</div>
-                  {step.date && <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#999" }}>{step.date}</div>}
+                  <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: step.done ? 600 : 400, color: step.done ? "#1a1a1a" : "#767676", fontSize: 14 }}>{step.label}</div>
+                  {step.date && <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676" }}>{step.date}</div>}
                 </div>
               </div>
             ))}
@@ -1017,7 +1027,7 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
       <aside style={{ width: 220, background: "#1a1a1a", color: "#fff", padding: "28px 0", flexShrink: 0 }}>
         <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontWeight: 700, letterSpacing: 2, padding: "0 24px 28px", borderBottom: "1px solid #2a2a2a", marginBottom: 12 }}>LUXEDROP &#x25A0; ADMIN</div>
         {tabs.map(t => (
-          <div key={t} onClick={() => setAdminTab(t)} style={{ padding: "13px 24px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", background: adminTab === t ? "rgba(255,255,255,0.08)" : "transparent", color: adminTab === t ? "#c8956c" : "#aaa", fontWeight: adminTab === t ? 600 : 400, borderLeft: adminTab === t ? "3px solid #c8956c" : "3px solid transparent" }}>
+          <div key={t} onClick={() => setAdminTab(t)} style={{ padding: "13px 24px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", background: adminTab === t ? "rgba(255,255,255,0.08)" : "transparent", color: adminTab === t ? "#8b6644" : "#aaa", fontWeight: adminTab === t ? 600 : 400, borderLeft: adminTab === t ? "3px solid #8b6644" : "3px solid transparent" }}>
             {{ "dashboard": "\u25A0 Dashboard", "products": "\u25A0 Products", "orders": "\u25A0 Orders", "customers": "\u25A0 Customers", "analytics": "\u25A0 Analytics" } [t]}
           </div>
         ))}
@@ -1037,7 +1047,7 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
                 <div key={s.label} style={{ background: "#fff", borderRadius: 16, padding: "22px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
-                      <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#999", letterSpacing: 1 }}>{s.label.toUpperCase()}</div>
+                      <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#767676", letterSpacing: 1 }}>{s.label.toUpperCase()}</div>
                       <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8, fontFamily: "'Jost',sans-serif" }}>{s.value}</div>
                     </div>
                     <div style={{ fontSize: 28 }}>{s.icon}</div>
@@ -1052,11 +1062,11 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
                 {orders.slice(0, 5).map(o => (
                   <div key={o.id} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid #f0ede8", fontFamily: "'Jost',sans-serif", fontSize: 13 }}>
                     <span style={{ fontWeight: 600 }}>{o.id?.slice(0, 8) + "..."}</span>
-                    <span style={{ color: "#888" }}>{fmt(o.total)}</span>
+                    <span style={{ color: "#767676" }}>{fmt(o.total)}</span>
                     <span style={{ color: o.status === "Delivered" ? "#10b981" : o.status === "Shipped" ? "#3b82f6" : "#f59e0b", fontWeight: 600 }}>{o.status}</span>
                   </div>
                 ))}
-                {orders.length === 0 && <p style={{ fontFamily: "'Jost',sans-serif", color: "#aaa", fontSize: 13 }}>No orders yet</p>}
+                {orders.length === 0 && <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676", fontSize: 13 }}>No orders yet</p>}
               </div>
               <div style={{ background: "#fff", borderRadius: 16, padding: 24 }}>
                 <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 20 }}>Top Products</h3>
@@ -1065,7 +1075,7 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
                     <img src={p.img} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />
                     <div style={{ flex: 1, fontFamily: "'Jost',sans-serif", fontSize: 13 }}>
                       <div style={{ fontWeight: 600 }}>{p.name.slice(0, 22)}...</div>
-                      <div style={{ color: "#999" }}>{fmt(p.price)}</div>
+                      <div style={{ color: "#767676" }}>{fmt(p.price)}</div>
                     </div>
                     <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#10b981", fontWeight: 600 }}>+{disc(p.price, p.original)}%</div>
                   </div>
@@ -1078,26 +1088,26 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
               <h2 style={{ fontSize: 28, fontWeight: 600 }}>Products ({products.length})</h2>
-              <button onClick={() => openForm(null)} style={{ background: "#c8956c", color: "#fff", border: "none", padding: "12px 24px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>+ Add Product</button>
+              <button onClick={() => openForm(null)} style={{ background: "#8b6644", color: "#fff", border: "none", padding: "12px 24px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>+ Add Product</button>
             </div>
             <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead style={{ background: "#f8f5f0" }}>
-                  <tr>{["Image", "Name", "Category", "Price", "Stock", "Margin", "Actions"].map(h => <th key={h} style={{ padding: "14px 16px", fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 1, color: "#888", textAlign: "left" }}>{h}</th>)}</tr>
+                  <tr>{["Image", "Name", "Category", "Price", "Stock", "Margin", "Actions"].map(h => <th key={h} style={{ padding: "14px 16px", fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 1, color: "#767676", textAlign: "left" }}>{h}</th>)}</tr>
                 </thead>
                 <tbody>
                   {products.map(p => (
                     <tr key={p.id} style={{ borderBottom: "1px solid #f8f5f0" }}>
                       <td style={{ padding: "12px 16px" }}><img src={p.img} alt="" style={{ width: 44, height: 44, borderRadius: 8, objectFit: "cover" }} /></td>
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13 }}>{p.name}</td>
-                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#888", textTransform: "capitalize" }}>{p.category}</td>
+                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", textTransform: "capitalize" }}>{p.category}</td>
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 13 }}>{fmt(p.price)}</td>
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontSize: 13, color: p.stock < 100 ? "#f59e0b" : "#10b981" }}>{p.stock}</td>
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#10b981", fontWeight: 600 }}>{disc(p.price, p.original)}%</td>
                       <td style={{ padding: "12px 16px" }}>
                         <div style={{ display: "flex", gap: 8 }}>
                           <button onClick={() => openForm(p)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#3b82f6", background: "#eff6ff", border: "none", padding: "4px 12px", borderRadius: 6, cursor: "pointer" }}>Edit</button>
-                          <button onClick={() => del(p.id)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#ef4444", background: "#fef2f2", border: "none", padding: "4px 12px", borderRadius: 6, cursor: "pointer" }}>Delete</button>
+                          <button onClick={() => del(p.id)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#dc2626", background: "#fef2f2", border: "none", padding: "4px 12px", borderRadius: 6, cursor: "pointer" }}>Delete</button>
                         </div>
                       </td>
                     </tr>
@@ -1139,7 +1149,7 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
                   </div>
                   <div style={{ display: "flex", gap: 12 }}>
                     <button onClick={() => setShowForm(false)} style={{ flex: 1, background: "#f0ede8", color: "#555", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
-                    <button onClick={save} className="hover-btn" style={{ flex: 1, background: "#c8956c", color: "#fff", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>{editProd ? "Update" : "Create"}</button>
+                    <button onClick={save} className="hover-btn" style={{ flex: 1, background: "#8b6644", color: "#fff", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>{editProd ? "Update" : "Create"}</button>
                   </div>
                 </div>
               </div>
@@ -1152,13 +1162,13 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
             <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead style={{ background: "#f8f5f0" }}>
-                  <tr>{["Order ID", "Customer", "Items", "Total", "Status", "Action"].map(h => <th key={h} style={{ padding: "14px 16px", fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 1, color: "#888", textAlign: "left" }}>{h}</th>)}</tr>
+                  <tr>{["Order ID", "Customer", "Items", "Total", "Status", "Action"].map(h => <th key={h} style={{ padding: "14px 16px", fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 1, color: "#767676", textAlign: "left" }}>{h}</th>)}</tr>
                 </thead>
                 <tbody>
                   {orders.map(o => (
                     <tr key={o.id} style={{ borderBottom: "1px solid #f8f5f0" }}>
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 13 }}>{o.id?.slice(0, 8)}...</td>
-                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", color: "#888", fontSize: 13 }}>{o.customerName || o.email || "Guest"}</td>
+                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", color: "#767676", fontSize: 13 }}>{o.customerName || o.email || "Guest"}</td>
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontSize: 13 }}>{o.items?.length || 0}</td>
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 13 }}>{fmt(o.total)}</td>
                       <td style={{ padding: "12px 16px" }}>
@@ -1171,7 +1181,7 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
                       </td>
                     </tr>
                   ))}
-                  {orders.length === 0 && <tr><td colSpan={6} style={{ padding: 32, textAlign: "center", color: "#aaa", fontFamily: "'Jost',sans-serif" }}>No orders yet</td></tr>}
+                  {orders.length === 0 && <tr><td colSpan={6} style={{ padding: 32, textAlign: "center", color: "#767676", fontFamily: "'Jost',sans-serif" }}>No orders yet</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -1182,14 +1192,14 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
             <h2 style={{ fontSize: 28, fontWeight: 600, marginBottom: 24 }}>Customers ({customers.length})</h2>
             {customers.map(c => (
               <div key={c.id} style={{ background: "#fff", borderRadius: 16, padding: "20px 24px", marginBottom: 12, display: "flex", alignItems: "center", gap: 16 }}>
-                <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#c8956c", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "'Jost',sans-serif" }}>{c.name?.split(" ").map(n => n[0]).join("") || "?"}</div>
+                <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#8b6644", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "'Jost',sans-serif" }}>{c.name?.split(" ").map(n => n[0]).join("") || "?"}</div>
                 <div style={{ flex: 1, fontFamily: "'Jost',sans-serif" }}>
                   <div style={{ fontWeight: 600, fontSize: 15 }}>{c.name || "Unknown"}</div>
-                  <div style={{ fontSize: 13, color: "#999" }}>{c.email}</div>
+                  <div style={{ fontSize: 13, color: "#767676" }}>{c.email}</div>
                 </div>
               </div>
             ))}
-            {customers.length === 0 && <p style={{ fontFamily: "'Jost',sans-serif", color: "#aaa", fontSize: 14 }}>No registered users yet.</p>}
+            {customers.length === 0 && <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676", fontSize: 14 }}>No registered users yet.</p>}
             {subs.length > 0 && (
               <div style={{ marginTop: 40 }}>
                 <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>Newsletter Subscribers ({subs.length})</h3>
@@ -1211,7 +1221,7 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
                 ["Products", String(products.length), "in catalog", "#f59e0b"],
               ].map(([l, v, c, col]) => (
                 <div key={l} style={{ background: "#fff", borderRadius: 16, padding: 24 }}>
-                  <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#999", letterSpacing: 1, marginBottom: 8 }}>{l.toUpperCase()}</div>
+                  <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#767676", letterSpacing: 1, marginBottom: 8 }}>{l.toUpperCase()}</div>
                   <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 30, fontWeight: 700 }}>{v}</div>
                   <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: col, fontWeight: 600, marginTop: 8 }}>{c}</div>
                 </div>
@@ -1226,10 +1236,10 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
                   <div key={s} style={{ marginBottom: 16 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'Jost',sans-serif", fontSize: 13, marginBottom: 6 }}>
                       <span style={{ fontWeight: 600 }}>{s}</span>
-                      <span style={{ color: "#888" }}>{count} ({pct}%)</span>
+                      <span style={{ color: "#767676" }}>{count} ({pct}%)</span>
                     </div>
                     <div style={{ height: 10, background: "#f0ede8", borderRadius: 10, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: pct + "%", background: "linear-gradient(90deg,#c8956c,#e8b48c)", borderRadius: 10 }} />
+                      <div style={{ height: "100%", width: pct + "%", background: "linear-gradient(90deg,#8b6644,#e8b48c)", borderRadius: 10 }} />
                     </div>
                   </div>
                 )
@@ -1273,21 +1283,21 @@ function ContactContent({ showToast }) {
         <div>
           {[["Full Name", "name"], ["Email", "email"]].map(([l, k]) => (
             <div key={k} style={{ marginBottom: 16 }}>
-              <label style={{ display: "block", fontSize: 13, color: "#888", marginBottom: 6 }}>{l}</label>
+              <label style={{ display: "block", fontSize: 13, color: "#767676", marginBottom: 6 }}>{l}</label>
               <input value={form[k]} onChange={e => setForm(p => ({ ...p, [k]: e.target.value }))} style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />
             </div>
           ))}
           <div style={{ marginBottom: 20 }}>
-            <label style={{ display: "block", fontSize: 13, color: "#888", marginBottom: 6 }}>Message</label>
+            <label style={{ display: "block", fontSize: 13, color: "#767676", marginBottom: 6 }}>Message</label>
             <textarea value={form.msg} onChange={e => setForm(p => ({ ...p, msg: e.target.value }))} rows={5} style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", resize: "vertical" }} />
           </div>
-          <button onClick={() => { showToast("Message sent! We'll reply within 24h."); setForm({ name: "", email: "", msg: "" }) }} style={{ background: "#c8956c", color: "#fff", border: "none", padding: "12px 28px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Send Message &#x2192;</button>
+          <button onClick={() => { showToast("Message sent! We'll reply within 24h."); setForm({ name: "", email: "", msg: "" }) }} style={{ background: "#8b6644", color: "#fff", border: "none", padding: "12px 28px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Send Message &#x2192;</button>
         </div>
         <div>
           {[["\u2709\uFE0F", "Email", "support@luxedrop.com"], ["\uD83D\uDCF1", "WhatsApp", "+1 (800) LUXEDROP"], ["\uD83D\uDD52", "Hours", "Mon-Fri 9am-8pm EST"], ["\uD83D\uDCCD", "Address", "123 Luxury Lane, New York, NY 10001"]].map(([icon, l, v]) => (
             <div key={l} style={{ display: "flex", gap: 14, marginBottom: 24 }}>
               <div style={{ fontSize: 24 }}>{icon}</div>
-              <div><div style={{ fontWeight: 600, fontSize: 14, color: "#333" }}>{l}</div><div style={{ color: "#888", fontSize: 14 }}>{v}</div></div>
+              <div><div style={{ fontWeight: 600, fontSize: 14, color: "#333" }}>{l}</div><div style={{ color: "#767676", fontSize: 14 }}>{v}</div></div>
             </div>
           ))}
         </div>
@@ -1351,49 +1361,49 @@ function Footer({ nav, newsletter, setNewsletter, newsletterDone, setNewsletterD
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 40, marginBottom: 48 }}>
           <div>
             <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 26, fontWeight: 700, letterSpacing: 2, marginBottom: 16 }}>LUXEDROP</div>
-            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#888", lineHeight: 1.8, marginBottom: 20 }}>Premium products, curated for you. Free shipping worldwide.</p>
+            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#aaa", lineHeight: 1.8, marginBottom: 20 }}>Premium products, curated for you. Free shipping worldwide.</p>
             <div style={{ display: "flex", gap: 12 }}>
               {[["Instagram", "\u25A0"], ["TikTok", "\u25A0"], ["Pinterest", "\u25A0"], ["Twitter", "\u25A0"]].map(([s, i]) => (
-                <div key={s} style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 14, color: "#888" }}>{i}</div>
+                <div key={s} style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 14, color: "#ccc" }}>{i}</div>
               ))}
             </div>
           </div>
           <div>
-            <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 2, color: "#c8956c", marginBottom: 20 }}>SHOP</div>
+            <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 2, color: "#8b6644", marginBottom: 20 }}>SHOP</div>
             {[["All Products", "shop"], ["Electronics", "shop"], ["Fashion", "shop"], ["Beauty", "shop"], ["Home", "shop"]].map(([l, p]) => (
-              <div key={l} onClick={() => nav(p)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#888", marginBottom: 10, cursor: "pointer" }}>{l}</div>
+              <div key={l} onClick={() => nav(p)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#bbb", marginBottom: 10, cursor: "pointer" }}>{l}</div>
             ))}
           </div>
           <div>
-            <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 2, color: "#c8956c", marginBottom: 20 }}>SUPPORT</div>
+            <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 2, color: "#8b6644", marginBottom: 20 }}>SUPPORT</div>
             {[["Contact Us", "contact"], ["Track Order", "tracking"], ["My Orders", "orders"], ["About Us", "about"], ["Admin", "admin"]].map(([l, p]) => (
-              <div key={l} onClick={() => nav(p)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#888", marginBottom: 10, cursor: "pointer" }}>{l}</div>
+              <div key={l} onClick={() => nav(p)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#bbb", marginBottom: 10, cursor: "pointer" }}>{l}</div>
             ))}
           </div>
           <div>
-            <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 2, color: "#c8956c", marginBottom: 20 }}>LEGAL</div>
+            <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 2, color: "#8b6644", marginBottom: 20 }}>LEGAL</div>
             {[["Privacy Policy", "privacy"], ["Refund Policy", "refund"], ["Terms & Conditions", "terms"]].map(([l, p]) => (
-              <div key={l} onClick={() => nav(p)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#888", marginBottom: 10, cursor: "pointer" }}>{l}</div>
+              <div key={l} onClick={() => nav(p)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#bbb", marginBottom: 10, cursor: "pointer" }}>{l}</div>
             ))}
           </div>
           <div>
-            <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 2, color: "#c8956c", marginBottom: 20 }}>NEWSLETTER</div>
-            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#888", marginBottom: 16, lineHeight: 1.7 }}>Get 10% off your first order. Subscribe for exclusive deals.</p>
+            <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 2, color: "#8b6644", marginBottom: 20 }}>NEWSLETTER</div>
+            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#bbb", marginBottom: 16, lineHeight: 1.7 }}>Get 10% off your first order. Subscribe for exclusive deals.</p>
             {newsletterDone ? (
               <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#10b981" }}>&#x2713; You're subscribed!</div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <input value={newsletter} onChange={e => setNewsletter(e.target.value)} placeholder="your@email.com" style={{ padding: "11px 14px", borderRadius: 8, border: "1px solid #333", background: "rgba(255,255,255,0.05)", color: "#fff", fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none" }} />
-                <button onClick={onSubscribe} style={{ background: "#c8956c", color: "#fff", border: "none", padding: "11px", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Subscribe</button>
+                <button onClick={onSubscribe} style={{ background: "#8b6644", color: "#fff", border: "none", padding: "11px", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Subscribe</button>
               </div>
             )}
           </div>
         </div>
         <div style={{ borderTop: "1px solid #2a2a2a", padding: "20px 0", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666" }}>&copy; 2026 LuxeDrop. All rights reserved.</div>
+          <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#aaa" }}>&copy; 2026 LuxeDrop. All rights reserved.</div>
           <div style={{ display: "flex", gap: 12 }}>
             {["Visa", "Mastercard", "PayPal", "Razorpay", "COD"].map(p => (
-              <span key={p} style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#666", background: "#222", padding: "4px 10px", borderRadius: 4 }}>{p}</span>
+              <span key={p} style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#ccc", background: "#2a2a2a", padding: "4px 10px", borderRadius: 4 }}>{p}</span>
             ))}
           </div>
         </div>
