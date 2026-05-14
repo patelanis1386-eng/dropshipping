@@ -125,19 +125,19 @@ export const getProductById = async (id) => {
 }
 
 export const addProduct = async (product) => {
-  const ref = await addDoc(collection(db, "products"), {
+  const ref = await withTimeout(addDoc(collection(db, "products"), {
     ...product,
     createdAt: serverTimestamp(),
-  })
+  }))
   return ref.id
 }
 
 export const updateProduct = async (id, data) => {
-  await updateDoc(doc(db, "products", id), data)
+  await withTimeout(updateDoc(doc(db, "products", id), data))
 }
 
 export const deleteProduct = async (id) => {
-  await deleteDoc(doc(db, "products", id))
+  await withTimeout(deleteDoc(doc(db, "products", id)))
 }
 
 export const getOrders = async (userId = null) => {

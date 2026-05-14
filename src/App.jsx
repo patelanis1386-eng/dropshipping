@@ -840,26 +840,27 @@ function AuthPage({ setUser, authMode, setAuthMode, nav, showToast, signUp, sign
       return
     }
     const v = validate()
-    if (v) return showToast(v, "info")
+    if (v) {
+      setErr(v)
+      showToast(v, "info")
+      return
+    }
     setSubmitting(true)
     setErr("")
     try {
       if (authMode === "login") {
         await signIn(form.email, form.password)
         showToast("Welcome back!")
-        setSubmitting(false)
         nav("home")
       } else if (authMode === "signup") {
         await signUp(form.email, form.password, form.name)
         setUser({ name: form.name, email: form.email })
         setDone(true)
-        setSubmitting(false)
         showToast("Account created! You're now signed in.")
       } else {
         await resetPassword(form.email)
         showToast("Password reset link sent to your email", "info")
         setAuthMode("login")
-        setSubmitting(false)
         return
       }
     } catch (e) {
@@ -872,11 +873,13 @@ function AuthPage({ setUser, authMode, setAuthMode, nav, showToast, signUp, sign
                   e.code === "auth/invalid-email" ? "Invalid email address" :
                   e.code === "auth/network-request-failed" ? "Network error. Check your connection." :
                   e.code === "auth/operation-not-allowed" ? "Email/password sign-up is not enabled. Enable it in Firebase Console." :
+                  e.code === "auth/configuration-not-found" ? "Firebase Auth is not configured for this project." :
                   e.code === "auth/popup-closed-by-user" ? "" :
                   e.code?.includes("auth/popup") ? "" :
                   e.message || "Something went wrong"
       if (msg) showToast(msg, "info")
       setErr(msg)
+    } finally {
       setSubmitting(false)
     }
   }
@@ -928,6 +931,11 @@ function AuthPage({ setUser, authMode, setAuthMode, nav, showToast, signUp, sign
         <button type="button" onClick={submit} disabled={submitting} className="hover-btn" style={{ width: "100%", background: done ? "#10b981" : submitting ? "#ccc" : "#8b6644", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: submitting ? "not-allowed" : "pointer", marginBottom: 16 }}>
           {done ? "Done" : submitting ? (authMode === "signup" ? "Creating account..." : authMode === "forgot" ? "Sending reset link..." : "Signing in...") : authMode === "login" ? "Sign In" : authMode === "signup" ? "Create Account" : "Send Reset Link"}
         </button>
+        {err && (
+          <div style={{ background: "#fff7ed", border: "1px solid #fed7aa", color: "#9a3412", borderRadius: 8, padding: "10px 12px", fontFamily: "'Jost',sans-serif", fontSize: 13, lineHeight: 1.5, marginBottom: 16 }}>
+            {err}
+          </div>
+        )}
         <div style={{ textAlign: "center", fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#767676" }}>
           {authMode === "login" ? <>Don't have an account? <span onClick={() => { setAuthMode("signup"); setErr(""); setDone(false) }} style={{ color: "#8b6644", cursor: "pointer", fontWeight: 600 }}>Sign up</span></> :
            authMode === "signup" ? <>Already a member? <span onClick={() => { setAuthMode("login"); setErr(""); setDone(false) }} style={{ color: "#8b6644", cursor: "pointer", fontWeight: 600 }}>Sign in</span></> :
@@ -1033,6 +1041,8 @@ function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav }
   const [customers, setCustomers] = useState([])
   const [subs, setSubs] = useState([])
   const [uploading, setUploading] = useState(false)
+  const [savingProduct, setSavingProduct] = useState(false)
+  const [productError, setProductError] = useState("")
 
   useEffect(() => {
     if (adminTab === "customers") { getUsers().then(setCustomers).catch(() => {}); getNewsletterSubscribers().then(setSubs).catch(() => {}) }
@@ -1041,23 +1051,46 @@ function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav }
   const openForm = (p) => {
     setEditProd(p)
     setForm(p ? { name: p.name, category: p.category, price: String(p.price), original: String(p.original), stock: String(p.stock), desc: p.desc, img: p.img, badge: p.badge } : { name: "", category: "electronics", price: "", original: "", stock: "", desc: "", img: "", badge: "New Arrival" })
+    setProductError("")
     setShowForm(true)
   }
 
   const save = async () => {
-    if (!form.name || !form.price) return alert("Fill in name and price")
+    if (savingProduct) return
+    if (!form.name.trim()) return setProductError("Product name is required.")
+    if (!form.price || Number.isNaN(Number(form.price)) || Number(form.price) <= 0) return setProductError("Enter a valid product price.")
+    setSavingProduct(true)
+    setProductError("")
     try {
-      const data = { name: form.name, category: form.category, price: Number(form.price), original: Number(form.original) || Number(form.price), stock: Number(form.stock) || 0, desc: form.desc, img: form.img || "https://images.unsplash.com/photo-1505740420928-5e560c06d30a?w=600&q=80", badge: form.badge }
+      const data = {
+        name: form.name.trim(),
+        category: form.category,
+        price: Number(form.price),
+        original: Number(form.original) || Number(form.price),
+        stock: Number(form.stock) || 0,
+        desc: form.desc,
+        img: form.img || "https://images.unsplash.com/photo-1505740420928-5e560c06d30a?w=600&q=80",
+        badge: form.badge,
+        rating: editProd?.rating || 4.8,
+        reviews: editProd?.reviews || 0,
+        shipping: editProd?.shipping || "Free Shipping",
+      }
       if (editProd) {
         await updateProduct(editProd.id, data)
         setProducts(prev => prev.map(p => p.id === editProd.id ? { ...p, ...data } : p))
       } else {
         const id = await addProduct(data)
-        setProducts(prev => [...prev, { id, ...data }])
+        setProducts(prev => [{ id, ...data }, ...prev])
       }
       setShowForm(false)
+      setProductError("")
     } catch (e) {
-      alert("Failed to save: " + e.message)
+      const msg = e.code === "permission-denied" || e.code === "auth/permission-denied" ? "Firestore refused this save. Check your Firestore rules/admin permission." :
+                  e.message?.includes("timed out") ? e.message :
+                  e.message || "Product could not be saved."
+      setProductError(msg)
+    } finally {
+      setSavingProduct(false)
     }
   }
 
@@ -1298,9 +1331,14 @@ function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav }
             <input value={form.img} onChange={e => setForm(p => ({ ...p, img: e.target.value }))} placeholder="Or paste image URL" style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none", marginTop: 8 }} />
           </div>
           <div style={{ display: "flex", gap: 12 }}>
-            <button onClick={() => setShowForm(false)} style={{ flex: 1, background: "#f0ede8", color: "#555", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
-            <button onClick={save} className="hover-btn" style={{ flex: 1, background: "#8b6644", color: "#fff", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>{editProd ? "Update" : "Create"}</button>
+            <button onClick={() => setShowForm(false)} disabled={savingProduct} style={{ flex: 1, background: "#f0ede8", color: "#555", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: savingProduct ? "not-allowed" : "pointer" }}>Cancel</button>
+            <button onClick={save} disabled={savingProduct} className="hover-btn" style={{ flex: 1, background: savingProduct ? "#ccc" : "#8b6644", color: "#fff", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: savingProduct ? "not-allowed" : "pointer" }}>{savingProduct ? "Saving..." : editProd ? "Update" : "Create"}</button>
           </div>
+          {productError && (
+            <div style={{ background: "#fff7ed", border: "1px solid #fed7aa", color: "#9a3412", borderRadius: 8, padding: "10px 12px", fontFamily: "'Jost',sans-serif", fontSize: 13, lineHeight: 1.5, marginTop: 14 }}>
+              {productError}
+            </div>
+          )}
         </div>
       </div>
     )}
