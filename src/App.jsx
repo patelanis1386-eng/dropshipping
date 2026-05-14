@@ -805,6 +805,7 @@ function AuthPage({ setUser, authMode, setAuthMode, nav, showToast, signUp, sign
         return
       }
     } catch (e) {
+      console.error("Sign-in/sign-up error:", e)
       const msg = e.code === "auth/email-already-in-use" ? "This email is already registered. Try signing in." :
                   e.code === "auth/user-not-found" ? "No account found with this email" :
                   e.code === "auth/wrong-password" || e.code === "auth/invalid-credential" ? "Incorrect password" :

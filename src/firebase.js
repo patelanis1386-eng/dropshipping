@@ -43,8 +43,15 @@ const db = getFirestore(app)
 
 export { auth, db, onAuthStateChanged }
 
+const withTimeout = (promise, ms = 15000) => {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out. Check your connection or Firebase configuration.")), ms)),
+  ])
+}
+
 export const signUp = async (email, password, name) => {
-  const cred = await createUserWithEmailAndPassword(auth, email, password)
+  const cred = await withTimeout(createUserWithEmailAndPassword(auth, email, password))
   try {
     await updateProfile(cred.user, { displayName: name })
   } catch (_) {}
@@ -59,41 +66,45 @@ export const signUp = async (email, password, name) => {
 }
 
 export const signIn = async (email, password) => {
-  const cred = await signInWithEmailAndPassword(auth, email, password)
+  const cred = await withTimeout(signInWithEmailAndPassword(auth, email, password))
   return cred.user
 }
 
 export const logOut = () => signOut(auth)
 
-export const resetPassword = (email) => sendPasswordResetEmail(auth, email)
+export const resetPassword = (email) => withTimeout(sendPasswordResetEmail(auth, email))
 
 export const signInAsGuest = async () => {
-  const cred = await signInAnonymously(auth)
+  const cred = await withTimeout(signInAnonymously(auth))
   const user = cred.user
-  const userDoc = doc(db, "users", user.uid)
-  const snap = await getDoc(userDoc)
-  if (!snap.exists()) {
-    await setDoc(userDoc, {
-      name: "Guest",
-      email: `guest_${user.uid.slice(0, 6)}@luxedrop.com`,
-      createdAt: serverTimestamp(),
-    })
-  }
+  try {
+    const userDoc = doc(db, "users", user.uid)
+    const snap = await getDoc(userDoc)
+    if (!snap.exists()) {
+      await setDoc(userDoc, {
+        name: "Guest",
+        email: `guest_${user.uid.slice(0, 6)}@luxedrop.com`,
+        createdAt: serverTimestamp(),
+      })
+    }
+  } catch (_) {}
   return user
 }
 
 const googleProvider = new GoogleAuthProvider()
 export const signInWithGoogle = async () => {
-  const result = await signInWithPopup(auth, googleProvider)
+  const result = await withTimeout(signInWithPopup(auth, googleProvider), 30000)
   const user = result.user
   const userDoc = doc(db, "users", user.uid)
   const snap = await getDoc(userDoc)
   if (!snap.exists()) {
-    await setDoc(userDoc, {
-      name: user.displayName || user.email.split("@")[0],
-      email: user.email,
-      createdAt: serverTimestamp(),
-    })
+    try {
+      await setDoc(userDoc, {
+        name: user.displayName || user.email.split("@")[0],
+        email: user.email,
+        createdAt: serverTimestamp(),
+      })
+    } catch (_) {}
   }
   return user
 }
