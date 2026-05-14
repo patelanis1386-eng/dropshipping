@@ -55,13 +55,11 @@ export const signUp = async (email, password, name) => {
   try {
     await updateProfile(cred.user, { displayName: name })
   } catch (_) {}
-  try {
-    await setDoc(doc(db, "users", cred.user.uid), {
-      name,
-      email,
-      createdAt: serverTimestamp(),
-    })
-  } catch (_) {}
+  setDoc(doc(db, "users", cred.user.uid), {
+    name,
+    email,
+    createdAt: serverTimestamp(),
+  }).catch(() => {})
   return cred.user
 }
 

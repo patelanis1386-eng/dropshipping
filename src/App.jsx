@@ -778,7 +778,10 @@ function AuthPage({ setUser, authMode, setAuthMode, nav, showToast, signUp, sign
   const [done, setDone] = useState(false)
   const [showPw, setShowPw] = useState(false)
   const [err, setErr] = useState("")
-  const upd = (k, v) => setForm(p => ({ ...p, [k]: v }))
+  const upd = (k, v) => {
+    setDone(false)
+    setForm(p => ({ ...p, [k]: v }))
+  }
 
   const validate = () => {
     if (!form.email.trim()) return "Email is required"
@@ -792,6 +795,10 @@ function AuthPage({ setUser, authMode, setAuthMode, nav, showToast, signUp, sign
   }
 
   const submit = async () => {
+    if (done) {
+      nav("home")
+      return
+    }
     const v = validate()
     if (v) return showToast(v, "info")
     setSubmitting(true)
@@ -808,8 +815,6 @@ function AuthPage({ setUser, authMode, setAuthMode, nav, showToast, signUp, sign
         setDone(true)
         setSubmitting(false)
         showToast("Account created! You're now signed in.")
-        await new Promise(r => setTimeout(r, 800))
-        nav("home")
       } else {
         await resetPassword(form.email)
         showToast("Password reset link sent to your email", "info")
@@ -880,13 +885,13 @@ function AuthPage({ setUser, authMode, setAuthMode, nav, showToast, signUp, sign
             <span onClick={() => { setAuthMode("forgot"); setErr("") }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#8b6644", cursor: "pointer", fontWeight: 600 }}>Forgot password?</span>
           </div>
         )}
-        <button type="button" onClick={submit} disabled={submitting && !done} className="hover-btn" style={{ width: "100%", background: done ? "#10b981" : submitting ? "#ccc" : "#8b6644", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: submitting && !done ? "not-allowed" : "pointer", marginBottom: 16 }}>
-          {done ? "Done!" : submitting ? "Please wait..." : authMode === "login" ? "Sign In" : authMode === "signup" ? "Create Account" : "Send Reset Link"}
+        <button type="button" onClick={submit} disabled={submitting} className="hover-btn" style={{ width: "100%", background: done ? "#10b981" : submitting ? "#ccc" : "#8b6644", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: submitting ? "not-allowed" : "pointer", marginBottom: 16 }}>
+          {done ? "Done" : submitting ? (authMode === "signup" ? "Creating account..." : authMode === "forgot" ? "Sending reset link..." : "Signing in...") : authMode === "login" ? "Sign In" : authMode === "signup" ? "Create Account" : "Send Reset Link"}
         </button>
         <div style={{ textAlign: "center", fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#767676" }}>
-          {authMode === "login" ? <>Don't have an account? <span onClick={() => { setAuthMode("signup"); setErr("") }} style={{ color: "#8b6644", cursor: "pointer", fontWeight: 600 }}>Sign up</span></> :
-           authMode === "signup" ? <>Already a member? <span onClick={() => { setAuthMode("login"); setErr("") }} style={{ color: "#8b6644", cursor: "pointer", fontWeight: 600 }}>Sign in</span></> :
-           <span onClick={() => { setAuthMode("login"); setErr("") }} style={{ color: "#8b6644", cursor: "pointer", fontWeight: 600 }}>Back to Sign In</span>}
+          {authMode === "login" ? <>Don't have an account? <span onClick={() => { setAuthMode("signup"); setErr(""); setDone(false) }} style={{ color: "#8b6644", cursor: "pointer", fontWeight: 600 }}>Sign up</span></> :
+           authMode === "signup" ? <>Already a member? <span onClick={() => { setAuthMode("login"); setErr(""); setDone(false) }} style={{ color: "#8b6644", cursor: "pointer", fontWeight: 600 }}>Sign in</span></> :
+           <span onClick={() => { setAuthMode("login"); setErr(""); setDone(false) }} style={{ color: "#8b6644", cursor: "pointer", fontWeight: 600 }}>Back to Sign In</span>}
         </div>
         <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #f0ede8", display: "flex", flexDirection: "column", gap: 12 }}>
           <button type="button" onClick={handleGoogle} disabled={submitting} className="hover-btn" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "11px", borderRadius: 10, border: "1px solid #e0d8ce", background: "#fff", cursor: submitting ? "not-allowed" : "pointer", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600, opacity: submitting ? 0.6 : 1 }}>
