@@ -1068,6 +1068,7 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
   const ordTotal = orders.reduce((s, o) => s + (typeof o.total === "number" ? o.total : 0), 0)
 
   return (
+    <>
     <div style={{ display: "flex", minHeight: "80vh" }}>
       <aside style={{ width: 220, background: "#1a1a1a", color: "#fff", padding: "28px 0", flexShrink: 0 }}>
         <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontWeight: 700, letterSpacing: 2, padding: "0 24px 28px", borderBottom: "1px solid #2a2a2a", marginBottom: 12 }}>LUXEDROP &#x25A0; ADMIN</div>
@@ -1295,6 +1296,7 @@ function AdminPage({ products, orders, adminTab, setAdminTab, nav }) {
         </div>
       </div>
     )}
+    </>
   )
 }
 
