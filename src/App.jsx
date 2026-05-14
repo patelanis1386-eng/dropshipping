@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers } from "./firebase"
 import { SEED_PRODUCTS, SEED_REVIEWS, SEED_CATEGORIES, fmt, disc } from "./data"
-import { addDoc, collection, serverTimestamp } from "firebase/firestore"
+import { addDoc, collection, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore"
 
 const Stars = ({ n }) => "\u2605".repeat(Math.floor(n)) + (n % 1 >= 0.5 ? "\u00BD" : "") + "\u25A0".repeat(5 - Math.ceil(n))
 
@@ -28,9 +28,19 @@ export default function App() {
   const [categories, setCategories] = useState(SEED_CATEGORIES)
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (fbUser) => {
+    const unsub = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
-        setUser({ name: fbUser.displayName || fbUser.email.split("@")[0], email: fbUser.email })
+        const base = { name: fbUser.displayName || fbUser.email.split("@")[0], email: fbUser.email }
+        try {
+          const snap = await getDoc(doc(db, "users", fbUser.uid))
+          if (snap.exists() && snap.data().isAdmin) {
+            setUser({ ...base, isAdmin: true })
+          } else {
+            setUser(base)
+          }
+        } catch (_) {
+          setUser(base)
+        }
       } else {
         setUser(null)
       }
@@ -38,6 +48,18 @@ export default function App() {
     })
     return () => unsub()
   }, [])
+
+  window.makeMeAdmin = async () => {
+    const u = auth.currentUser
+    if (!u) return alert("Sign in first")
+    try {
+      await setDoc(doc(db, "users", u.uid), { isAdmin: true }, { merge: true })
+      alert("Admin role set! Reload the page.")
+      setUser(prev => prev ? { ...prev, isAdmin: true } : prev)
+    } catch (e) {
+      alert("Failed: " + e.message)
+    }
+  }
 
   const handleLogout = async () => {
     await logOut()
@@ -154,7 +176,7 @@ export default function App() {
         {page === "auth"     && <AuthPage setUser={setUser} authMode={authMode} setAuthMode={setAuthMode} nav={nav} showToast={showToast} signUp={signUp} signIn={signIn} resetPassword={resetPassword} signInWithGoogle={signInWithGoogle} signInAsGuest={signInAsGuest} />}
         {page === "orders"   && <OrdersPage orders={orders} nav={nav} user={user} />}
         {page === "tracking" && <TrackingPage nav={nav} />}
-        {page === "admin"    && <AdminPage products={products} orders={orders} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} />}
+        {page === "admin"    && user?.isAdmin && <AdminPage products={products} orders={orders} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} />}
         {page === "about"    && <StaticPage title="About Us" nav={nav}><AboutContent /></StaticPage>}
         {page === "contact"  && <StaticPage title="Contact Us" nav={nav}><ContactContent showToast={showToast} /></StaticPage>}
         {page === "privacy"  && <StaticPage title="Privacy Policy" nav={nav}><PrivacyContent /></StaticPage>}
@@ -162,7 +184,7 @@ export default function App() {
         {page === "terms"    && <StaticPage title="Terms & Conditions" nav={nav}><TermsContent /></StaticPage>}
       </main>
 
-      <Footer nav={nav} newsletter={newsletter} setNewsletter={setNewsletter} newsletterDone={newsletterDone} setNewsletterDone={setNewsletterDone} showToast={showToast} />
+      <Footer nav={nav} newsletter={newsletter} setNewsletter={setNewsletter} newsletterDone={newsletterDone} setNewsletterDone={setNewsletterDone} showToast={showToast} user={user} />
       <WhatsAppButton />
     </div>
   )
@@ -219,7 +241,7 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
                     <div style={{ fontWeight: 600, fontSize: 14, color: "#1a1a1a" }}>{user.name}</div>
                     <div style={{ fontSize: 12, color: "#767676", marginTop: 2 }}>{user.email}</div>
                   </div>
-                  {[["My Orders", "orders"], ["Wishlist", "wishlist"], ["Admin", "admin"]].map(([l, p]) => (
+                  {[["My Orders", "orders"], ["Wishlist", "wishlist"], ...(user?.isAdmin ? [["Admin", "admin"]] : [])].map(([l, p]) => (
                     <div key={l} onClick={() => { setShowUserMenu(false); nav(p) }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#555", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#f8f5f0"} onMouseLeave={e => e.target.style.background = "transparent"}>{l}</div>
                   ))}
                   <div onClick={() => { setShowUserMenu(false); handleLogout() }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#dc2626", borderTop: "1px solid #f0ede8", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#fef2f2"} onMouseLeave={e => e.target.style.background = "transparent"}>Sign Out</div>
@@ -1349,7 +1371,7 @@ function TermsContent() {
   )
 }
 
-function Footer({ nav, newsletter, setNewsletter, newsletterDone, setNewsletterDone, showToast }) {
+function Footer({ nav, newsletter, setNewsletter, newsletterDone, setNewsletterDone, showToast, user }) {
   const onSubscribe = async () => {
     if (!newsletter.includes("@")) return showToast("Enter a valid email", "info")
     try {
@@ -1381,7 +1403,7 @@ function Footer({ nav, newsletter, setNewsletter, newsletterDone, setNewsletterD
           </div>
           <div>
             <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 2, color: "#8b6644", marginBottom: 20 }}>SUPPORT</div>
-            {[["Contact Us", "contact"], ["Track Order", "tracking"], ["My Orders", "orders"], ["About Us", "about"], ["Admin", "admin"]].map(([l, p]) => (
+            {[["Contact Us", "contact"], ["Track Order", "tracking"], ["My Orders", "orders"], ["About Us", "about"], ...(user?.isAdmin ? [["Admin", "admin"]] : [])].map(([l, p]) => (
               <div key={l} onClick={() => nav(p)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#bbb", marginBottom: 10, cursor: "pointer" }}>{l}</div>
             ))}
           </div>
