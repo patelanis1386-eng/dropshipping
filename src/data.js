@@ -19,11 +19,11 @@ export const SEED_REVIEWS = [
   { name: "Marcus Webb", avatar: "MW", rating: 5, text: "Premium store, premium experience. The checkout was smooth, tracking updates were accurate, and the blanket is incredibly soft. 10/10.", product: "Velvet Throw Blanket", date: "Apr 29, 2026" },
 ]
 export const SEED_CATEGORIES = [
-  { name: "Fashion", color: "#e8b4b8", count: 156 },
-  { name: "Electronics", color: "#a8d8ea", count: 89 },
-  { name: "Beauty", color: "#f7d6e0", count: 124 },
-  { name: "Home", color: "#c8e6c9", count: 97 },
-  { name: "Trending", color: "#ffe0b2", count: 43 },
+  { name: "Fashion", icon: "\uD83D\uDC55", color: "#e8b4b8", count: 156 },
+  { name: "Electronics", icon: "\uD83D\uDCF1", color: "#a8d8ea", count: 89 },
+  { name: "Beauty", icon: "\uD83D\uDC84", color: "#f7d6e0", count: 124 },
+  { name: "Home", icon: "\uD83C\uDFE0", color: "#c8e6c9", count: 97 },
+  { name: "Trending", icon: "\uD83D\uDD25", color: "#ffe0b2", count: 43 },
 ]
 
 export const fmt = (n) => "$" + Number(n).toFixed(2)

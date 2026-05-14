@@ -138,7 +138,7 @@ export default function App() {
 
       {page === "home"     && <HomePage products={products} reviews={reviews} categories={categories} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} setSearchQ={setSearchQ} newsletter={newsletter} setNewsletter={setNewsletter} newsletterDone={newsletterDone} setNewsletterDone={setNewsletterDone} showToast={showToast} />}
       {page === "shop"     && <ShopPage products={filteredProducts} allProducts={products} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} catFilter={catFilter} setCatFilter={setCatFilter} searchQ={searchQ} setSearchQ={setSearchQ} sortBy={sortBy} setSortBy={setSortBy} />}
-      {page === "product"  && <ProductPage product={selectedProduct} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} products={products} showToast={showToast} />}
+      {page === "product"  && <ProductPage product={selectedProduct} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} products={products} reviews={reviews} showToast={showToast} />}
       {page === "cart"     && <CartPage cart={cart} setCart={setCart} removeCart={removeCart} cartTotal={cartTotal} nav={nav} />}
       {page === "checkout" && <CheckoutPage cart={cart} cartTotal={cartTotal} payMethod={payMethod} setPayMethod={setPayMethod} nav={nav} showToast={showToast} setCart={setCart} user={user} orders={orders} setOrders={setOrders} />}
       {page === "wishlist" && <WishlistPage wishlist={wishlist} toggleWish={toggleWish} addCart={addCart} nav={nav} />}
@@ -291,7 +291,7 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
       <section style={{ padding: "60px 24px", maxWidth: 1280, margin: "0 auto" }}>
         <SectionHeader title="Shop by Category" sub="Explore our curated collections" />
         <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 8 }}>
-          {CATEGORIES.map(cat => (
+          {categories.map(cat => (
             <div key={cat.name} onClick={() => { setSearchQ(""); nav("shop") }} className="hover-lift" style={{ flex: "0 0 160px", background: cat.color + "33", borderRadius: 20, padding: "28px 20px", textAlign: "center", cursor: "pointer" }}>
               <div style={{ fontSize: 36, marginBottom: 10 }}>{cat.icon}</div>
               <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, color: "#1a1a1a" }}>{cat.name}</div>
@@ -322,7 +322,7 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
           <SectionHeader title="What Our Customers Say" sub="Over 50,000 happy shoppers worldwide" />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
-            {REVIEWS.map(r => (
+            {reviews.map(r => (
               <div key={r.name} style={{ background: "#fff", borderRadius: 20, padding: 28, boxShadow: "0 2px 16px rgba(0,0,0,0.06)" }}>
                 <div style={{ color: "#c8956c", fontSize: 16, marginBottom: 12 }}>{"\u2605".repeat(r.rating)}</div>
                 <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#555", lineHeight: 1.7, marginBottom: 16 }}>"{r.text}"</p>
@@ -432,7 +432,7 @@ function ShopPage({ products, allProducts, nav, addCart, toggleWish, wishlist, c
   )
 }
 
-function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products, showToast }) {
+function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products, reviews, showToast }) {
   const [qty, setQty] = useState(1)
   const [tab, setTab] = useState("desc")
   const [imgIdx, setImgIdx] = useState(0)
@@ -523,7 +523,7 @@ function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products,
                 ))}
               </div>
             </div>
-            {REVIEWS.map(r => (
+            {reviews.map(r => (
               <div key={r.name} style={{ borderBottom: "1px solid #f0ede8", paddingBottom: 20, marginBottom: 20 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
                   <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#c8956c", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 13, fontFamily: "'Jost',sans-serif" }}>{r.avatar}</div>
