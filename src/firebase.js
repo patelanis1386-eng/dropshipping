@@ -45,12 +45,16 @@ export { auth, db, onAuthStateChanged }
 
 export const signUp = async (email, password, name) => {
   const cred = await createUserWithEmailAndPassword(auth, email, password)
-  await updateProfile(cred.user, { displayName: name })
-  await setDoc(doc(db, "users", cred.user.uid), {
-    name,
-    email,
-    createdAt: serverTimestamp(),
-  })
+  try {
+    await updateProfile(cred.user, { displayName: name })
+  } catch (_) {}
+  try {
+    await setDoc(doc(db, "users", cred.user.uid), {
+      name,
+      email,
+      createdAt: serverTimestamp(),
+    })
+  } catch (_) {}
   return cred.user
 }
 
