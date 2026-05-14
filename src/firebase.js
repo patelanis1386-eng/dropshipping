@@ -12,7 +12,7 @@ import {
   signInWithPopup,
 } from "firebase/auth"
 import {
-  getFirestore,
+  initializeFirestore,
   collection,
   getDocs,
   getDoc,
@@ -39,11 +39,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
-const db = getFirestore(app)
+const db = initializeFirestore(app, {
+  experimentalAutoDetectLongPolling: true,
+})
 
 export { auth, db, onAuthStateChanged }
 
-const withTimeout = (promise, ms = 10000) => {
+const withTimeout = (promise, ms = 20000) => {
   return Promise.race([
     promise,
     new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out. Check your connection or Firebase configuration.")), ms)),
