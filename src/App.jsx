@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers } from "./firebase"
-import { SEED_PRODUCTS, SEED_REVIEWS, SEED_CATEGORIES, fmt, disc } from "./data"
+import { SEED_REVIEWS, SEED_CATEGORIES, fmt, disc } from "./data"
 import { addDoc, collection, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore"
 
 const Stars = ({ n }) => "\u2605".repeat(Math.floor(n)) + (n % 1 >= 0.5 ? "\u00BD" : "") + "\u25A0".repeat(5 - Math.ceil(n))
@@ -23,7 +23,7 @@ export default function App() {
   const [orders, setOrders] = useState([])
   const [authLoading, setAuthLoading] = useState(true)
 
-  const [products, setProducts] = useState(SEED_PRODUCTS)
+  const [products, setProducts] = useState([])
   const [reviews, setReviews] = useState(SEED_REVIEWS)
   const [categories, setCategories] = useState(SEED_CATEGORIES)
 
