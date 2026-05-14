@@ -3,6 +3,7 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInAnonymously,
   signOut,
   sendPasswordResetEmail,
   updateProfile,
@@ -61,6 +62,21 @@ export const signIn = async (email, password) => {
 export const logOut = () => signOut(auth)
 
 export const resetPassword = (email) => sendPasswordResetEmail(auth, email)
+
+export const signInAsGuest = async () => {
+  const cred = await signInAnonymously(auth)
+  const user = cred.user
+  const userDoc = doc(db, "users", user.uid)
+  const snap = await getDoc(userDoc)
+  if (!snap.exists()) {
+    await setDoc(userDoc, {
+      name: "Guest",
+      email: `guest_${user.uid.slice(0, 6)}@luxedrop.com`,
+      createdAt: serverTimestamp(),
+    })
+  }
+  return user
+}
 
 const googleProvider = new GoogleAuthProvider()
 export const signInWithGoogle = async () => {
