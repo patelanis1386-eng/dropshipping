@@ -345,7 +345,7 @@ export default function App() {
         {page === "checkout" && <CheckoutPage cart={cart} cartTotal={cartTotal} payMethod={payMethod} setPayMethod={setPayMethod} nav={nav} showToast={showToast} setCart={setCart} user={user} orders={orders} setOrders={setOrders} shipping={shipping} />}
         {page === "wishlist" && <WishlistPage wishlist={wishlist} toggleWish={toggleWish} addCart={addCart} nav={nav} />}
         {page === "auth"     && <AuthPage setUser={setUser} authMode={authMode} setAuthMode={setAuthMode} nav={nav} showToast={showToast} signUp={signUp} signIn={signIn} resetPassword={resetPassword} signInWithGoogle={signInWithGoogle} signInAsGuest={signInAsGuest} />}
-        {page === "orders"   && <OrdersPage orders={orders} nav={nav} user={user} />}
+        {page === "orders"   && <OrdersPage orders={orders} setOrders={setOrders} nav={nav} user={user} />}
         {page === "tracking" && <TrackingPage nav={nav} />}
         {page === "admin"    && user?.isAdmin && <AdminPage products={products} setProducts={setProducts} orders={orders} setOrders={setOrders} shipping={shipping} setShipping={setShipping} banner={banner} setBanner={setBanner} productCategories={productCategories} setProductCategories={setProductCategories} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} showToast={showToast} />}
         {page === "about"    && <StaticPage title="About Us" nav={nav}><AboutContent /></StaticPage>}
@@ -1176,7 +1176,11 @@ function AuthPage({ setUser, authMode, setAuthMode, nav, showToast, signUp, sign
   )
 }
 
-function OrdersPage({ orders, nav, user }) {
+function OrdersPage({ orders, nav, user, setOrders }) {
+  useEffect(() => {
+    if (!user?.uid || user?.isAdmin) return
+    getUserOrders(user.uid).then(o => { if (o?.length) setOrders(o) }).catch(() => {})
+  }, [user?.uid])
   const myOrders = user ? orders.filter(o => o.email === user.email || o.userId === user.email) : orders
   const STATUS_COLOR = { Delivered: "#10b981", Shipped: "#3b82f6", Processing: "#f59e0b" }
   return (
@@ -1528,7 +1532,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
                       </td>
                       <td style={{ padding: "12px 16px" }}>
                         <div style={{ display: "flex", gap: 6, flexDirection: "column" }}>
-                          <select value={o.status} onChange={async e => { const s = e.target.value; await updateOrderStatus(o.id, s); setOrders(prev => prev.map(order => order.id === o.id ? { ...order, status: s } : order)); showToast("Status updated to " + s) }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, padding: "4px 8px", borderRadius: 6, border: "1px solid #e0d8ce", background: "#fff", cursor: "pointer" }}>
+                          <select value={o.status} onChange={async e => { const s = e.target.value; await updateOrderStatus(o.id, s); if (o.userId && o.userId !== "guest") { try { const uo = await getUserOrders(o.userId); if (uo) { const upd = uo.map(x => x.id === o.id ? { ...x, status: s } : x); await saveUserOrders(o.userId, upd) } } catch (_) {} } setOrders(prev => prev.map(order => order.id === o.id ? { ...order, status: s } : order)); showToast("Status updated to " + s) }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, padding: "4px 8px", borderRadius: 6, border: "1px solid #e0d8ce", background: "#fff", cursor: "pointer" }}>
                             {["Processing", "Shipped", "Delivered"].map(s => <option key={s} value={s}>{s}</option>)}
                           </select>
                           <button onClick={() => { setTrackForm({ trackingNumber: o.trackingNumber || "", carrier: o.carrier || "", estimatedDelivery: o.estimatedDelivery || "", steps: (o.trackingSteps || []).map(s => ({ ...s })) }); setTrackModalOrder(o) }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#3b82f6", background: "#eff6ff", border: "none", padding: "4px 10px", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>Tracking</button>
@@ -1723,6 +1727,8 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
                 const newStatus = delivered ? "Delivered" : shipped ? "Shipped" : trackModalOrder.status
                 await updateOrderTracking(trackModalOrder.id, { trackingNumber: trackForm.trackingNumber, carrier: trackForm.carrier, estimatedDelivery: trackForm.estimatedDelivery, trackingSteps: steps })
                 await updateOrderStatus(trackModalOrder.id, newStatus)
+                const uid = trackModalOrder.userId
+                if (uid && uid !== "guest") { try { const uo = await getUserOrders(uid); if (uo) { const upd = uo.map(x => x.id === trackModalOrder.id ? { ...x, trackingNumber: trackForm.trackingNumber, carrier: trackForm.carrier, estimatedDelivery: trackForm.estimatedDelivery, trackingSteps: steps, status: newStatus } : x); await saveUserOrders(uid, upd) } } catch (_) {} }
                 setOrders(prev => prev.map(order => order.id === trackModalOrder.id ? { ...order, trackingNumber: trackForm.trackingNumber, carrier: trackForm.carrier, estimatedDelivery: trackForm.estimatedDelivery, trackingSteps: steps, status: newStatus } : order))
                 showToast("Tracking updated!")
                 setTrackModalOrder(null)
