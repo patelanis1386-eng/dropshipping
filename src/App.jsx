@@ -1306,7 +1306,7 @@ function TrackingPage({ nav }) {
 }
 
 function AdminPage({ products, setProducts, orders, setOrders, shipping, setShipping, banner, setBanner, productCategories, setProductCategories, adminTab, setAdminTab, nav, showToast }) {
-  const tabs = ["dashboard", "products", "orders", "categories", "customers", "analytics"]
+  const tabs = ["dashboard", "products", "orders", "checkouts", "categories", "customers", "analytics"]
   const [showForm, setShowForm] = useState(false)
   const [editProd, setEditProd] = useState(null)
   const [form, setForm] = useState({ name: "", category: (productCategories?.[0] || "electronics"), price: "", original: "", stock: "", desc: "", img: "", badge: "New Arrival" })
@@ -1451,7 +1451,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
   }
 
   const T = (l) => ({ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 1, color: "#767676", textAlign: "left", padding: "14px 16px" })
-  const SIDEBAR_ICONS = { dashboard: "\u2302", products: "\u2606", orders: "\u2637", categories: "\u2630", customers: "\u266B", analytics: "\u2191" }
+  const SIDEBAR_ICONS = { dashboard: "\u2302", products: "\u2606", orders: "\u2637", checkouts: "\u2705", categories: "\u2630", customers: "\u266B", analytics: "\u2191" }
 
   return (
     <>
@@ -1682,6 +1682,90 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
             {orders.length > 0 && filteredOrders.length === 0 && (
               <div style={{ marginTop: 16, textAlign: "center" }}>
                 <button onClick={() => { setOrderSearch(""); setOrderStatusFilter("all") }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#8b6644", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>Clear filters</button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {adminTab === "checkouts" && (
+          <div className="fade-in">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
+              <h2 style={{ fontSize: 28, fontWeight: 600 }}>Checkout Details ({orders.length})</h2>
+              <input value={orderSearch} onChange={e => setOrderSearch(e.target.value)} placeholder="Search orders..." style={{ padding: "8px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none", width: 220, maxWidth: "100%" }} />
+            </div>
+            {filteredOrders.length === 0 ? (
+              <div style={{ textAlign: "center", padding: 60, fontFamily: "'Jost',sans-serif", color: "#767676" }}>No checkout records found.</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {filteredOrders.map(o => {
+                  const totalQty = (o.items || []).reduce((s, i) => s + (i.qty || 1), 0)
+                  return (
+                    <div key={o.id} style={{ background: "#fff", borderRadius: 16, padding: 20, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8, marginBottom: 16, paddingBottom: 12, borderBottom: "1px solid #f0ede8" }}>
+                        <div>
+                          <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 15, color: "#8b6644" }}>{o.orderNumber || o.id?.slice(0, 10)}</div>
+                          <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#767676", marginTop: 2 }}>{o.date || ""}</div>
+                        </div>
+                        <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, fontWeight: 700, padding: "4px 14px", borderRadius: 20, background: (STATUS_COLORS[o.status] || "#f59e0b") + "22", color: STATUS_COLORS[o.status] || "#f59e0b" }}>{o.status || "Pending"}</span>
+                      </div>
+
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 16 }}>
+                        <div>
+                          <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 10, letterSpacing: 1, color: "#8b6644", fontWeight: 700, marginBottom: 6 }}>CUSTOMER</div>
+                          <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, lineHeight: 1.6 }}>
+                            <div style={{ fontWeight: 600 }}>{o.customerName || "Guest"}</div>
+                            <div style={{ color: "#767676", wordBreak: "break-all" }}>{o.email}</div>
+                            {o.phone && <div style={{ color: "#767676" }}>{o.phone}</div>}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 10, letterSpacing: 1, color: "#8b6644", fontWeight: 700, marginBottom: 6 }}>SHIPPING ADDRESS</div>
+                          <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, lineHeight: 1.6, color: "#555" }}>
+                            {o.address ? o.address.split(",").map((line, i) => <div key={i}>{line.trim()}</div>) : <span style={{ color: "#767676" }}>N/A</span>}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 10, letterSpacing: 1, color: "#8b6644", fontWeight: 700, marginBottom: 6 }}>PAYMENT</div>
+                          <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, lineHeight: 1.6 }}>
+                            <div><strong>Method:</strong> {o.paymentMethod || "N/A"}</div>
+                            <div><strong>Total:</strong> {fmt(o.total)}</div>
+                            <div><strong>Items:</strong> {totalQty}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 10, letterSpacing: 1, color: "#8b6644", fontWeight: 700, marginBottom: 8 }}>PRODUCTS</div>
+                        <div style={{ overflowX: "auto" }}>
+                          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 280 }}>
+                            <thead>
+                              <tr style={{ background: "#f8f5f0" }}>
+                                {["Product", "Price", "Qty", "Subtotal"].map(h => <th key={h} style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#767676", padding: "8px 12px", textAlign: "left" }}>{h}</th>)}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {(o.items || []).map((item, idx) => (
+                                <tr key={idx} style={{ borderBottom: "1px solid #f0ede8" }}>
+                                  <td style={{ padding: "8px 12px", fontFamily: "'Jost',sans-serif", fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+                                    <img src={item.img || ""} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
+                                    <span style={{ fontWeight: 500 }}>{item.name}</span>
+                                  </td>
+                                  <td style={{ padding: "8px 12px", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", whiteSpace: "nowrap" }}>{fmt(item.price)}</td>
+                                  <td style={{ padding: "8px 12px", fontFamily: "'Jost',sans-serif", fontSize: 13, textAlign: "center" }}>{item.qty || 1}</td>
+                                  <td style={{ padding: "8px 12px", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>{fmt((item.price || 0) * (item.qty || 1))}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      <div style={{ marginTop: 16, paddingTop: 12, borderTop: "1px solid #f0ede8", display: "flex", justifyContent: "flex-end", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 16 }}>
+                        Total: {fmt(o.total)}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>
