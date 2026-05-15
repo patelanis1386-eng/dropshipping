@@ -299,14 +299,17 @@ export default function App() {
           .cart-item img { width: 64px !important; height: 64px !important; }
           .checkout-layout { grid-template-columns: 1fr !important; }
           .admin-page { flex-direction: column !important; }
-          .admin-sidebar { width: 100% !important; display: flex !important; overflow-x: auto !important; padding: 12px 0 !important; }
-          .admin-sidebar > div { white-space: nowrap !important; border-left: none !important; border-bottom: 3px solid transparent !important; padding: 10px 16px !important; }
+          .admin-sidebar { width: 100% !important; display: flex !important; overflow-x: auto !important; padding: 8px 0 !important; }
+          .admin-sidebar > div { white-space: nowrap !important; border-left: none !important; border-bottom: 3px solid transparent !important; padding: 10px 12px !important; font-size: 12px !important; }
           .admin-sidebar > div.active { border-left: none !important; border-bottom: 3px solid #8b6644 !important; }
           .admin-main { padding: 16px !important; }
           .admin-table-wrap { overflow-x: auto !important; }
           .admin-table-wrap table { min-width: 600px !important; }
+          .admin-orders-table { overflow-x: auto !important; }
+          .admin-orders-table table { min-width: 650px !important; }
           div.admin-stats-grid { grid-template-columns: repeat(2,1fr) !important; gap: 12px !important; }
           div.admin-dashboard-grid { grid-template-columns: 1fr !important; }
+          .modal-inner { width: 100% !important; max-width: 100% !important; min-height: 100vh !important; max-height: 100vh !important; border-radius: 0 !important; padding: 24px 16px !important; }
           footer > div > div:first-child { grid-template-columns: repeat(2,1fr) !important; gap: 24px !important; }
           .page-content { padding: 24px 16px !important; }
           .shop-page { padding: 24px 16px !important; }
@@ -329,6 +332,13 @@ export default function App() {
           .admin-stats-grid { grid-template-columns: repeat(2,1fr) !important; gap: 8px !important; }
           .admin-main { padding: 12px !important; }
           .admin-main h2 { font-size: 20px !important; }
+          .admin-main .admin-table-wrap table { min-width: 500px !important; }
+          .checkout-steps { gap: 6px !important; flex-wrap: wrap !important; }
+          .checkout-steps > div { font-size: 12px !important; }
+          .checkout-steps > div > div { width: 24px !important; height: 24px !important; font-size: 11px !important; }
+          nav > div { gap: 8px !important; }
+          .tracking-page input { font-size: 14px !important; }
+          .modal-inner { padding: 20px 14px !important; }
         }
       `}</style>
 
@@ -904,7 +914,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
   return (
     <div style={{ maxWidth: 1000, margin: "0 auto", padding: "40px 24px" }}>
       <h1 style={{ fontSize: 32, fontWeight: 600, marginBottom: 8 }}>Checkout</h1>
-      <div style={{ display: "flex", gap: 0, marginBottom: 40 }}>
+      <div className="checkout-steps" style={{ display: "flex", gap: 0, marginBottom: 40 }}>
         {["Shipping", "Payment", "Review"].map((s, i) => (
           <div key={s} style={{ display: "flex", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1515,7 +1525,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
         {adminTab === "orders" && (
           <div className="fade-in">
             <h2 style={{ fontSize: 28, fontWeight: 600, marginBottom: 24 }}>All Orders ({orders.length})</h2>
-            <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden" }}>
+            <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden" }} className="admin-orders-table">
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead style={{ background: "#f8f5f0" }}>
                   <tr>{["Order ID", "Customer", "Items", "Total", "Status", "Action"].map(h => <th key={h} style={{ padding: "14px 16px", fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 1, color: "#767676", textAlign: "left" }}>{h}</th>)}</tr>
@@ -1646,7 +1656,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
     </div>
     {showForm && (
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }} onClick={() => setShowForm(false)}>
-        <div style={{ background: "#fff", borderRadius: 20, padding: 32, width: "90%", maxWidth: 500, maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+        <div className="modal-inner" style={{ background: "#fff", borderRadius: 20, padding: 32, width: "90%", maxWidth: 500, maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
           <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 20 }}>{editProd ? "Edit Product" : "Add Product"}</h3>
           {[["name", "Product Name"], ["price", "Price"], ["original", "Original Price"], ["stock", "Stock"], ["desc", "Description"]].map(([k, l]) => (
             <div key={k} style={{ marginBottom: 12 }}>
@@ -1690,7 +1700,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
     )}
     {trackModalOrder && (
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }} onClick={() => setTrackModalOrder(null)}>
-        <div style={{ background: "#fff", borderRadius: 20, padding: 32, width: "90%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+        <div className="modal-inner" style={{ background: "#fff", borderRadius: 20, padding: 32, width: "90%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
           <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>Tracking — {trackModalOrder.orderNumber || trackModalOrder.id?.slice(0, 8)}</h3>
           <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", marginBottom: 20 }}>{trackModalOrder.customerName || trackModalOrder.email}</p>
           <div style={{ marginBottom: 16 }}>
