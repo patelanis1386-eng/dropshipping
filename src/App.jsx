@@ -395,20 +395,20 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
   return (
     <div>
       <section className="hero-section" style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #2d2418 50%, #3d2f20 100%)", color: "#fff", padding: "80px 24px", position: "relative", overflow: "hidden" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", alignItems: "center", gap: 60 }} className="mobile-col">
-          <div style={{ flex: 1 }} className="hero-text">
+        <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
+          <div className="hero-text">
             <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "#8b6644", marginBottom: 16 }}>INDIAN DROPSHIPPING</div>
             <h1 style={{ fontSize: "clamp(40px,6vw,72px)", fontWeight: 300, lineHeight: 1.1, marginBottom: 20, letterSpacing: -1 }}>
               Discover<br /><em style={{ fontStyle: "italic", color: "#8b6644" }}>Bharat's</em><br />Finest
             </h1>
-            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, color: "#ccc", maxWidth: 440, lineHeight: 1.7, marginBottom: 32 }}>
+            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, color: "#ccc", maxWidth: 600, lineHeight: 1.7, marginBottom: 32, margin: "0 auto 32px" }}>
               Premium products from across India. Handpicked for quality, delivered to your doorstep.
             </p>
-            <div className="hero-buttons" style={{ display: "flex", gap: 16 }}>
+            <div className="hero-buttons" style={{ display: "flex", gap: 16, justifyContent: "center" }}>
               <button onClick={() => nav("shop")} className="hover-btn" style={{ background: "#8b6644", color: "#fff", border: "none", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Shop Now &#x2192;</button>
               <button onClick={() => nav("tracking")} className="hover-btn" style={{ background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 500, fontSize: 14, cursor: "pointer" }}>Track Order</button>
             </div>
-            <div className="hero-stats" style={{ display: "flex", gap: 40, marginTop: 48 }}>
+            <div className="hero-stats" style={{ display: "flex", gap: 40, marginTop: 48, justifyContent: "center" }}>
               {[["50K+", "Happy Customers"], ["4.9\u2605", "Average Rating"]].map(([v, l]) => (
                 <div key={l}>
                   <div style={{ fontSize: 22, fontWeight: 700, color: "#8b6644", fontFamily: "'Jost',sans-serif" }}>{v}</div>
@@ -416,13 +416,6 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
                 </div>
               ))}
             </div>
-          </div>
-          <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }} className="hide-mobile">
-            {products.slice(0, 4).map((p, i) => (
-              <div key={p.id} onClick={() => nav("product", { product: p })} className="hover-lift" style={{ borderRadius: 16, overflow: "hidden", aspectRatio: i === 0 ? "1" : i === 3 ? "1" : "1", cursor: "pointer" }}>
-                <img src={p.img} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              </div>
-            ))}
           </div>
         </div>
       </section>
