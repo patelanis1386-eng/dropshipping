@@ -900,6 +900,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
       showToast("Order placed successfully! Your order number is " + orderNumber)
       nav("orders")
     } catch (e) {
+      console.error("placeOrder error:", e)
       showToast("Failed to place order. Try again.", "info")
     }
     setPlacing(false)
