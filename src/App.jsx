@@ -392,7 +392,7 @@ export default function App() {
       {showLogoutModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: 16 }} onClick={() => setShowLogoutModal(false)}>
           <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 20, padding: "36px 32px", width: "100%", maxWidth: 380, textAlign: "center", animation: "fadeIn 0.25s ease", boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>&#x1F6AA;</div>
+
             <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 8 }}>Sign Out?</h3>
             <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#767676", marginBottom: 28, lineHeight: 1.6 }}>
               Are you sure you want to sign out?<br />Your cart and wishlist will be saved.
