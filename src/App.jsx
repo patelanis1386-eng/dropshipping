@@ -51,6 +51,7 @@ export default function App() {
   const [reviews, setReviews] = useState(SEED_REVIEWS)
   const [categories, setCategories] = useState(SEED_CATEGORIES)
   const [banner, setBanner] = useState(null)
+  const [shipping, setShipping] = useState({ freeShipping: true, cost: 0, label: "Free Shipping" })
   const [productCategories, setProductCategories] = useState(["fashion", "electronics", "beauty", "home"])
 
   useEffect(() => {
@@ -104,12 +105,13 @@ export default function App() {
     const load = async () => {
       const localProducts = readLocalProducts()
       try {
-        const [fp, fr, fc, fb, fpc] = await Promise.all([getProducts(), getReviews(), getCategories(), getBanner(), getProductCategories()])
+        const [fp, fr, fc, fb, fpc, fs] = await Promise.all([getProducts(), getReviews(), getCategories(), getBanner(), getProductCategories(), getShippingSettings()])
         setProducts(mergeProducts(localProducts, fp))
         if (fr.length) setReviews(fr)
         if (fc.length) setCategories(fc)
         if (fb) setBanner(fb)
         if (fpc.length) setProductCategories(fpc.map(c => c.name))
+        if (fs) setShipping(fs)
       } catch (_) {
         setProducts(localProducts)
       }
@@ -274,13 +276,13 @@ export default function App() {
         {page === "home"     && <HomePage products={products} reviews={reviews} categories={categories} banner={banner} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} setSearchQ={setSearchQ} newsletter={newsletter} setNewsletter={setNewsletter} newsletterDone={newsletterDone} setNewsletterDone={setNewsletterDone} showToast={showToast} />}
         {page === "shop"     && <ShopPage products={filteredProducts} allProducts={products} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} catFilter={catFilter} setCatFilter={setCatFilter} searchQ={searchQ} setSearchQ={setSearchQ} sortBy={sortBy} setSortBy={setSortBy} productCategories={productCategories} />}
         {page === "product"  && <ProductPage product={selectedProduct} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} products={products} reviews={reviews} showToast={showToast} />}
-        {page === "cart"     && <CartPage cart={cart} setCart={setCart} removeCart={removeCart} cartTotal={cartTotal} nav={nav} />}
-        {page === "checkout" && <CheckoutPage cart={cart} cartTotal={cartTotal} payMethod={payMethod} setPayMethod={setPayMethod} nav={nav} showToast={showToast} setCart={setCart} user={user} orders={orders} setOrders={setOrders} />}
+        {page === "cart"     && <CartPage cart={cart} setCart={setCart} removeCart={removeCart} cartTotal={cartTotal} nav={nav} shipping={shipping} />}
+        {page === "checkout" && <CheckoutPage cart={cart} cartTotal={cartTotal} payMethod={payMethod} setPayMethod={setPayMethod} nav={nav} showToast={showToast} setCart={setCart} user={user} orders={orders} setOrders={setOrders} shipping={shipping} />}
         {page === "wishlist" && <WishlistPage wishlist={wishlist} toggleWish={toggleWish} addCart={addCart} nav={nav} />}
         {page === "auth"     && <AuthPage setUser={setUser} authMode={authMode} setAuthMode={setAuthMode} nav={nav} showToast={showToast} signUp={signUp} signIn={signIn} resetPassword={resetPassword} signInWithGoogle={signInWithGoogle} signInAsGuest={signInAsGuest} />}
         {page === "orders"   && <OrdersPage orders={orders} nav={nav} user={user} />}
         {page === "tracking" && <TrackingPage nav={nav} />}
-        {page === "admin"    && user?.isAdmin && <AdminPage products={products} setProducts={setProducts} orders={orders} banner={banner} setBanner={setBanner} productCategories={productCategories} setProductCategories={setProductCategories} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} showToast={showToast} />}
+        {page === "admin"    && user?.isAdmin && <AdminPage products={products} setProducts={setProducts} orders={orders} shipping={shipping} setShipping={setShipping} banner={banner} setBanner={setBanner} productCategories={productCategories} setProductCategories={setProductCategories} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} showToast={showToast} />}
         {page === "about"    && <StaticPage title="About Us" nav={nav}><AboutContent /></StaticPage>}
         {page === "contact"  && <StaticPage title="Contact Us" nav={nav}><ContactContent showToast={showToast} /></StaticPage>}
         {page === "privacy"  && <StaticPage title="Privacy Policy" nav={nav}><PrivacyContent /></StaticPage>}
@@ -710,7 +712,11 @@ function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products,
   )
 }
 
-function CartPage({ cart, setCart, removeCart, cartTotal, nav }) {
+function CartPage({ cart, setCart, removeCart, cartTotal, nav, shipping }) {
+  const shippingCost = cartTotal >= 999 ? 0 : (shipping?.freeShipping ? 0 : (shipping?.cost || 0))
+  const shippingLabel = cartTotal >= 999 ? "FREE" : (shipping?.freeShipping ? "FREE" : fmt(shippingCost))
+  const isFree = cartTotal >= 999 || shipping?.freeShipping
+  const total = cartTotal + cartTotal * 0.08 + (isFree ? 0 : (shipping?.cost || 0))
   const updateQty = (id, qty) => {
     if (qty < 1) return removeCart(id)
     setCart(prev => prev.map(i => i.id === id ? { ...i, qty } : i))
@@ -748,13 +754,13 @@ function CartPage({ cart, setCart, removeCart, cartTotal, nav }) {
           </div>
           <div style={{ background: "#f8f5f0", borderRadius: 20, padding: 28, alignSelf: "start" }}>
             <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 24 }}>Order Summary</h3>
-            {[["Subtotal", fmt(cartTotal)], ["Shipping", "FREE"], ["GST (8%)", fmt(cartTotal * 0.08)]].map(([k, v]) => (
+            {[["Subtotal", fmt(cartTotal)], ["Shipping", shippingLabel], ["GST (8%)", fmt(cartTotal * 0.08)]].map(([k, v]) => (
               <div key={k} style={{ display: "flex", justifyContent: "space-between", fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#666", marginBottom: 12 }}>
                 <span>{k}</span><span style={{ color: v === "FREE" ? "#10b981" : "#333", fontWeight: v === "FREE" ? 600 : 400 }}>{v}</span>
               </div>
             ))}
             <div style={{ borderTop: "1px solid #e0d8ce", paddingTop: 16, marginTop: 8, display: "flex", justifyContent: "space-between", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 20 }}>
-              <span>Total</span><span>{fmt(cartTotal + cartTotal * 0.08)}</span>
+              <span>Total</span><span>{fmt(total)}</span>
             </div>
             <div style={{ background: "#f3efe9", border: "1px solid #e0d8ce", borderRadius: 10, padding: "10px 14px", display: "flex", marginBottom: 16 }}>
               <input placeholder="Promo code (try BHARAT50)" style={{ flex: 1, border: "none", background: "none", fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none" }} />
@@ -769,14 +775,16 @@ function CartPage({ cart, setCart, removeCart, cartTotal, nav }) {
   )
 }
 
-function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast, setCart, user }) {
+function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast, setCart, user, shipping }) {
   const INDIAN_STATES = ["Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu & Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"]
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", city: "", state: "", pincode: "" })
   useEffect(() => { if (user?.uid) getSavedAddress(user.uid).then(a => { if (a) setForm(f => ({ ...f, ...a })) }).catch(() => {}) }, [user])
   const [placing, setPlacing] = useState(false)
   const upd = (k, v) => setForm(prev => ({ ...prev, [k]: v }))
-  const total = cartTotal + cartTotal * 0.08
+  const isFreeShip = cartTotal >= 999 || shipping?.freeShipping
+  const shippingCost = isFreeShip ? 0 : (shipping?.cost || 0)
+  const total = cartTotal + cartTotal * 0.08 + shippingCost
   const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })
 
   const placeOrder = async () => {
@@ -928,7 +936,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
             </div>
           ))}
           <div style={{ borderTop: "1px solid #e0d8ce", marginTop: 12, paddingTop: 12 }}>
-            {[["Subtotal", fmt(cartTotal)], ["Shipping", "FREE"], ["GST (8%)", fmt(cartTotal * 0.08)]].map(([k, v]) => (
+            {[["Subtotal", fmt(cartTotal)], ["Shipping", isFreeShip ? "FREE" : fmt(shippingCost)], ["GST (8%)", fmt(cartTotal * 0.08)]].map(([k, v]) => (
               <div key={k} style={{ display: "flex", justifyContent: "space-between", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", marginBottom: 8 }}><span>{k}</span><span>{v}</span></div>
             ))}
             <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 16, paddingTop: 8, borderTop: "1px solid #e0d8ce" }}><span>Total</span><span>{fmt(total)}</span></div>
@@ -1356,6 +1364,22 @@ function AdminPage({ products, setProducts, orders, banner, setBanner, productCa
                 </div>
               ))}
               <button onClick={async () => { try { await updateBanner(banner); showToast("Banner saved!") } catch (e) { showToast("Failed to save banner", "info") } }} className="hover-btn" style={{ background: "#8b6644", color: "#fff", border: "none", padding: "10px 24px", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer", marginTop: 4 }}>Save Banner</button>
+            </div>
+            <div style={{ background: "#fff", borderRadius: 16, padding: 24, marginBottom: 20 }}>
+              <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Shipping Settings</h3>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                  <input type="checkbox" checked={shipping?.freeShipping ?? true} onChange={e => setShipping(p => ({ ...p, freeShipping: e.target.checked }))} style={{ width: 18, height: 18 }} />
+                  Free Shipping
+                </label>
+              </div>
+              {!shipping?.freeShipping && (
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Shipping Cost (&#x20B9;)</label>
+                  <input type="number" value={shipping?.cost || ""} onChange={e => setShipping(p => ({ ...p, cost: Number(e.target.value) }))} placeholder="e.g. 50" style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none" }} />
+                </div>
+              )}
+              <button onClick={async () => { try { await updateShippingSettings(shipping); showToast("Shipping settings saved!") } catch (e) { showToast("Failed to save shipping settings", "info") } }} className="hover-btn" style={{ background: "#8b6644", color: "#fff", border: "none", padding: "10px 24px", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Save Shipping</button>
             </div>
             <div className="admin-dashboard-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
               <div style={{ background: "#fff", borderRadius: 16, padding: 24 }}>

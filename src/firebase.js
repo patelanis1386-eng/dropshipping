@@ -259,6 +259,15 @@ export const getNewsletterSubscribers = async () => {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
 }
 
+export const getShippingSettings = async () => {
+  const snap = await getDoc(doc(db, "settings", "shipping"))
+  return snap.exists() ? snap.data() : { freeShipping: true, cost: 0, label: "Free Shipping" }
+}
+
+export const updateShippingSettings = async (data) => {
+  await withTimeout(setDoc(doc(db, "settings", "shipping"), { ...data, updatedAt: serverTimestamp() }, { merge: true }))
+}
+
 export const getSavedAddress = async (uid) => {
   const snap = await getDoc(doc(db, "users", uid))
   if (!snap.exists()) return null
