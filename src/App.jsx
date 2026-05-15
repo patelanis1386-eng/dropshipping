@@ -33,8 +33,8 @@ const mergeProducts = (...groups) => {
 
 export default function App() {
   const [page, setPage] = useState("home")
-  const [cart, setCart] = useState(() => { try { return JSON.parse(localStorage.getItem(CART_KEY) || "[]") } catch { return [] } })
-  const [wishlist, setWishlist] = useState(() => { try { return JSON.parse(localStorage.getItem(WISHLIST_KEY) || "[]") } catch { return [] } })
+  const [cart, setCart] = useState([])
+  const [wishlist, setWishlist] = useState([])
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [user, setUser] = useState(null)
   const [toast, setToast] = useState(null)
@@ -96,8 +96,14 @@ export default function App() {
   }
 
   const handleLogout = async () => {
+    const uid = user?.uid
+    if (uid) { saveUserCart(uid, cart).catch(() => {}); saveUserWishlist(uid, wishlist).catch(() => {}) }
     await logOut()
+    setCart([])
+    setWishlist([])
     setOrders([])
+    localStorage.removeItem(CART_KEY)
+    localStorage.removeItem(WISHLIST_KEY)
     showToast("Signed out")
   }
 
@@ -124,18 +130,38 @@ export default function App() {
     getOrders().then(setOrders).catch(() => setOrders([]))
   }, [user])
 
-  useEffect(() => { localStorage.setItem(CART_KEY, JSON.stringify(cart)) }, [cart])
-  useEffect(() => { localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist)) }, [wishlist])
+  useEffect(() => {
+    if (user?.uid) return
+    localStorage.setItem(CART_KEY, JSON.stringify(cart))
+  }, [cart, user?.uid])
+  useEffect(() => {
+    if (user?.uid) return
+    localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist))
+  }, [wishlist, user?.uid])
+
+  useEffect(() => {
+    if (user?.uid) return
+    try {
+      const c = JSON.parse(localStorage.getItem(CART_KEY) || "[]")
+      const w = JSON.parse(localStorage.getItem(WISHLIST_KEY) || "[]")
+      if (c.length) setCart(c)
+      if (w.length) setWishlist(w)
+    } catch (_) {}
+  }, [user?.uid])
 
   const firestoreLoaded = useRef(false)
   useEffect(() => {
     if (!user?.uid) { firestoreLoaded.current = false; return }
     firestoreLoaded.current = false
+    localStorage.removeItem(CART_KEY)
+    localStorage.removeItem(WISHLIST_KEY)
     ;(async () => {
       try {
         const [fcart, fwish] = await Promise.all([getUserCart(user.uid), getUserWishlist(user.uid)])
         if (fcart && fcart.length > 0) setCart(fcart)
+        else setCart([])
         if (fwish && fwish.length > 0) setWishlist(fwish)
+        else setWishlist([])
       } catch (_) {}
       firestoreLoaded.current = true
     })()
