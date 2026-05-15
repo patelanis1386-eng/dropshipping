@@ -258,3 +258,13 @@ export const getNewsletterSubscribers = async () => {
   const snap = await getDocs(collection(db, "newsletter"))
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
 }
+
+export const getSavedAddress = async (uid) => {
+  const snap = await getDoc(doc(db, "users", uid))
+  if (!snap.exists()) return null
+  return snap.data().savedAddress || null
+}
+
+export const saveUserAddress = async (uid, address) => {
+  await withTimeout(setDoc(doc(db, "users", uid), { savedAddress: address, updatedAt: serverTimestamp() }, { merge: true }))
+}

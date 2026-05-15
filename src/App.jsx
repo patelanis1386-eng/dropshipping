@@ -748,7 +748,7 @@ function CartPage({ cart, setCart, removeCart, cartTotal, nav }) {
           </div>
           <div style={{ background: "#f8f5f0", borderRadius: 20, padding: 28, alignSelf: "start" }}>
             <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 24 }}>Order Summary</h3>
-            {[["Subtotal", fmt(cartTotal)], ["Shipping", "FREE"], ["Tax (est.)", fmt(cartTotal * 0.08)]].map(([k, v]) => (
+            {[["Subtotal", fmt(cartTotal)], ["Shipping", "FREE"], ["GST (8%)", fmt(cartTotal * 0.08)]].map(([k, v]) => (
               <div key={k} style={{ display: "flex", justifyContent: "space-between", fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#666", marginBottom: 12 }}>
                 <span>{k}</span><span style={{ color: v === "FREE" ? "#10b981" : "#333", fontWeight: v === "FREE" ? 600 : 400 }}>{v}</span>
               </div>
@@ -770,24 +770,30 @@ function CartPage({ cart, setCart, removeCart, cartTotal, nav }) {
 }
 
 function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast, setCart, user }) {
+  const INDIAN_STATES = ["Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu & Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"]
   const [step, setStep] = useState(1)
-  const [form, setForm] = useState({ name: "", email: "", address: "", city: "", zip: "", country: "US" })
+  const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", city: "", state: "", pincode: "" })
+  useEffect(() => { if (user?.uid) getSavedAddress(user.uid).then(a => { if (a) setForm(f => ({ ...f, ...a })) }).catch(() => {}) }, [user])
   const [placing, setPlacing] = useState(false)
   const upd = (k, v) => setForm(prev => ({ ...prev, [k]: v }))
   const total = cartTotal + cartTotal * 0.08
   const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })
 
   const placeOrder = async () => {
-    if (!form.name || !form.email || !form.address) return showToast("Please fill all fields", "info")
+    if (!form.name || !form.email || !form.phone || !form.address || !form.city || !form.state || !form.pincode) return showToast("Please fill all fields", "info")
+    if (!/^\d{10}$/.test(form.phone)) return showToast("Enter a valid 10-digit phone number", "info")
+    if (!/^\d{6}$/.test(form.pincode)) return showToast("Enter a valid 6-digit pincode", "info")
     setPlacing(true)
     try {
       const orderNumber = await getNextOrderNumber()
+      if (user?.uid) saveUserAddress(user.uid, { name: form.name, email: form.email, phone: form.phone, address: form.address, city: form.city, state: form.state, pincode: form.pincode }).catch(() => {})
       await createOrder({
         orderNumber,
-        userId: user?.email || "guest",
+        userId: user?.uid || "guest",
         customerName: form.name,
         email: form.email,
-        address: `${form.address}, ${form.city}, ${form.zip}, ${form.country}`,
+        phone: form.phone,
+        address: `${form.address}, ${form.city}, ${form.state}, ${form.pincode}, India`,
         items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
         total,
         status: "Processing",
@@ -840,15 +846,41 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
           {step === 1 && (
             <div className="fade-in">
               <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 20 }}>Shipping Information</h3>
-              {[["Full Name", "name", "text"], ["Email Address", "email", "email"], ["Street Address", "address", "text"], ["City", "city", "text"], ["ZIP Code", "zip", "text"]].map(([label, key, type]) => (
-                <div key={key} style={{ marginBottom: 16 }}>
-                  <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>{label}</label>
-                  <input type={type} value={form[key]} onChange={e => upd(key, e.target.value)} style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>Full Name</label>
+                  <input type="text" value={form.name} onChange={e => upd("name", e.target.value)} style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
                 </div>
-              ))}
-              <select value={form.country} onChange={e => upd("country", e.target.value)} style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", marginBottom: 20, background: "#fff" }}>
-                {["US", "CA", "UK", "AU", "IN", "DE", "FR"].map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>Email Address</label>
+                  <input type="email" value={form.email} onChange={e => upd("email", e.target.value)} style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+                </div>
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>Phone Number</label>
+                <input type="tel" value={form.phone} onChange={e => upd("phone", e.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="10-digit mobile number" style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>Street Address</label>
+                <input type="text" value={form.address} onChange={e => upd("address", e.target.value)} placeholder="House / Flat / Street" style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>City</label>
+                  <input type="text" value={form.city} onChange={e => upd("city", e.target.value)} style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+                </div>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>Pincode</label>
+                  <input type="text" value={form.pincode} onChange={e => upd("pincode", e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="6-digit pincode" style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+                </div>
+              </div>
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>State</label>
+                <select value={form.state} onChange={e => upd("state", e.target.value)} style={{ width: "100%", padding: "11px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", background: "#fff", boxSizing: "border-box" }}>
+                  <option value="">Select State</option>
+                  {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
               <button onClick={() => setStep(2)} className="hover-btn" style={{ width: "100%", background: "#1a1a1a", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Continue to Payment &#x2192;</button>
             </div>
           )}
@@ -857,8 +889,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
               <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 20 }}>Payment Method</h3>
               {[
                 { id: "stripe", label: "Credit / Debit Card", icon: "\uD83D\uDCB3", sub: "Visa, Mastercard, RuPay" },
-                { id: "razorpay", label: "Razorpay", icon: "\uD83C\uDFE6", sub: "UPI, Cards, Netbanking, Wallets" },
-                { id: "paypal", label: "PayPal", icon: "\uD83D\uDCB1", sub: "International payments" },
+                { id: "razorpay", label: "UPI / GPay / PhonePe", icon: "\uD83C\uDFE6", sub: "Instant payment via UPI apps" },
                 { id: "cod", label: "Cash on Delivery", icon: "\uD83D\uDCB5", sub: "Pay when you receive" },
               ].map(pm => (
                 <div key={pm.id} onClick={() => setPayMethod(pm.id)} style={{ display: "flex", alignItems: "center", gap: 16, padding: "14px 18px", borderRadius: 12, border: "2px solid " + (payMethod === pm.id ? "#8b6644" : "#e0d8ce"), marginBottom: 12, cursor: "pointer", background: payMethod === pm.id ? "#fff8f3" : "#fff" }}>
@@ -897,7 +928,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
             </div>
           ))}
           <div style={{ borderTop: "1px solid #e0d8ce", marginTop: 12, paddingTop: 12 }}>
-            {[["Subtotal", fmt(cartTotal)], ["Shipping", "FREE"], ["Tax", fmt(cartTotal * 0.08)]].map(([k, v]) => (
+            {[["Subtotal", fmt(cartTotal)], ["Shipping", "FREE"], ["GST (8%)", fmt(cartTotal * 0.08)]].map(([k, v]) => (
               <div key={k} style={{ display: "flex", justifyContent: "space-between", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", marginBottom: 8 }}><span>{k}</span><span>{v}</span></div>
             ))}
             <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 16, paddingTop: 8, borderTop: "1px solid #e0d8ce" }}><span>Total</span><span>{fmt(total)}</span></div>
