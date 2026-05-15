@@ -1116,7 +1116,13 @@ function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav, 
         addProduct(data).then((id) => {
           writeLocalProducts(readLocalProducts().filter(p => p.id !== localProduct.id))
           setProducts(prev => prev.map(p => p.id === localProduct.id ? { id, ...data } : p))
-        }).catch(() => {})
+        }).catch((e) => {
+          const msg = e.code === "permission-denied"
+            ? "Firestore save failed: Permission denied. Check your Firestore security rules to allow writes."
+            : "Firestore save failed: " + (e.message || "Unknown error. The product is saved locally only.")
+          setProductError(msg)
+          showToast(msg, "error")
+        })
         return
       }
       setShowForm(false)
