@@ -198,10 +198,66 @@ export default function App() {
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
         .fade-in { animation: fadeIn 0.5s ease forwards; }
         .hero-text { animation: fadeIn 0.8s ease forwards; }
-        @media (max-width: 768px) {
+        .show-mobile { display: none !important; }
+        @media (max-width: 900px) {
           .hide-mobile { display: none !important; }
+          .show-mobile { display: flex !important; }
           .mobile-col { flex-direction: column !important; }
           .mobile-full { width: 100% !important; }
+          h1:not(.hero-text h1) { font-size: 24px !important; }
+          h2 { font-size: 22px !important; }
+          nav > div { padding: 0 12px !important; height: 58px !important; gap: 12px !important; }
+          nav input { font-size: 13px !important; }
+          section.hero-section { padding: 40px 16px !important; }
+          section.hero-section h1 { font-size: 36px !important; }
+          section.hero-section p { font-size: 15px !important; }
+          .hero-stats { gap: 20px !important; margin-top: 32px !important; }
+          .hero-stats > div > div:first-child { font-size: 18px !important; }
+          .product-grid { grid-template-columns: repeat(2,1fr) !important; gap: 12px !important; }
+          .product-card-body { padding: 10px !important; }
+          .product-name { font-size: 13px !important; }
+          .product-price { font-size: 15px !important; }
+          section.banner-section { margin: 0 12px !important; padding: 32px 20px !important; border-radius: 16px !important; }
+          section.banner-section h2 { font-size: 24px !important; }
+          div.review-grid { grid-template-columns: 1fr !important; }
+          .product-page div.mobile-col { grid-template-columns: 1fr !important; gap: 24px !important; }
+          .product-page div.mobile-col img + div img { width: 56px !important; height: 56px !important; }
+          .product-info h1 { font-size: 22px !important; }
+          .cart-layout { grid-template-columns: 1fr !important; }
+          .cart-item { gap: 12px !important; }
+          .cart-item img { width: 64px !important; height: 64px !important; }
+          .checkout-layout { grid-template-columns: 1fr !important; }
+          .admin-page { flex-direction: column !important; }
+          .admin-sidebar { width: 100% !important; display: flex !important; overflow-x: auto !important; padding: 12px 0 !important; }
+          .admin-sidebar > div { white-space: nowrap !important; border-left: none !important; border-bottom: 3px solid transparent !important; padding: 10px 16px !important; }
+          .admin-sidebar > div.active { border-left: none !important; border-bottom: 3px solid #8b6644 !important; }
+          .admin-main { padding: 16px !important; }
+          .admin-table-wrap { overflow-x: auto !important; }
+          .admin-table-wrap table { min-width: 600px !important; }
+          div.admin-stats-grid { grid-template-columns: repeat(2,1fr) !important; gap: 12px !important; }
+          div.admin-dashboard-grid { grid-template-columns: 1fr !important; }
+          footer > div > div:first-child { grid-template-columns: repeat(2,1fr) !important; gap: 24px !important; }
+          .page-content { padding: 24px 16px !important; }
+          .shop-page { padding: 24px 16px !important; }
+          .static-page { padding: 32px 16px !important; }
+          .static-page h1 { font-size: 28px !important; }
+          .tracking-page { padding: 32px 20px !important; }
+          .contact-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 480px) {
+          .product-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+          section.hero-section { padding: 28px 12px !important; }
+          section.hero-section h1 { font-size: 28px !important; }
+          .hero-buttons { flex-direction: column !important; gap: 10px !important; }
+          .hero-buttons button { width: 100% !important; }
+          .hero-stats { gap: 16px !important; flex-wrap: wrap !important; }
+          .hero-stats > div { flex: 1 1 40% !important; }
+          .product-card-body { padding: 8px !important; }
+          .product-name { font-size: 12px !important; }
+          .product-price { font-size: 14px !important; }
+          .admin-stats-grid { grid-template-columns: repeat(2,1fr) !important; gap: 8px !important; }
+          .admin-main { padding: 12px !important; }
+          .admin-main h2 { font-size: 20px !important; }
         }
       `}</style>
 
@@ -237,6 +293,7 @@ export default function App() {
 function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleLogout, handleClaimAdmin }) {
   const [scrolled, setScrolled] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40)
     window.addEventListener("scroll", h)
@@ -250,6 +307,8 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
     return () => document.removeEventListener("click", close)
   }, [showUserMenu])
 
+  const mobileNav = (p) => { setMobileMenuOpen(false); nav(p) }
+
   return (
     <nav style={{ position: "sticky", top: 0, zIndex: 200, background: scrolled ? "rgba(250,249,247,0.97)" : "#faf9f7", borderBottom: scrolled ? "1px solid #ede8e0" : "none", transition: "all 0.3s" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", height: 68, gap: 24 }}>
@@ -257,7 +316,7 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
           LUXE<span style={{ color: "#a67a54" }}>DROP</span>
         </div>
 
-        <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, background: "#f3efe9", borderRadius: 10, padding: "8px 14px", maxWidth: 400 }}>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, background: "#f3efe9", borderRadius: 10, padding: "8px 14px", maxWidth: 400 }} className="hide-mobile">
           <span style={{ color: "#767676", fontSize: 14 }}>&#x1F50D;</span>
           <input value={searchQ} onChange={e => { setSearchQ(e.target.value); nav("shop") }} placeholder="Search products..." style={{ flex: 1, border: "none", background: "none", fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none", color: "#333" }} />
         </div>
@@ -269,6 +328,7 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <span className="nav-link show-mobile" onClick={() => nav("shop")} style={{ fontSize: 18, position: "relative" }}>&#x1F50D;</span>
           <span className="nav-link" onClick={() => nav("wishlist")} style={{ fontSize: 20, position: "relative" }}>&#x2661;</span>
           <span className="nav-link" onClick={() => nav("cart")} style={{ fontSize: 20, position: "relative" }}>
             &#x1F6D2;
@@ -294,12 +354,28 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
               )}
             </div>
           ) : (
-            <span className="nav-link" onClick={() => nav("auth")} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600, background: "#1a1a1a", color: "#fff", padding: "8px 18px", borderRadius: 8 }}>
+            <span className="nav-link" onClick={() => nav("auth")} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600, background: "#1a1a1a", color: "#fff", padding: "8px 14px", borderRadius: 8 }}>
               Sign In
             </span>
           )}
+          <div className="show-mobile" onClick={() => setMobileMenuOpen(true)} style={{ fontSize: 22, cursor: "pointer", color: "#1a1a1a", padding: 4, userSelect: "none" }}>&#x2630;</div>
         </div>
       </div>
+      {mobileMenuOpen && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 500 }} onClick={() => setMobileMenuOpen(false)}>
+          <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 280, background: "#fff", boxShadow: "-8px 0 32px rgba(0,0,0,0.15)", zIndex: 501, animation: "slideIn 0.25s ease", padding: "24px", display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+              <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, fontWeight: 700, letterSpacing: 2 }}>LUXEDROP</div>
+              <span onClick={() => setMobileMenuOpen(false)} style={{ fontSize: 24, cursor: "pointer", color: "#767676", userSelect: "none" }}>&#x2715;</span>
+            </div>
+            {[["Shop", "shop"], ["Trending", "shop"], ["Orders", "orders"], ["Track Order", "tracking"], ["Wishlist", "wishlist"], ["Cart", "cart"], ["About Us", "about"], ["Contact Us", "contact"], ...(user?.isAdmin ? [["Admin Panel", "admin"]] : [])].map(([l, p]) => (
+              <div key={l} onClick={() => mobileNav(p)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, fontWeight: 500, padding: "14px 0", borderBottom: "1px solid #f0ede8", cursor: "pointer", color: "#333" }}>{l}</div>
+            ))}
+            {user && <div onClick={() => { setMobileMenuOpen(false); handleLogout() }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, fontWeight: 500, padding: "14px 0", cursor: "pointer", color: "#dc2626", marginTop: "auto" }}>Sign Out</div>}
+            {!user && <div onClick={() => mobileNav("auth")} style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, fontWeight: 600, padding: "14px 0", cursor: "pointer", color: "#8b6644", marginTop: "auto" }}>Sign In</div>}
+          </div>
+        </div>
+      )}
     </nav>
   )
 }
@@ -318,7 +394,7 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
 
   return (
     <div>
-      <section style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #2d2418 50%, #3d2f20 100%)", color: "#fff", padding: "80px 24px", position: "relative", overflow: "hidden" }}>
+      <section className="hero-section" style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #2d2418 50%, #3d2f20 100%)", color: "#fff", padding: "80px 24px", position: "relative", overflow: "hidden" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", alignItems: "center", gap: 60 }} className="mobile-col">
           <div style={{ flex: 1 }} className="hero-text">
             <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "#8b6644", marginBottom: 16 }}>INDIAN DROPSHIPPING</div>
@@ -328,11 +404,11 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
             <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, color: "#ccc", maxWidth: 440, lineHeight: 1.7, marginBottom: 32 }}>
               Premium products from across India. Handpicked for quality, delivered to your doorstep.
             </p>
-            <div style={{ display: "flex", gap: 16 }}>
+            <div className="hero-buttons" style={{ display: "flex", gap: 16 }}>
               <button onClick={() => nav("shop")} className="hover-btn" style={{ background: "#8b6644", color: "#fff", border: "none", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Shop Now &#x2192;</button>
               <button onClick={() => nav("tracking")} className="hover-btn" style={{ background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 500, fontSize: 14, cursor: "pointer" }}>Track Order</button>
             </div>
-            <div style={{ display: "flex", gap: 40, marginTop: 48 }}>
+            <div className="hero-stats" style={{ display: "flex", gap: 40, marginTop: 48 }}>
               {[["50K+", "Happy Customers"], ["4.9\u2605", "Average Rating"], ["Free", "Shipping Across India"]].map(([v, l]) => (
                 <div key={l}>
                   <div style={{ fontSize: 22, fontWeight: 700, color: "#8b6644", fontFamily: "'Jost',sans-serif" }}>{v}</div>
@@ -383,7 +459,7 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
         <ProductGrid products={featured} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} />
       </section>
 
-      <section style={{ background: "linear-gradient(135deg, #8b6644, #e8a87c)", margin: "0 24px", borderRadius: 24, padding: "48px 40px", textAlign: "center" }}>
+      <section className="banner-section" style={{ background: "linear-gradient(135deg, #8b6644, #e8a87c)", margin: "0 24px", borderRadius: 24, padding: "48px 40px", textAlign: "center" }}>
         <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "rgba(255,255,255,0.8)", marginBottom: 12 }}>MEGA FESTIVE SALE</div>
         <h2 style={{ fontSize: "clamp(28px,4vw,48px)", color: "#fff", fontWeight: 300, marginBottom: 12 }}>Up to <strong>60% Off</strong> on Indian Brands</h2>
         <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, color: "rgba(255,255,255,0.85)", marginBottom: 28 }}>Use code <strong>LUXE50</strong> for extra 10% off</p>
@@ -398,7 +474,7 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
       <section style={{ background: "#f3efe9", padding: "60px 24px" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
           <SectionHeader title="What Our Customers Say" sub="Over 50,000 happy shoppers worldwide" />
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
+          <div className="review-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
             {reviews.map(r => (
               <div key={r.name} style={{ background: "#fff", borderRadius: 20, padding: 28, boxShadow: "0 2px 16px rgba(0,0,0,0.06)" }}>
                 <div style={{ color: "#8b6644", fontSize: 16, marginBottom: 12 }}>{"\u2605".repeat(r.rating)}</div>
@@ -438,7 +514,7 @@ function SectionHeader({ title, sub, action }) {
 
 function ProductGrid({ products, nav, addCart, toggleWish, wishlist }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px,1fr))", gap: 20 }}>
+    <div className="product-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px,1fr))", gap: 20 }}>
       {products.map(p => <ProductCard key={p.id} product={p} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} />)}
     </div>
   )
@@ -456,13 +532,13 @@ function ProductCard({ product: p, nav, addCart, toggleWish, wishlist }) {
           <button onClick={e => { e.stopPropagation(); addCart(p) }} style={{ background: "#8b6644", color: "#fff", border: "none", padding: "12px 24px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Add to Cart &#x2192;</button>
         </div>
       </div>
-      <div style={{ padding: 16 }}>
-        <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#767676", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>{p.category}</div>
-        <div onClick={() => nav("product", { product: p })} style={{ fontWeight: 600, fontSize: 15, marginBottom: 6, lineHeight: 1.3 }}>{p.name}</div>
+      <div className="product-card-body" style={{ padding: 16 }}>
+        <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#767676", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }} className="product-category">{p.category}</div>
+        <div onClick={() => nav("product", { product: p })} className="product-name" style={{ fontWeight: 600, fontSize: 15, marginBottom: 6, lineHeight: 1.3 }}>{p.name}</div>
         <div style={{ color: "#8b6644", fontSize: 12, fontFamily: "'Jost',sans-serif", marginBottom: 10 }}>{"\u2605".repeat(Math.floor(p.rating))} ({p.reviews.toLocaleString()})</div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 17, color: "#1a1a1a" }}>{fmt(p.price)}</span>
+            <span className="product-price" style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 17, color: "#1a1a1a" }}>{fmt(p.price)}</span>
             <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", textDecoration: "line-through" }}>{fmt(p.original)}</span>
           </div>
           <button onClick={() => toggleWish(p)} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: wishlisted ? "#e74c3c" : "#767676" }}>
@@ -476,7 +552,7 @@ function ProductCard({ product: p, nav, addCart, toggleWish, wishlist }) {
 
 function ShopPage({ products, allProducts, nav, addCart, toggleWish, wishlist, catFilter, setCatFilter, searchQ, setSearchQ, sortBy, setSortBy }) {
   return (
-    <div style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 24px" }}>
+    <div className="shop-page" style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 24px" }}>
       <h1 style={{ fontSize: 36, fontWeight: 600, marginBottom: 8 }}>All Products</h1>
       <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676", marginBottom: 32 }}>Showing {products.length} of {allProducts.length} products</p>
       <div style={{ display: "flex", gap: 24 }} className="mobile-col">
@@ -519,7 +595,7 @@ function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products,
   const imgs = [p.img, p.img.replace("w=600", "w=601"), p.img.replace("q=80", "q=70")]
 
   return (
-    <div style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 24px" }}>
+    <div className="product-page" style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 24px" }}>
       <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", marginBottom: 24 }}>
         <span style={{ cursor: "pointer", color: "#8b6644" }} onClick={() => nav("home")}>Home</span> / <span style={{ color: "#333" }}>{p.name}</span>
       </div>
@@ -536,7 +612,7 @@ function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products,
             ))}
           </div>
         </div>
-        <div>
+        <div className="product-info">
           <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#8b6644", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>{p.category}</div>
           <h1 style={{ fontSize: "clamp(24px,3vw,36px)", fontWeight: 600, marginBottom: 12, lineHeight: 1.2 }}>{p.name}</h1>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
@@ -649,10 +725,10 @@ function CartPage({ cart, setCart, removeCart, cartTotal, nav }) {
           <button onClick={() => nav("shop")} style={{ background: "#8b6644", color: "#fff", border: "none", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Start Shopping &#x2192;</button>
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 32 }} className="mobile-col">
+        <div className="cart-layout mobile-col" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 32 }}>
           <div>
             {cart.map(item => (
-              <div key={item.id} style={{ display: "flex", gap: 16, padding: "20px 0", borderBottom: "1px solid #f0ede8", alignItems: "center" }}>
+              <div key={item.id} className="cart-item" style={{ display: "flex", gap: 16, padding: "20px 0", borderBottom: "1px solid #f0ede8", alignItems: "center" }}>
                 <img src={item.img} alt={item.name} style={{ width: 88, height: 88, borderRadius: 12, objectFit: "cover" }} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{item.name}</div>
@@ -746,7 +822,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
           </div>
         ))}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 32 }} className="mobile-col">
+      <div className="checkout-layout mobile-col" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 32 }}>
         <div>
           {step === 1 && (
             <div className="fade-in">
@@ -1024,7 +1100,7 @@ function TrackingPage({ nav }) {
     })
   }
   return (
-    <div style={{ maxWidth: 700, margin: "0 auto", padding: "60px 24px" }}>
+    <div className="tracking-page" style={{ maxWidth: 700, margin: "0 auto", padding: "60px 24px" }}>
       <h1 style={{ fontSize: 36, fontWeight: 600, marginBottom: 8, textAlign: "center" }}>Track Your Order</h1>
       <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676", textAlign: "center", marginBottom: 40 }}>Enter your order ID to get real-time tracking updates</p>
       <div style={{ display: "flex", gap: 12, marginBottom: 40 }}>
@@ -1154,21 +1230,21 @@ function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav, 
 
   return (
     <>
-    <div style={{ display: "flex", minHeight: "80vh" }}>
-      <aside style={{ width: 220, background: "#1a1a1a", color: "#fff", padding: "28px 0", flexShrink: 0 }}>
-        <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontWeight: 700, letterSpacing: 2, padding: "0 24px 28px", borderBottom: "1px solid #2a2a2a", marginBottom: 12 }}>LUXEDROP &#x25A0; ADMIN</div>
+    <div style={{ display: "flex", minHeight: "80vh" }} className="admin-page">
+      <aside className="admin-sidebar" style={{ width: 220, background: "#1a1a1a", color: "#fff", padding: "28px 0", flexShrink: 0 }}>
+        <div className="hide-mobile" style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontWeight: 700, letterSpacing: 2, padding: "0 24px 28px", borderBottom: "1px solid #2a2a2a", marginBottom: 12 }}>LUXEDROP &#x25A0; ADMIN</div>
         {tabs.map(t => (
-          <div key={t} onClick={() => setAdminTab(t)} style={{ padding: "13px 24px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", background: adminTab === t ? "rgba(255,255,255,0.08)" : "transparent", color: adminTab === t ? "#8b6644" : "#aaa", fontWeight: adminTab === t ? 600 : 400, borderLeft: adminTab === t ? "3px solid #8b6644" : "3px solid transparent" }}>
+          <div key={t} onClick={() => setAdminTab(t)} style={{ padding: "13px 24px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", background: adminTab === t ? "rgba(255,255,255,0.08)" : "transparent", color: adminTab === t ? "#8b6644" : "#aaa", fontWeight: adminTab === t ? 600 : 400, borderLeft: adminTab === t ? "3px solid #8b6644" : "3px solid transparent" }} className={adminTab === t ? "active" : ""}>
             {{ "dashboard": "\u25A0 Dashboard", "products": "\u25A0 Products", "orders": "\u25A0 Orders", "customers": "\u25A0 Customers", "analytics": "\u25A0 Analytics" } [t]}
           </div>
         ))}
-        <div onClick={() => nav("home")} style={{ padding: "13px 24px", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#aaa", cursor: "pointer", marginTop: 20 }}>&#x2190; Back to Store</div>
+        <div className="hide-mobile" onClick={() => nav("home")} style={{ padding: "13px 24px", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#aaa", cursor: "pointer", marginTop: 20 }}>&#x2190; Back to Store</div>
       </aside>
-      <main style={{ flex: 1, padding: 32, background: "#f8f5f0", overflowY: "auto" }}>
+      <main className="admin-main" style={{ flex: 1, padding: 32, background: "#f8f5f0", overflowY: "auto" }}>
         {adminTab === "dashboard" && (
           <div className="fade-in">
             <h2 style={{ fontSize: 28, fontWeight: 600, marginBottom: 28 }}>Dashboard Overview</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 32 }}>
+            <div className="admin-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 32 }}>
               {[
                 { label: "Revenue", value: fmt(ordTotal), change: "+" + orders.length + " orders", icon: "\uD83D\uDCC8", color: "#10b981" },
                 { label: "Orders", value: orders.length, change: "+" + orders.filter(o => o.status === "Processing").length + " pending", icon: "\uD83D\uDCCB", color: "#3b82f6" },
@@ -1187,7 +1263,7 @@ function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav, 
                 </div>
               ))}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+            <div className="admin-dashboard-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
               <div style={{ background: "#fff", borderRadius: 16, padding: 24 }}>
                 <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 20 }}>Recent Orders</h3>
                 {orders.slice(0, 5).map(o => (
@@ -1221,7 +1297,7 @@ function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav, 
               <h2 style={{ fontSize: 28, fontWeight: 600 }}>Products ({products.length})</h2>
               <button onClick={() => openForm(null)} style={{ background: "#8b6644", color: "#fff", border: "none", padding: "12px 24px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>+ Add Product</button>
             </div>
-            <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden" }}>
+            <div className="admin-table-wrap" style={{ background: "#fff", borderRadius: 16, overflow: "hidden" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead style={{ background: "#f8f5f0" }}>
                   <tr>{["Image", "Name", "Category", "Price", "Stock", "Margin", "Actions"].map(h => <th key={h} style={{ padding: "14px 16px", fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 1, color: "#767676", textAlign: "left" }}>{h}</th>)}</tr>
@@ -1391,7 +1467,7 @@ function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav, 
 
 function StaticPage({ title, nav, children }) {
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "60px 24px" }}>
+    <div className="static-page" style={{ maxWidth: 800, margin: "0 auto", padding: "60px 24px" }}>
       <h1 style={{ fontSize: 40, fontWeight: 600, marginBottom: 40, borderBottom: "1px solid #e8e2da", paddingBottom: 20 }}>{title}</h1>
       <div style={{ fontFamily: "'Jost',sans-serif", color: "#555", lineHeight: 2, fontSize: 15 }}>{children}</div>
     </div>
@@ -1416,7 +1492,7 @@ function ContactContent({ showToast }) {
   return (
     <>
       <p style={{ marginBottom: 32 }}>We're here to help! Reach us through any of the channels below or fill out the form.</p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40 }} className="mobile-col">
+      <div className="contact-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40 }}>
         <div>
           {[["Full Name", "name"], ["Email", "email"]].map(([l, k]) => (
             <div key={k} style={{ marginBottom: 16 }}>
