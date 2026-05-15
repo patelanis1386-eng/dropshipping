@@ -273,8 +273,16 @@ export default function App() {
         @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: none; } }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+        @keyframes glow { 0%,100% { text-shadow: 0 0 8px rgba(139,102,68,0.3); } 50% { text-shadow: 0 0 20px rgba(139,102,68,0.7); } }
         .fade-in { animation: fadeIn 0.5s ease forwards; }
         .hero-text { animation: fadeIn 0.8s ease forwards; }
+        .hero-label { animation: fadeInUp 0.6s ease both; }
+        .hero-heading-1 { animation: fadeInUp 0.6s ease 0.15s both; }
+        .hero-heading-2 { animation: fadeInUp 0.6s ease 0.35s both; }
+        .hero-heading-3 { animation: fadeInUp 0.6s ease 0.55s both; }
+        .hero-glow { animation: glow 2.5s ease-in-out infinite; }
         .show-mobile { display: none !important; }
         @media (max-width: 900px) {
           .hide-mobile { display: none !important; }
@@ -493,10 +501,12 @@ function HomePage({ products, reviews, categories, banner, nav, addCart, toggleW
     <div>
       <section className="hero-section" style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #2d2418 50%, #3d2f20 100%)", color: "#fff", padding: "80px 24px", position: "relative", overflow: "hidden" }}>
         <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
-          <div className="hero-text">
-            <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "#8b6644", marginBottom: 16 }}>INDIAN DROPSHIPPING</div>
+          <div>
+            <div className="hero-label" style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "#8b6644", marginBottom: 16 }}>INDIAN DROPSHIPPING</div>
             <h1 style={{ fontSize: "clamp(40px,6vw,72px)", fontWeight: 300, lineHeight: 1.1, marginBottom: 20, letterSpacing: -1 }}>
-              Discover<br /><em style={{ fontStyle: "italic", color: "#8b6644" }}>Bharat's</em><br />Finest
+              <span className="hero-heading-1" style={{ display: "inline-block" }}>Discover</span><br />
+              <span className="hero-heading-2" style={{ display: "inline-block", fontStyle: "italic", color: "#8b6644" }}>Bharat's</span><br />
+              <span className="hero-heading-3 hero-glow" style={{ display: "inline-block" }}>Finest</span>
             </h1>
             <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, color: "#ccc", maxWidth: 600, lineHeight: 1.7, marginBottom: 32, margin: "0 auto 32px" }}>
               Premium products from across India. Handpicked for quality, delivered to your doorstep.
