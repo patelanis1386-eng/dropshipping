@@ -193,6 +193,10 @@ export const updateOrderTracking = async (id, data) => {
   await updateDoc(doc(db, "orders", id), data)
 }
 
+export const deleteOrder = async (id) => {
+  await withTimeout(deleteDoc(doc(db, "orders", id)))
+}
+
 export const getReviews = async () => {
   const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"))
   const snap = await getDocs(q)

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Fragment } from "react"
-import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers, getBanner, updateBanner, getProductCategories, addProductCategory, deleteProductCategory, getNextOrderNumber, getOrderByOrderNumber, updateOrderTracking, getSavedAddress, saveUserAddress, getShippingSettings, updateShippingSettings, getUserCart, saveUserCart, getUserWishlist, saveUserWishlist, saveUserOrders, getUserOrders } from "./firebase"
+import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers, getBanner, updateBanner, getProductCategories, addProductCategory, deleteProductCategory, getNextOrderNumber, getOrderByOrderNumber, updateOrderTracking, deleteOrder, getSavedAddress, saveUserAddress, getShippingSettings, updateShippingSettings, getUserCart, saveUserCart, getUserWishlist, saveUserWishlist, saveUserOrders, getUserOrders } from "./firebase"
 import { SEED_REVIEWS, SEED_CATEGORIES, fmt, disc } from "./data"
 import { addDoc, collection, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore"
 
@@ -1437,6 +1437,37 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
     try { await updateOrderStatus(o.id, newStatus); if (o.userId && o.userId !== "guest") { try { const uo = await getUserOrders(o.userId); if (uo) { const upd = uo.map(x => x.id === o.id ? { ...x, status: newStatus } : x); await saveUserOrders(o.userId, upd) } } catch (_) {} }; setOrders(prev => prev.map(order => order.id === o.id ? { ...order, status: newStatus } : order)); showToast("Status updated to " + newStatus) } catch (e) { showToast("Failed to update status", "info") }
   }
 
+  const handleDeleteOrder = async (o) => {
+    if (!confirm(`Delete order ${o.orderNumber || o.id?.slice(0, 8)}? This cannot be undone.`)) return
+    try {
+      await deleteOrder(o.id)
+      if (o.userId && o.userId !== "guest") {
+        try { const uo = await getUserOrders(o.userId); if (uo) { const upd = uo.filter(x => x.id !== o.id); await saveUserOrders(o.userId, upd) } } catch (_) {}
+      }
+      setOrders(prev => prev.filter(order => order.id !== o.id))
+      showToast("Order deleted")
+    } catch (e) {
+      showToast("Failed to delete order", "info")
+    }
+  }
+
+  const handleDeleteCustomerOrders = async (customerEmail) => {
+    if (!confirm(`Delete all orders for ${customerEmail}? This cannot be undone.`)) return
+    const customerOrders = orders.filter(o => o.email === customerEmail)
+    try {
+      await Promise.all(customerOrders.map(o => deleteOrder(o.id)))
+      for (const o of customerOrders) {
+        if (o.userId && o.userId !== "guest") {
+          try { const uo = await getUserOrders(o.userId); if (uo) { const upd = uo.filter(x => x.id !== o.id); await saveUserOrders(o.userId, upd) } } catch (_) {}
+        }
+      }
+      setOrders(prev => prev.filter(o => o.email !== customerEmail))
+      showToast(`Deleted ${customerOrders.length} order(s) for ${customerEmail}`)
+    } catch (e) {
+      showToast("Failed to delete customer orders", "info")
+    }
+  }
+
   const handleSaveTracking = async () => {
     const o = trackModalOrder
     try {
@@ -1624,6 +1655,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
                                 {ALL_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                               </select>
                               <button onClick={e => { e.stopPropagation(); setTrackForm({ trackingNumber: o.trackingNumber || "", carrier: o.carrier || "", estimatedDelivery: o.estimatedDelivery || "", steps: (o.trackingSteps || []).map(s => ({ ...s })) }); setTrackModalOrder(o) }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#3b82f6", background: "#eff6ff", border: "none", padding: "4px 10px", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>Tracking</button>
+                              <button onClick={e => { e.stopPropagation(); handleDeleteOrder(o) }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#dc2626", background: "#fef2f2", border: "none", padding: "4px 10px", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>Delete</button>
                             </div>
                           </td>
                         </tr>
@@ -1760,8 +1792,11 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
                         </div>
                       </div>
 
-                      <div style={{ marginTop: 16, paddingTop: 12, borderTop: "1px solid #f0ede8", display: "flex", justifyContent: "flex-end", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 16 }}>
-                        Total: {fmt(o.total)}
+                      <div style={{ marginTop: 16, paddingTop: 12, borderTop: "1px solid #f0ede8", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                        <button onClick={() => handleDeleteOrder(o)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#dc2626", background: "#fef2f2", border: "none", padding: "6px 16px", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}>Delete</button>
+                        <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 16 }}>
+                          Total: {fmt(o.total)}
+                        </div>
                       </div>
                     </div>
                   )
@@ -1807,9 +1842,10 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
                     <div style={{ fontWeight: 600, fontSize: 15 }}>{c.name} {c.orders.length > 1 && <span style={{ fontSize: 11, color: "#10b981", background: "#d1fae5", padding: "2px 8px", borderRadius: 10, fontWeight: 600 }}>Repeat</span>}</div>
                     <div style={{ fontSize: 13, color: "#767676" }}>{c.email} {c.phone && <span>&middot; {c.phone}</span>}</div>
                   </div>
-                  <div style={{ textAlign: "right", fontFamily: "'Jost',sans-serif" }}>
+                  <div style={{ textAlign: "right", fontFamily: "'Jost',sans-serif", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
                     <div style={{ fontWeight: 700, fontSize: 15 }}>{fmt(c.totalSpent)}</div>
                     <div style={{ fontSize: 12, color: "#767676" }}>{c.orders.length} orders</div>
+                    <button onClick={e => { e.stopPropagation(); handleDeleteCustomerOrders(c.email) }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#dc2626", background: "#fef2f2", border: "none", padding: "3px 10px", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>Delete</button>
                   </div>
                 </div>
                 {expandedCustomer === c.email && (
