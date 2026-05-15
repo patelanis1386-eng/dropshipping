@@ -48,6 +48,7 @@ export default function App() {
   const [newsletterDone, setNewsletterDone] = useState(false)
   const [orders, setOrders] = useState([])
   const [authLoading, setAuthLoading] = useState(true)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const [products, setProducts] = useState(() => readLocalProducts())
   const [reviews, setReviews] = useState(SEED_REVIEWS)
@@ -96,13 +97,13 @@ export default function App() {
   }
 
   const handleLogout = async () => {
-    if (!confirm("Are you sure you want to sign out?")) return
     const uid = user?.uid
     if (uid) { saveUserCart(uid, cart).catch(() => {}); saveUserWishlist(uid, wishlist).catch(() => {}); saveUserOrders(uid, orders).catch(() => {}) }
     await logOut()
     setCart([])
     setWishlist([])
     setOrders([])
+    setShowLogoutModal(false)
     localStorage.removeItem(CART_KEY)
     localStorage.removeItem(WISHLIST_KEY)
     showToast("Signed out")
@@ -384,9 +385,25 @@ export default function App() {
       `}</style>
 
       {authLoading && <div style={{ position: "fixed", inset: 0, background: "#faf9f7", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cormorant Garamond',serif", fontSize: 20, color: "#8b6644" }}>Loading...</div>}
-      <Navbar cart={cart} cartCount={cartCount} user={user} nav={nav} page={page} searchQ={searchQ} setSearchQ={setSearchQ} handleLogout={handleLogout} handleClaimAdmin={handleClaimAdmin} />
+      <Navbar cart={cart} cartCount={cartCount} user={user} nav={nav} page={page} searchQ={searchQ} setSearchQ={setSearchQ} handleLogout={handleLogout} handleClaimAdmin={handleClaimAdmin} setShowLogoutModal={setShowLogoutModal} />
 
       {toast && <Toast msg={toast.msg} type={toast.type} />}
+
+      {showLogoutModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: 16 }} onClick={() => setShowLogoutModal(false)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 20, padding: "36px 32px", width: "100%", maxWidth: 380, textAlign: "center", animation: "fadeIn 0.25s ease", boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>&#x1F6AA;</div>
+            <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 8 }}>Sign Out?</h3>
+            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#767676", marginBottom: 28, lineHeight: 1.6 }}>
+              Are you sure you want to sign out?<br />Your cart and wishlist will be saved.
+            </p>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button onClick={() => setShowLogoutModal(false)} className="hover-btn" style={{ flex: 1, background: "#f0ede8", color: "#555", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
+              <button onClick={handleLogout} className="hover-btn" style={{ flex: 1, background: "#dc2626", color: "#fff", border: "none", padding: "14px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Sign Out</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main>
         {page === "home"     && <HomePage products={products} reviews={reviews} categories={categories} banner={banner} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} setSearchQ={setSearchQ} newsletter={newsletter} setNewsletter={setNewsletter} newsletterDone={newsletterDone} setNewsletterDone={setNewsletterDone} showToast={showToast} />}
@@ -412,7 +429,7 @@ export default function App() {
   )
 }
 
-function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleLogout, handleClaimAdmin }) {
+function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleLogout, handleClaimAdmin, setShowLogoutModal }) {
   const [scrolled, setScrolled] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -471,7 +488,7 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
                     <div key={l} onClick={() => { setShowUserMenu(false); nav(p) }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#555", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#f8f5f0"} onMouseLeave={e => e.target.style.background = "transparent"}>{l}</div>
                   ))}
                   {user && !user.isAdmin && user.email === "patelanis5304@gmail.com" && <div onClick={async () => { handleClaimAdmin(); setShowUserMenu(false) }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#8b6644", borderTop: "1px solid #f0ede8", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#f8f5f0"} onMouseLeave={e => e.target.style.background = "transparent"}>Claim Admin</div>}
-                  <div onClick={() => { setShowUserMenu(false); handleLogout() }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#dc2626", borderTop: "1px solid #f0ede8", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#fef2f2"} onMouseLeave={e => e.target.style.background = "transparent"}>Sign Out</div>
+                  <div onClick={() => { setShowUserMenu(false); setShowLogoutModal(true) }} style={{ padding: "12px 18px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", color: "#dc2626", borderTop: "1px solid #f0ede8", transition: "background 0.15s" }} onMouseEnter={e => e.target.style.background = "#fef2f2"} onMouseLeave={e => e.target.style.background = "transparent"}>Sign Out</div>
                 </div>
               )}
             </div>
@@ -493,7 +510,7 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
             {[["Home", "home"], ["Shop", "shop"], ["Trending", "shop"], ["Orders", "orders"], ["Track Order", "tracking"], ["Wishlist", "wishlist"], ["Cart", "cart"], ["About Us", "about"], ["Contact Us", "contact"], ...(user?.isAdmin ? [["Admin Panel", "admin"]] : [])].map(([l, p]) => (
               <div key={l} onClick={() => mobileNav(p)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, fontWeight: 500, padding: "14px 0", borderBottom: "1px solid #f0ede8", cursor: "pointer", color: "#333" }}>{l}</div>
             ))}
-            {user && <div onClick={() => { setMobileMenuOpen(false); handleLogout() }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, fontWeight: 500, padding: "14px 0", cursor: "pointer", color: "#dc2626", marginTop: "auto" }}>Sign Out</div>}
+            {user && <div onClick={() => { setMobileMenuOpen(false); setShowLogoutModal(true) }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, fontWeight: 500, padding: "14px 0", cursor: "pointer", color: "#dc2626", marginTop: "auto" }}>Sign Out</div>}
             {!user && <div onClick={() => mobileNav("auth")} style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, fontWeight: 600, padding: "14px 0", cursor: "pointer", color: "#8b6644", marginTop: "auto" }}>Sign In</div>}
           </div>
         </div>
