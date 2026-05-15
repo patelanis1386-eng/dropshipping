@@ -185,6 +185,10 @@ export const getOrderByOrderNumber = async (orderNumber) => {
   return { id: d.id, ...d.data() }
 }
 
+export const updateOrder = async (id, data) => {
+  await withTimeout(updateDoc(doc(db, "orders", id), data))
+}
+
 export const updateOrderTracking = async (id, data) => {
   await updateDoc(doc(db, "orders", id), data)
 }
