@@ -437,13 +437,16 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
       <section style={{ padding: "60px 24px", maxWidth: 1280, margin: "0 auto" }}>
         <SectionHeader title="Shop by Category" sub="Explore our curated collections" />
         <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 8 }}>
-          {categories.map(cat => (
+          {categories.map(cat => {
+            const count = cat.productCategory ? products.filter(p => p.category === cat.productCategory).length : 0
+            return (
             <div key={cat.name} onClick={() => { setSearchQ(""); nav("shop") }} className="hover-lift" style={{ flex: "0 0 160px", background: cat.color + "33", borderRadius: 20, padding: "28px 20px", textAlign: "center", cursor: "pointer" }}>
               <div style={{ fontSize: 36, marginBottom: 10 }}>{cat.icon}</div>
               <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, color: "#1a1a1a" }}>{cat.name}</div>
-              <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "rgba(0,0,0,0.5)", marginTop: 4 }}>{cat.count} items</div>
+              <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "rgba(0,0,0,0.5)", marginTop: 4 }}>{count} items</div>
             </div>
-          ))}
+            )
+          })}
         </div>
       </section>
 

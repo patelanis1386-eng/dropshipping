@@ -19,12 +19,12 @@ export const SEED_REVIEWS = [
   { name: "Rahul Verma", avatar: "RV", rating: 5, text: "Bought the mixer grinder for my mother. She's been using it daily for idli batter and chutneys. Powerful motor and easy to clean. Best purchase this year!", product: "Mixer Grinder 750W", date: "Apr 28, 2026" },
 ]
 export const SEED_CATEGORIES = [
-  { name: "Sarees", icon: "\uD83D\uDC55", color: "#e8b4b8", count: 89 },
-  { name: "Kurtis", icon: "\uD83D\uDC57", color: "#f7d6e0", count: 124 },
-  { name: "Jewelry", icon: "\uD83D\uDC8D", color: "#ffe0b2", count: 67 },
-  { name: "Electronics", icon: "\uD83D\uDCF1", color: "#a8d8ea", count: 112 },
-  { name: "Beauty", icon: "\uD83D\uDC84", color: "#f7d6e0", count: 156 },
-  { name: "Home", icon: "\uD83C\uDFE0", color: "#c8e6c9", count: 78 },
+  { name: "Sarees", icon: "\uD83D\uDC55", color: "#e8b4b8", productCategory: "fashion" },
+  { name: "Kurtis", icon: "\uD83D\uDC57", color: "#f7d6e0", productCategory: "fashion" },
+  { name: "Jewelry", icon: "\uD83D\uDC8D", color: "#ffe0b2", productCategory: "fashion" },
+  { name: "Electronics", icon: "\uD83D\uDCF1", color: "#a8d8ea", productCategory: "electronics" },
+  { name: "Beauty", icon: "\uD83D\uDC84", color: "#f7d6e0", productCategory: "beauty" },
+  { name: "Home", icon: "\uD83C\uDFE0", color: "#c8e6c9", productCategory: "home" },
 ]
 
 export const fmt = (n) => "\u20B9" + Number(n).toLocaleString("en-IN")
