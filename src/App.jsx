@@ -96,6 +96,7 @@ export default function App() {
   }
 
   const handleLogout = async () => {
+    if (!confirm("Are you sure you want to sign out?")) return
     const uid = user?.uid
     if (uid) { saveUserCart(uid, cart).catch(() => {}); saveUserWishlist(uid, wishlist).catch(() => {}); saveUserOrders(uid, orders).catch(() => {}) }
     await logOut()
