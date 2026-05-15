@@ -1717,8 +1717,13 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
             <button onClick={() => setTrackModalOrder(null)} style={{ flex: 1, background: "#f0ede8", color: "#555", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
             <button onClick={async () => {
               try {
-                await updateOrderTracking(trackModalOrder.id, { trackingNumber: trackForm.trackingNumber, carrier: trackForm.carrier, estimatedDelivery: trackForm.estimatedDelivery, trackingSteps: trackForm.steps })
-                setOrders(prev => prev.map(order => order.id === trackModalOrder.id ? { ...order, trackingNumber: trackForm.trackingNumber, carrier: trackForm.carrier, estimatedDelivery: trackForm.estimatedDelivery, trackingSteps: trackForm.steps } : order))
+                const steps = trackForm.steps
+                const shipped = steps.find(s => s.label === "Shipped")?.done
+                const delivered = steps.find(s => s.label === "Delivered")?.done
+                const newStatus = delivered ? "Delivered" : shipped ? "Shipped" : trackModalOrder.status
+                await updateOrderTracking(trackModalOrder.id, { trackingNumber: trackForm.trackingNumber, carrier: trackForm.carrier, estimatedDelivery: trackForm.estimatedDelivery, trackingSteps: steps })
+                await updateOrderStatus(trackModalOrder.id, newStatus)
+                setOrders(prev => prev.map(order => order.id === trackModalOrder.id ? { ...order, trackingNumber: trackForm.trackingNumber, carrier: trackForm.carrier, estimatedDelivery: trackForm.estimatedDelivery, trackingSteps: steps, status: newStatus } : order))
                 showToast("Tracking updated!")
                 setTrackModalOrder(null)
               } catch (e) { showToast("Failed to save tracking", "info") }
