@@ -1383,7 +1383,7 @@ function AdminPage({ products, setProducts, orders, banner, setBanner, adminTab,
               <div key={c.id} style={{ background: "#fff", borderRadius: 16, padding: "20px 24px", marginBottom: 12, display: "flex", alignItems: "center", gap: 16 }}>
                 <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#8b6644", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "'Jost',sans-serif" }}>{c.name?.split(" ").map(n => n[0]).join("") || "?"}</div>
                 <div style={{ flex: 1, fontFamily: "'Jost',sans-serif" }}>
-                  <div style={{ fontWeight: 600, fontSize: 15 }}>{c.name || "Unknown"}</div>
+                  <div style={{ fontWeight: 600, fontSize: 15 }}>{c.name || ""}</div>
                   <div style={{ fontSize: 13, color: "#767676" }}>{c.email}</div>
                 </div>
               </div>
