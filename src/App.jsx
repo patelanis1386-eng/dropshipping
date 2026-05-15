@@ -126,6 +126,12 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    const validIds = new Set(products.map(p => p.id))
+    setCart(prev => prev.filter(i => validIds.has(i.id)))
+    setWishlist(prev => prev.filter(i => validIds.has(i.id)))
+  }, [products])
+
+  useEffect(() => {
     if (!user) { setOrders([]); return }
     if (user?.isAdmin) {
       getOrders().then(setOrders).catch(() => setOrders([]))
@@ -1387,10 +1393,6 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
     if (!confirm("Delete this product? It will be removed from all users' carts and wishlists.")) return
     writeLocalProducts(readLocalProducts().filter(p => p.id !== id))
     setProducts(prev => prev.filter(p => p.id !== id))
-    setCart(prev => prev.filter(i => i.id !== id))
-    setWishlist(prev => prev.filter(i => i.id !== id))
-    localStorage.removeItem(CART_KEY)
-    localStorage.removeItem(WISHLIST_KEY)
     if (!id?.startsWith("local-")) {
       try {
         await deleteProduct(id)
@@ -1406,13 +1408,8 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
           return Promise.all(updates)
         }))
         showToast("Product deleted from all users")
-        const u = auth.currentUser
-        if (u?.uid) {
-          const [fcart, fwish] = await Promise.all([getUserCart(u.uid), getUserWishlist(u.uid)])
-          setCart(fcart || [])
-          setWishlist(fwish || [])
-        }
       } catch (e) {
+        console.error("Delete cleanup error:", e)
         showToast("Product deleted, but some user caches may remain", "info")
       }
     }
