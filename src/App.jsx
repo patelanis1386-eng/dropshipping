@@ -893,7 +893,9 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
           { label: "Delivered", done: false, date: "" },
         ],
       })
-      setOrders(prev => [{ id: orderId, orderNumber, userId: user?.uid || "guest", customerName: form.name, email: form.email, phone: form.phone, address: `${form.address}, ${form.city}, ${form.state}, ${form.pincode}, India`, items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })), total, status: "Processing", paymentMethod: payMethod, trackingNumber: "", carrier: "", estimatedDelivery: "", trackingSteps: [{ label: "Order Placed", done: true, date: today }, { label: "Processing", done: false, date: "" }, { label: "Shipped", done: false, date: "" }, { label: "In Transit", done: false, date: "" }, { label: "Out for Delivery", done: false, date: "" }, { label: "Delivered", done: false, date: "" }] }, ...prev])
+      const newOrder = { id: orderId, orderNumber, userId: user?.uid || "guest", customerName: form.name, email: form.email, phone: form.phone, address: `${form.address}, ${form.city}, ${form.state}, ${form.pincode}, India`, items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })), total, status: "Processing", paymentMethod: payMethod, trackingNumber: "", carrier: "", estimatedDelivery: "", trackingSteps: [{ label: "Order Placed", done: true, date: today }, { label: "Processing", done: false, date: "" }, { label: "Shipped", done: false, date: "" }, { label: "In Transit", done: false, date: "" }, { label: "Out for Delivery", done: false, date: "" }, { label: "Delivered", done: false, date: "" }] }
+      setOrders(prev => [newOrder, ...prev])
+      if (user?.uid) { const updated = [newOrder, ...orders]; saveUserOrders(user.uid, updated).catch(() => {}) }
       setCart([])
       showToast("Order placed successfully! Your order number is " + orderNumber)
       nav("orders")
