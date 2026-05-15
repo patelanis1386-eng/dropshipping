@@ -557,31 +557,7 @@ function HomePage({ products, reviews, categories, banner, nav, addCart, toggleW
         <ProductGrid products={trending} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} />
       </section>
 
-      <section style={{ background: "#f3efe9", padding: "60px 24px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-          <SectionHeader title="What Our Customers Say" sub="Over 50,000 happy shoppers worldwide" />
-          <div className="review-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
-            {reviews.map(r => (
-              <div key={r.name} style={{ background: "#fff", borderRadius: 20, padding: 28, boxShadow: "0 2px 16px rgba(0,0,0,0.06)" }}>
-                <div style={{ color: "#8b6644", fontSize: 16, marginBottom: 12 }}>{"\u2605".repeat(r.rating)}</div>
-                <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#555", lineHeight: 1.7, marginBottom: 16 }}>"{r.text}"</p>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 38, height: 38, borderRadius: "50%", background: "#8b6644", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 14, fontFamily: "'Jost',sans-serif" }}>{r.avatar}</div>
-                  <div>
-                    <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13 }}>{r.name}</div>
-                    <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#767676" }}>Purchased: {r.product}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      <section style={{ padding: "60px 24px", maxWidth: 1280, margin: "0 auto" }}>
-        <SectionHeader title="AI Picks For You" sub="Personalized recommendations based on trending in India" />
-        <ProductGrid products={products.slice(4, 8)} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} />
-      </section>
     </div>
   )
 }
