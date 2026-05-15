@@ -499,14 +499,7 @@ function HomePage({ products, reviews, categories, banner, nav, addCart, toggleW
               <button onClick={() => nav("shop")} className="hover-btn" style={{ background: "#8b6644", color: "#fff", border: "none", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Shop Now &#x2192;</button>
               <button onClick={() => nav("tracking")} className="hover-btn" style={{ background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 500, fontSize: 14, cursor: "pointer" }}>Track Order</button>
             </div>
-            <div className="hero-stats" style={{ display: "flex", gap: 40, marginTop: 48, justifyContent: "center" }}>
-              {[["50K+", "Happy Customers"], ["4.9\u2605", "Average Rating"]].map(([v, l]) => (
-                <div key={l}>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: "#8b6644", fontFamily: "'Jost',sans-serif" }}>{v}</div>
-                  <div style={{ fontSize: 12, color: "#aaa", fontFamily: "'Jost',sans-serif", marginTop: 2 }}>{l}</div>
-                </div>
-              ))}
-            </div>
+
           </div>
         </div>
       </section>
