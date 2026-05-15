@@ -367,7 +367,7 @@ export default function App() {
         {page === "auth"     && <AuthPage setUser={setUser} authMode={authMode} setAuthMode={setAuthMode} nav={nav} showToast={showToast} signUp={signUp} signIn={signIn} resetPassword={resetPassword} signInWithGoogle={signInWithGoogle} signInAsGuest={signInAsGuest} />}
         {page === "orders"   && <OrdersPage orders={orders} setOrders={setOrders} nav={nav} user={user} />}
         {page === "tracking" && <TrackingPage nav={nav} />}
-        {page === "admin"    && user?.isAdmin && <AdminPage products={products} setProducts={setProducts} orders={orders} setOrders={setOrders} shipping={shipping} setShipping={setShipping} banner={banner} setBanner={setBanner} productCategories={productCategories} setProductCategories={setProductCategories} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} showToast={showToast} />}
+        {page === "admin"    && user?.isAdmin && <AdminPage products={products} setProducts={setProducts} orders={orders} setOrders={setOrders} shipping={shipping} setShipping={setShipping} banner={banner} setBanner={setBanner} productCategories={productCategories} setProductCategories={setProductCategories} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} showToast={showToast} cart={cart} setCart={setCart} wishlist={wishlist} setWishlist={setWishlist} />}
         {page === "about"    && <StaticPage title="About Us" nav={nav}><AboutContent /></StaticPage>}
         {page === "contact"  && <StaticPage title="Contact Us" nav={nav}><ContactContent showToast={showToast} /></StaticPage>}
         {page === "privacy"  && <StaticPage title="Privacy Policy" nav={nav}><PrivacyContent /></StaticPage>}
@@ -1298,7 +1298,7 @@ function TrackingPage({ nav }) {
   )
 }
 
-function AdminPage({ products, setProducts, orders, setOrders, shipping, setShipping, banner, setBanner, productCategories, setProductCategories, adminTab, setAdminTab, nav, showToast }) {
+function AdminPage({ products, setProducts, orders, setOrders, shipping, setShipping, banner, setBanner, productCategories, setProductCategories, adminTab, setAdminTab, nav, showToast, cart, setCart, wishlist, setWishlist }) {
   const tabs = ["dashboard", "products", "orders", "checkouts", "categories", "customers", "analytics"]
   const [showForm, setShowForm] = useState(false)
   const [editProd, setEditProd] = useState(null)
@@ -1384,11 +1384,29 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
   }
 
   const del = async (id) => {
-    if (!confirm("Delete this product?")) return
+    if (!confirm("Delete this product? It will be removed from all users' carts and wishlists.")) return
     writeLocalProducts(readLocalProducts().filter(p => p.id !== id))
     setProducts(prev => prev.filter(p => p.id !== id))
+    setCart(prev => prev.filter(i => i.id !== id))
+    setWishlist(prev => prev.filter(i => i.id !== id))
     if (!id?.startsWith("local-")) {
-      deleteProduct(id).catch(() => {})
+      try {
+        await deleteProduct(id)
+        const users = await getUsers()
+        await Promise.all(users.map(async (u) => {
+          const updates = []
+          if (u.cart?.some(i => i.id === id)) {
+            updates.push(saveUserCart(u.id, u.cart.filter(i => i.id !== id)))
+          }
+          if (u.wishlist?.some(i => i.id === id)) {
+            updates.push(saveUserWishlist(u.id, u.wishlist.filter(i => i.id !== id)))
+          }
+          return Promise.all(updates)
+        }))
+        showToast("Product deleted from all users")
+      } catch (e) {
+        showToast("Product deleted, but some user caches may remain", "info")
+      }
     }
   }
 
