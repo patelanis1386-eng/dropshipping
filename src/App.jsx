@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers, getBanner, updateBanner, getProductCategories, addProductCategory, deleteProductCategory, getNextOrderNumber, getOrderByOrderNumber, updateOrderTracking, getSavedAddress, saveUserAddress, getShippingSettings, updateShippingSettings, getUserCart, saveUserCart, getUserWishlist, saveUserWishlist } from "./firebase"
+import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers, getBanner, updateBanner, getProductCategories, addProductCategory, deleteProductCategory, getNextOrderNumber, getOrderByOrderNumber, updateOrderTracking, getSavedAddress, saveUserAddress, getShippingSettings, updateShippingSettings, getUserCart, saveUserCart, getUserWishlist, saveUserWishlist, saveUserOrders, getUserOrders } from "./firebase"
 import { SEED_REVIEWS, SEED_CATEGORIES, fmt, disc } from "./data"
 import { addDoc, collection, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore"
 
@@ -97,7 +97,7 @@ export default function App() {
 
   const handleLogout = async () => {
     const uid = user?.uid
-    if (uid) { saveUserCart(uid, cart).catch(() => {}); saveUserWishlist(uid, wishlist).catch(() => {}) }
+    if (uid) { saveUserCart(uid, cart).catch(() => {}); saveUserWishlist(uid, wishlist).catch(() => {}); saveUserOrders(uid, orders).catch(() => {}) }
     await logOut()
     setCart([])
     setWishlist([])
@@ -127,7 +127,11 @@ export default function App() {
 
   useEffect(() => {
     if (!user) { setOrders([]); return }
-    getOrders().then(setOrders).catch(() => setOrders([]))
+    if (user?.isAdmin) {
+      getOrders().then(setOrders).catch(() => setOrders([]))
+    } else {
+      getUserOrders(user.uid).then(o => { if (o?.length) setOrders(o) }).catch(() => {})
+    }
   }, [user])
 
   useEffect(() => {
@@ -178,6 +182,12 @@ export default function App() {
     const t = setTimeout(() => saveUserWishlist(user.uid, wishlist).catch(() => {}), 500)
     return () => clearTimeout(t)
   }, [wishlist, user?.uid])
+
+  useEffect(() => {
+    if (!user?.uid || !firestoreLoaded.current || user?.isAdmin) return
+    const t = setTimeout(() => saveUserOrders(user.uid, orders).catch(() => {}), 500)
+    return () => clearTimeout(t)
+  }, [orders, user?.uid, user?.isAdmin])
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type })

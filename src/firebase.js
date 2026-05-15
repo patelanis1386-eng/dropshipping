@@ -297,3 +297,13 @@ export const getUserWishlist = async (uid) => {
   if (!snap.exists()) return null
   return snap.data().wishlist || null
 }
+
+export const saveUserOrders = async (uid, orders) => {
+  await withTimeout(setDoc(doc(db, "users", uid), { orders, updatedAt: serverTimestamp() }, { merge: true }))
+}
+
+export const getUserOrders = async (uid) => {
+  const snap = await getDoc(doc(db, "users", uid))
+  if (!snap.exists()) return null
+  return snap.data().orders || null
+}
