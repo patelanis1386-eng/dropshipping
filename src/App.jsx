@@ -413,7 +413,7 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 20 }} className="hide-mobile">
-          {[["Shop", "shop"], ["Trending", "shop"], ["Orders", "orders"], ["Track", "tracking"]].map(([l, p]) => (
+          {[["Home", "home"], ["Shop", "shop"], ["Trending", "shop"], ["Orders", "orders"], ["Track", "tracking"]].map(([l, p]) => (
             <span key={l} className="nav-link" onClick={() => nav(p)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 500, letterSpacing: 1, textTransform: "uppercase" }}>{l}</span>
           ))}
         </div>
@@ -459,7 +459,7 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
               <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, fontWeight: 700, letterSpacing: 2 }}>LUXEDROP</div>
               <span onClick={() => setMobileMenuOpen(false)} style={{ fontSize: 24, cursor: "pointer", color: "#767676", userSelect: "none" }}>&#x2715;</span>
             </div>
-            {[["Shop", "shop"], ["Trending", "shop"], ["Orders", "orders"], ["Track Order", "tracking"], ["Wishlist", "wishlist"], ["Cart", "cart"], ["About Us", "about"], ["Contact Us", "contact"], ...(user?.isAdmin ? [["Admin Panel", "admin"]] : [])].map(([l, p]) => (
+            {[["Home", "home"], ["Shop", "shop"], ["Trending", "shop"], ["Orders", "orders"], ["Track Order", "tracking"], ["Wishlist", "wishlist"], ["Cart", "cart"], ["About Us", "about"], ["Contact Us", "contact"], ...(user?.isAdmin ? [["Admin Panel", "admin"]] : [])].map(([l, p]) => (
               <div key={l} onClick={() => mobileNav(p)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, fontWeight: 500, padding: "14px 0", borderBottom: "1px solid #f0ede8", cursor: "pointer", color: "#333" }}>{l}</div>
             ))}
             {user && <div onClick={() => { setMobileMenuOpen(false); handleLogout() }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, fontWeight: 500, padding: "14px 0", cursor: "pointer", color: "#dc2626", marginTop: "auto" }}>Sign Out</div>}
