@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers } from "./firebase"
+import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers, getBanner, updateBanner } from "./firebase"
 import { SEED_REVIEWS, SEED_CATEGORIES, fmt, disc } from "./data"
 import { addDoc, collection, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore"
 
@@ -50,6 +50,7 @@ export default function App() {
   const [products, setProducts] = useState(() => readLocalProducts())
   const [reviews, setReviews] = useState(SEED_REVIEWS)
   const [categories, setCategories] = useState(SEED_CATEGORIES)
+  const [banner, setBanner] = useState(null)
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (fbUser) => {
@@ -102,10 +103,11 @@ export default function App() {
     const load = async () => {
       const localProducts = readLocalProducts()
       try {
-        const [fp, fr, fc] = await Promise.all([getProducts(), getReviews(), getCategories()])
+        const [fp, fr, fc, fb] = await Promise.all([getProducts(), getReviews(), getCategories(), getBanner()])
         setProducts(mergeProducts(localProducts, fp))
         if (fr.length) setReviews(fr)
         if (fc.length) setCategories(fc)
+        if (fb) setBanner(fb)
       } catch (_) {
         setProducts(localProducts)
       }
@@ -267,7 +269,7 @@ export default function App() {
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
       <main>
-        {page === "home"     && <HomePage products={products} reviews={reviews} categories={categories} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} setSearchQ={setSearchQ} newsletter={newsletter} setNewsletter={setNewsletter} newsletterDone={newsletterDone} setNewsletterDone={setNewsletterDone} showToast={showToast} />}
+        {page === "home"     && <HomePage products={products} reviews={reviews} categories={categories} banner={banner} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} setSearchQ={setSearchQ} newsletter={newsletter} setNewsletter={setNewsletter} newsletterDone={newsletterDone} setNewsletterDone={setNewsletterDone} showToast={showToast} />}
         {page === "shop"     && <ShopPage products={filteredProducts} allProducts={products} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} catFilter={catFilter} setCatFilter={setCatFilter} searchQ={searchQ} setSearchQ={setSearchQ} sortBy={sortBy} setSortBy={setSortBy} />}
         {page === "product"  && <ProductPage product={selectedProduct} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} products={products} reviews={reviews} showToast={showToast} />}
         {page === "cart"     && <CartPage cart={cart} setCart={setCart} removeCart={removeCart} cartTotal={cartTotal} nav={nav} />}
@@ -276,7 +278,7 @@ export default function App() {
         {page === "auth"     && <AuthPage setUser={setUser} authMode={authMode} setAuthMode={setAuthMode} nav={nav} showToast={showToast} signUp={signUp} signIn={signIn} resetPassword={resetPassword} signInWithGoogle={signInWithGoogle} signInAsGuest={signInAsGuest} />}
         {page === "orders"   && <OrdersPage orders={orders} nav={nav} user={user} />}
         {page === "tracking" && <TrackingPage nav={nav} />}
-        {page === "admin"    && user?.isAdmin && <AdminPage products={products} setProducts={setProducts} orders={orders} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} showToast={showToast} />}
+        {page === "admin"    && user?.isAdmin && <AdminPage products={products} setProducts={setProducts} orders={orders} banner={banner} setBanner={setBanner} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} showToast={showToast} />}
         {page === "about"    && <StaticPage title="About Us" nav={nav}><AboutContent /></StaticPage>}
         {page === "contact"  && <StaticPage title="Contact Us" nav={nav}><ContactContent showToast={showToast} /></StaticPage>}
         {page === "privacy"  && <StaticPage title="Privacy Policy" nav={nav}><PrivacyContent /></StaticPage>}
@@ -388,7 +390,7 @@ function Toast({ msg, type }) {
   )
 }
 
-function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wishlist, setSearchQ, newsletter, setNewsletter, newsletterDone, setNewsletterDone, showToast }) {
+function HomePage({ products, reviews, categories, banner, nav, addCart, toggleWish, wishlist, setSearchQ, newsletter, setNewsletter, newsletterDone, setNewsletterDone, showToast }) {
   const featured = products.filter(p => ["Best Seller", "Editor's Pick", "Top Rated", "New Arrival"].includes(p.badge))
   const trending = products.filter(p => ["Trending", "Hot Deal"].includes(p.badge))
 
@@ -455,11 +457,11 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
         <ProductGrid products={featured} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} />
       </section>
 
-      <section className="banner-section" style={{ background: "linear-gradient(135deg, #8b6644, #e8a87c)", margin: "0 24px", borderRadius: 24, padding: "48px 40px", textAlign: "center" }}>
-        <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "rgba(255,255,255,0.8)", marginBottom: 12 }}>MEGA FESTIVE SALE</div>
-        <h2 style={{ fontSize: "clamp(28px,4vw,48px)", color: "#fff", fontWeight: 300, marginBottom: 12 }}>Up to <strong>60% Off</strong> on Indian Brands</h2>
-        <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, color: "rgba(255,255,255,0.85)", marginBottom: 28 }}>Use code <strong>LUXE50</strong> for extra 10% off</p>
-        <button onClick={() => nav("shop")} className="hover-btn" style={{ background: "#fff", color: "#8b6644", border: "none", padding: "14px 36px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Shop Sale &#x2192;</button>
+      <section className="banner-section" style={{ background: banner?.bgColor || "linear-gradient(135deg, #8b6644, #e8a87c)", margin: "0 24px", borderRadius: 24, padding: "48px 40px", textAlign: "center" }}>
+        <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: 4, color: "rgba(255,255,255,0.8)", marginBottom: 12 }}>{banner?.label || "MEGA FESTIVE SALE"}</div>
+        <h2 style={{ fontSize: "clamp(28px,4vw,48px)", color: "#fff", fontWeight: 300, marginBottom: 12 }} dangerouslySetInnerHTML={{ __html: banner?.title || "Up to <strong>60% Off</strong> on Indian Brands" }} />
+        <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, color: "rgba(255,255,255,0.85)", marginBottom: 28 }} dangerouslySetInnerHTML={{ __html: banner?.subtitle || "Use code <strong>LUXE50</strong> for extra 10% off" }} />
+        <button onClick={() => nav("shop")} className="hover-btn" style={{ background: "#fff", color: "#8b6644", border: "none", padding: "14px 36px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>{banner?.btnText || "Shop Sale"} &#x2192;</button>
       </section>
 
       <section style={{ padding: "60px 24px", maxWidth: 1280, margin: "0 auto" }}>
@@ -1132,7 +1134,7 @@ function TrackingPage({ nav }) {
   )
 }
 
-function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav, showToast }) {
+function AdminPage({ products, setProducts, orders, banner, setBanner, adminTab, setAdminTab, nav, showToast }) {
   const tabs = ["dashboard", "products", "orders", "customers", "analytics"]
   const [showForm, setShowForm] = useState(false)
   const [editProd, setEditProd] = useState(null)
@@ -1258,6 +1260,22 @@ function AdminPage({ products, setProducts, orders, adminTab, setAdminTab, nav, 
                   <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: s.color, fontWeight: 600, marginTop: 10 }}>{s.change}</div>
                 </div>
               ))}
+            </div>
+            <div style={{ background: "#fff", borderRadius: 16, padding: 24, marginBottom: 20 }}>
+              <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Homepage Banner</h3>
+              {[
+                { key: "label", label: "Label", placeholder: "MEGA FESTIVE SALE" },
+                { key: "title", label: "Title (HTML allowed)", placeholder: "Up to &lt;strong&gt;60% Off&lt;/strong&gt; on Indian Brands" },
+                { key: "subtitle", label: "Subtitle (HTML allowed)", placeholder: "Use code &lt;strong&gt;LUXE50&lt;/strong&gt; for extra 10% off" },
+                { key: "btnText", label: "Button Text", placeholder: "Shop Sale" },
+                { key: "bgColor", label: "Background Color / Gradient", placeholder: "linear-gradient(135deg, #8b6644, #e8a87c)" },
+              ].map(({ key, label, placeholder }) => (
+                <div key={key} style={{ marginBottom: 12 }}>
+                  <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>{label}</label>
+                  <input value={banner?.[key] || ""} onChange={e => setBanner(prev => ({ ...prev, [key]: e.target.value }))} placeholder={placeholder} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none" }} />
+                </div>
+              ))}
+              <button onClick={async () => { try { await updateBanner(banner); showToast("Banner saved!") } catch (e) { showToast("Failed to save banner", "info") } }} className="hover-btn" style={{ background: "#8b6644", color: "#fff", border: "none", padding: "10px 24px", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer", marginTop: 4 }}>Save Banner</button>
             </div>
             <div className="admin-dashboard-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
               <div style={{ background: "#fff", borderRadius: 16, padding: 24 }}>

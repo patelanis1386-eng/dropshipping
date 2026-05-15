@@ -206,6 +206,15 @@ export const addCategory = async (category) => {
   return ref.id
 }
 
+export const getBanner = async () => {
+  const snap = await getDoc(doc(db, "settings", "banner"))
+  return snap.exists() ? snap.data() : null
+}
+
+export const updateBanner = async (data) => {
+  await withTimeout(setDoc(doc(db, "settings", "banner"), { ...data, updatedAt: serverTimestamp() }, { merge: true }))
+}
+
 export const getUsers = async () => {
   const snap = await getDocs(collection(db, "users"))
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
