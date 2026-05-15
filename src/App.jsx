@@ -250,7 +250,6 @@ export default function App() {
   return (
     <div style={{ fontFamily: "'Cormorant Garamond', 'Georgia', serif", background: "#faf9f7", color: "#1a1a1a", minHeight: "100vh" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Jost:wght@300;400;500;600;700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #faf9f7; }
         ::-webkit-scrollbar { width: 5px; }
@@ -270,7 +269,10 @@ export default function App() {
           .nav-link:active { transform: scale(0.92); color: #a67a54; }
         }
         .product-card:hover .product-overlay { opacity: 1 !important; }
-        input:focus, select:focus, textarea:focus { outline: 2px solid #a67a54; outline-offset: 1px; }
+        input:focus, select:focus, textarea:focus { outline: 2px solid #a67a54; outline-offset: 2px; }
+        :focus-visible { outline: 2px solid #a67a54; outline-offset: 2px; }
+        .content-vis { content-visibility: auto; contain-intrinsic-size: 1px 500px; }
+        @media (prefers-reduced-motion) { .hero-label, .hero-heading-1, .hero-heading-2 { animation: none !important; } }
         .brand-accent { color: #a67a54; }
         .btn-primary { background: #a67a54; color: #fff; }
         .btn-primary:hover { background: #8b6644; }
@@ -283,6 +285,7 @@ export default function App() {
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: none; } }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
         @keyframes glow { 0%,100% { text-shadow: 0 0 8px rgba(139,102,68,0.3); } 50% { text-shadow: 0 0 20px rgba(139,102,68,0.7); } }
         @keyframes logoReveal { 0% { letter-spacing: 12px; opacity: 0; filter: blur(4px); } 60% { letter-spacing: 2px; opacity: 1; filter: blur(0); } 100% { letter-spacing: 2px; opacity: 1; filter: blur(0); } }
@@ -449,14 +452,14 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
   const mobileNav = (p) => { setMobileMenuOpen(false); nav(p) }
 
   return (
-    <nav style={{ position: "sticky", top: 0, zIndex: 200, background: scrolled ? "rgba(250,249,247,0.97)" : "#faf9f7", borderBottom: scrolled ? "1px solid #ede8e0" : "none", transition: "all 0.3s" }}>
+    <nav aria-label="Main navigation" style={{ position: "sticky", top: 0, zIndex: 200, background: scrolled ? "rgba(250,249,247,0.97)" : "#faf9f7", borderBottom: scrolled ? "1px solid #ede8e0" : "none", transition: "all 0.3s" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", height: 68, gap: 24 }}>
         <div onClick={() => nav("home")} className="logo-text" style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 26, fontWeight: 700, whiteSpace: "nowrap" }}>
           LUXE<span className="logo-drop">DROP</span>
         </div>
 
         <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, background: "#f3efe9", borderRadius: 10, padding: "8px 14px", maxWidth: 400 }} className="hide-mobile">
-          <span style={{ color: "#767676", fontSize: 14 }}>&#x1F50D;</span>
+          <span style={{ color: "#767676", fontSize: 14 }} aria-hidden="true">&#x1F50D;</span>
           <input value={searchQ} onChange={e => { setSearchQ(e.target.value); nav("shop") }} placeholder="Search products..." style={{ flex: 1, border: "none", background: "none", fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none", color: "#333" }} />
         </div>
 
@@ -467,16 +470,16 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <span className="nav-link show-mobile" onClick={() => nav("shop")} style={{ fontSize: 18, position: "relative" }}>&#x1F50D;</span>
-          <span className="nav-link" onClick={() => nav("wishlist")} style={{ fontSize: 20, position: "relative" }}>&#x2661;</span>
-          <span className="nav-link" onClick={() => nav("cart")} style={{ fontSize: 20, position: "relative" }}>
+          <span className="nav-link show-mobile" onClick={() => nav("shop")} style={{ fontSize: 18, position: "relative" }} aria-label="Search">&#x1F50D;</span>
+          <span className="nav-link" onClick={() => nav("wishlist")} style={{ fontSize: 20, position: "relative" }} aria-label="Wishlist">&#x2661;</span>
+          <span className="nav-link" onClick={() => nav("cart")} style={{ fontSize: 20, position: "relative" }} aria-label="Cart">
             &#x1F6D2;
             {cartCount > 0 && <span style={{ position: "absolute", top: -6, right: -8, background: "#8b6644", color: "#fff", fontSize: 10, fontWeight: 700, width: 18, height: 18, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>{cartCount}</span>}
           </span>
           {user ? (
             <div style={{ position: "relative" }}>
-              <div id="user-menu-btn" onClick={() => setShowUserMenu(!showUserMenu)} className="hover-btn" style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600, background: "#1a1a1a", color: "#fff", padding: "8px 18px", borderRadius: 8, cursor: "pointer" }}>
-                {user.name.split(" ")[0]} <span style={{ fontSize: 10 }}>{showUserMenu ? "\u25B2" : "\u25BC"}</span>
+              <div id="user-menu-btn" onClick={() => setShowUserMenu(!showUserMenu)} className="hover-btn" style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 600, background: "#1a1a1a", color: "#fff", padding: "8px 18px", borderRadius: 8, cursor: "pointer" }} role="button" aria-haspopup="true" aria-expanded={showUserMenu} aria-label="User menu">
+                {user.name.split(" ")[0]} <span style={{ fontSize: 10 }} aria-hidden="true">{showUserMenu ? "\u25B2" : "\u25BC"}</span>
               </div>
               {showUserMenu && (
                 <div id="user-menu-dropdown" style={{ position: "absolute", top: "100%", right: 0, marginTop: 8, background: "#fff", borderRadius: 12, boxShadow: "0 8px 32px rgba(0,0,0,0.12)", minWidth: 180, overflow: "hidden", zIndex: 300 }}>
@@ -497,7 +500,7 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
               Sign In
             </span>
           )}
-          <div className="show-mobile" onClick={() => setMobileMenuOpen(true)} style={{ fontSize: 22, cursor: "pointer", color: "#1a1a1a", padding: 4, userSelect: "none" }}>&#x2630;</div>
+          <div className="show-mobile" onClick={() => setMobileMenuOpen(true)} style={{ fontSize: 22, cursor: "pointer", color: "#1a1a1a", padding: 4, userSelect: "none" }} aria-label="Open menu">&#x2630;</div>
         </div>
       </div>
       {mobileMenuOpen && (
@@ -521,7 +524,7 @@ function Navbar({ cart, cartCount, user, nav, page, searchQ, setSearchQ, handleL
 
 function Toast({ msg, type }) {
   return (
-    <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 999, background: type === "info" ? "#3b82f6" : "#10b981", color: "#fff", padding: "14px 24px", borderRadius: 12, fontFamily: "'Jost',sans-serif", fontSize: 14, fontWeight: 600, boxShadow: "0 8px 32px rgba(0,0,0,0.15)", animation: "slideIn 0.3s ease", display: "flex", alignItems: "center", gap: 10 }}>
+    <div role="alert" aria-live="polite" style={{ position: "fixed", bottom: 24, right: 24, zIndex: 999, background: type === "info" ? "#3b82f6" : "#10b981", color: "#fff", padding: "14px 24px", borderRadius: 12, fontFamily: "'Jost',sans-serif", fontSize: 14, fontWeight: 600, boxShadow: "0 8px 32px rgba(0,0,0,0.15)", animation: "slideIn 0.3s ease", display: "flex", alignItems: "center", gap: 10 }}>
       {type === "info" ? "\u2139\uFE0F" : "\u2713"} {msg}
     </div>
   )
@@ -631,7 +634,7 @@ function ProductCard({ product: p, nav, addCart, toggleWish, wishlist }) {
   return (
     <div className="hover-lift product-card" style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", cursor: "pointer" }}>
       <div style={{ position: "relative", aspectRatio: "1" }} onClick={() => nav("product", { product: p })}>
-        <img src={p.img} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <img src={p.img} alt={p.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         <div style={{ position: "absolute", top: 12, left: 12, background: "#8b6644", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "'Jost',sans-serif", padding: "4px 10px", borderRadius: 6 }}>{p.badge}</div>
         <div style={{ position: "absolute", top: 12, right: 12, background: "#fff2e8", color: "#8b6644", fontSize: 11, fontFamily: "'Jost',sans-serif", fontWeight: 700, padding: "4px 10px", borderRadius: 6 }}>-{disc(p.price, p.original)}%</div>
         <div className="product-overlay" style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)", opacity: 0, transition: "opacity 0.3s", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -708,12 +711,12 @@ function ProductPage({ product: p, nav, addCart, toggleWish, wishlist, products,
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48 }} className="mobile-col">
         <div>
           <div style={{ borderRadius: 20, overflow: "hidden", aspectRatio: "1", marginBottom: 12 }}>
-            <img src={imgs[imgIdx]} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src={imgs[imgIdx]} alt={p.name} fetchpriority="high" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
           <div style={{ display: "flex", gap: 10 }}>
             {imgs.map((img, i) => (
               <div key={i} onClick={() => setImgIdx(i)} style={{ width: 72, height: 72, borderRadius: 10, overflow: "hidden", cursor: "pointer", border: imgIdx === i ? "2px solid #8b6644" : "2px solid transparent" }}>
-                <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src={img} alt={p.name + " view"} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
             ))}
           </div>
@@ -839,7 +842,7 @@ function CartPage({ cart, setCart, removeCart, cartTotal, nav, shipping }) {
           <div>
             {cart.map(item => (
               <div key={item.id} className="cart-item" style={{ display: "flex", gap: 16, padding: "20px 0", borderBottom: "1px solid #f0ede8", alignItems: "center" }}>
-                <img src={item.img} alt={item.name} style={{ width: 88, height: 88, borderRadius: 12, objectFit: "cover" }} />
+                <img src={item.img} alt={item.name} loading="lazy" decoding="async" style={{ width: 88, height: 88, borderRadius: 12, objectFit: "cover" }} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{item.name}</div>
                   <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", marginBottom: 12 }}>{item.category}</div>
@@ -857,7 +860,7 @@ function CartPage({ cart, setCart, removeCart, cartTotal, nav, shipping }) {
             ))}
           </div>
           <div style={{ background: "#f8f5f0", borderRadius: 20, padding: 28, alignSelf: "start" }}>
-            <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 24 }}>Order Summary</h3>
+            <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 24 }}>Order Summary</h2>
             {[["Subtotal", fmt(cartTotal)], ["Shipping", shippingLabel], ["GST (8%)", fmt(cartTotal * 0.08)]].map(([k, v]) => (
               <div key={k} style={{ display: "flex", justifyContent: "space-between", fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#666", marginBottom: 12 }}>
                 <span>{k}</span><span style={{ color: v === "FREE" ? "#10b981" : "#333", fontWeight: v === "FREE" ? 600 : 400 }}>{v}</span>
@@ -961,7 +964,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
         <div>
           {step === 1 && (
             <div className="fade-in">
-              <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 20 }}>Shipping Information</h3>
+              <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 20 }}>Shipping Information</h2>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>Full Name</label>
@@ -1002,7 +1005,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
           )}
           {step === 2 && (
             <div className="fade-in">
-              <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 20 }}>Payment Method</h3>
+              <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 20 }}>Payment Method</h2>
               {[
                 { id: "stripe", label: "Credit / Debit Card", icon: "\uD83D\uDCB3", sub: "Visa, Mastercard, RuPay" },
                 { id: "razorpay", label: "UPI / GPay / PhonePe", icon: "\uD83C\uDFE6", sub: "Instant payment via UPI apps" },
@@ -1036,7 +1039,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
           )}
         </div>
         <div style={{ background: "#f8f5f0", borderRadius: 20, padding: 24, alignSelf: "start" }}>
-          <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Summary</h3>
+          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Summary</h2>
           {cart.map(i => (
             <div key={i.id} style={{ display: "flex", justifyContent: "space-between", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", marginBottom: 8 }}>
               <span>{i.name.slice(0, 20)}... &#x00D7;{i.qty}</span>
@@ -1589,7 +1592,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
                 <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 20 }}>Best Sellers</h3>
                 {bestSellers.slice(0, 5).map(p => (
                   <div key={p.name} style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid #f0ede8", alignItems: "center" }}>
-                    <img src={p.img} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />
+                    <img src={p.img} alt={p.name} loading="lazy" decoding="async" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />
                     <div style={{ flex: 1, fontFamily: "'Jost',sans-serif", fontSize: 13 }}><div style={{ fontWeight: 600 }}>{p.name.slice(0, 22)}</div><div style={{ color: "#767676" }}>{p.qty} sold</div></div>
                   </div>
                 ))}
@@ -1621,7 +1624,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
                 <tbody>
                   {products.map(p => (
                     <tr key={p.id} style={{ borderBottom: "1px solid #f8f5f0" }}>
-                      <td style={{ padding: "12px 16px" }}><img src={p.img} alt="" style={{ width: 44, height: 44, borderRadius: 8, objectFit: "cover" }} /></td>
+                      <td style={{ padding: "12px 16px" }}><img src={p.img} alt={p.name} loading="lazy" decoding="async" style={{ width: 44, height: 44, borderRadius: 8, objectFit: "cover" }} /></td>
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13 }}>{p.name}</td>
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", textTransform: "capitalize" }}>{p.category}</td>
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 13 }}>{fmt(p.price)}</td>
@@ -1717,7 +1720,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
                                   const prod = products.find(p => p.id === item.id)
                                   return (
                                     <div key={idx} style={{ display: "flex", gap: 12, alignItems: "center", padding: "8px 0", borderBottom: "1px solid #f0ede8" }}>
-                                      <img src={item.img || prod?.img || ""} alt="" style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover", background: "#f0ede8" }} />
+                                      <img src={item.img || prod?.img || ""} alt={item.name || "product"} loading="lazy" decoding="async" style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover", background: "#f0ede8" }} />
                                       <div style={{ flex: 1, fontFamily: "'Jost',sans-serif", fontSize: 13 }}>
                                         <div style={{ fontWeight: 600 }}>{item.name}</div>
                                         <div style={{ color: "#767676", fontSize: 12 }}>{fmt(item.price)} x {item.qty || 1}</div>
@@ -1807,7 +1810,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
                               {(o.items || []).map((item, idx) => (
                                 <tr key={idx} style={{ borderBottom: "1px solid #f0ede8" }}>
                                   <td style={{ padding: "8px 12px", fontFamily: "'Jost',sans-serif", fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
-                                    <img src={item.img || ""} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
+                                    <img src={item.img || ""} alt={item.name || "product"} loading="lazy" decoding="async" style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
                                     <span style={{ fontWeight: 500 }}>{item.name}</span>
                                   </td>
                                   <td style={{ padding: "8px 12px", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", whiteSpace: "nowrap" }}>{fmt(item.price)}</td>
@@ -1928,7 +1931,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
                 {bestSellers.slice(0, 8).map((p, i) => (
                   <div key={p.name} style={{ display: "flex", gap: 12, padding: "8px 0", borderBottom: "1px solid #f0ede8", alignItems: "center" }}>
                     <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#767676", fontWeight: 700, width: 20 }}>#{i + 1}</span>
-                    <img src={p.img} alt="" style={{ width: 36, height: 36, borderRadius: 6, objectFit: "cover" }} />
+                    <img src={p.img} alt={p.name} loading="lazy" decoding="async" style={{ width: 36, height: 36, borderRadius: 6, objectFit: "cover" }} />
                     <div style={{ flex: 1, fontFamily: "'Jost',sans-serif", fontSize: 12 }}><div style={{ fontWeight: 600 }}>{p.name.slice(0, 24)}</div><div style={{ color: "#767676" }}>{p.qty} sold &middot; {fmt(p.revenue)}</div></div>
                   </div>
                 ))}
@@ -2002,7 +2005,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
           </div>
           <div style={{ marginBottom: 20 }}>
             <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>Image</label>
-            {form.img && <img src={form.img} alt="" style={{ width: 80, height: 80, borderRadius: 8, objectFit: "cover", marginBottom: 8, display: "block" }} />}
+            {form.img && <img src={form.img} alt="Product preview" decoding="async" style={{ width: 80, height: 80, borderRadius: 8, objectFit: "cover", marginBottom: 8, display: "block" }} />}
             <label className="hover-btn" style={{ display: "inline-block", background: "#f0ede8", color: "#555", padding: "10px 18px", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer" }}>
               {uploading ? "Uploading..." : "Upload to Cloudinary"}
               <input type="file" accept="image/*" onChange={uploadImg} style={{ display: "none" }} />
