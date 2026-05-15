@@ -409,7 +409,7 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
               <button onClick={() => nav("tracking")} className="hover-btn" style={{ background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", padding: "14px 32px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 500, fontSize: 14, cursor: "pointer" }}>Track Order</button>
             </div>
             <div className="hero-stats" style={{ display: "flex", gap: 40, marginTop: 48 }}>
-              {[["50K+", "Happy Customers"], ["4.9\u2605", "Average Rating"], ["Free", "Shipping Across India"]].map(([v, l]) => (
+              {[["50K+", "Happy Customers"], ["4.9\u2605", "Average Rating"]].map(([v, l]) => (
                 <div key={l}>
                   <div style={{ fontSize: 22, fontWeight: 700, color: "#8b6644", fontFamily: "'Jost',sans-serif" }}>{v}</div>
                   <div style={{ fontSize: 12, color: "#aaa", fontFamily: "'Jost',sans-serif", marginTop: 2 }}>{l}</div>
@@ -429,7 +429,7 @@ function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wis
 
       <section style={{ background: "#fff", borderBottom: "1px solid #ede8e0" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "20px 24px", display: "flex", justifyContent: "center", gap: "clamp(20px,4vw,60px)", flexWrap: "wrap" }}>
-          {[["\uD83D\uDE9A", "Free Shipping", "Across India"], ["\uD83D\uDD04", "Easy Returns", "7-day policy"], ["\uD83D\uDD12", "Secure Pay", "UPI & Cards"], ["\uD83C\uDF1F", "Premium Quality", "Vetted artisans"]].map(([icon, t, s]) => (
+          {[["\uD83D\uDD04", "Easy Returns", "7-day policy"], ["\uD83D\uDD12", "Secure Pay", "UPI & Cards"], ["\uD83C\uDF1F", "Premium Quality", "Vetted artisans"]].map(([icon, t, s]) => (
             <div key={t} style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 22 }}>{icon}</span>
               <div>
