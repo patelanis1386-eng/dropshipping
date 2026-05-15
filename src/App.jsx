@@ -300,15 +300,20 @@ export default function App() {
           .checkout-layout { grid-template-columns: 1fr !important; }
           .admin-page { flex-direction: column !important; }
           .admin-sidebar { width: 100% !important; display: flex !important; overflow-x: auto !important; padding: 8px 0 !important; }
-          .admin-sidebar > div { white-space: nowrap !important; border-left: none !important; border-bottom: 3px solid transparent !important; padding: 10px 12px !important; font-size: 12px !important; }
-          .admin-sidebar > div.active { border-left: none !important; border-bottom: 3px solid #8b6644 !important; }
+          .admin-sidebar { height: auto !important; position: relative !important; top: auto !important; flex-direction: row !important; padding: 0 !important; gap: 0 !important; overflow-x: auto !important; width: 100% !important; }
+          .admin-sidebar > div { flex-shrink: 0 !important; white-space: nowrap !important; padding: 10px 12px !important; font-size: 12px !important; background: transparent !important; border-right: none !important; border-bottom: 3px solid transparent !important; gap: 4px !important; }
           .admin-main { padding: 16px !important; }
+          .admin-sidebar .hide-mobile { display: none !important; }
           .admin-table-wrap { overflow-x: auto !important; }
           .admin-table-wrap table { min-width: 600px !important; }
           .admin-orders-table { overflow-x: auto !important; }
           .admin-orders-table table { min-width: 650px !important; }
           div.admin-stats-grid { grid-template-columns: repeat(2,1fr) !important; gap: 12px !important; }
           div.admin-dashboard-grid { grid-template-columns: 1fr !important; }
+          .admin-page main input, .admin-page main select { width: 100% !important; max-width: 100% !important; }
+          .admin-page main > div > div:first-child > div { flex: 1 !important; }
+          .admin-page main > div > div:first-child > div input { width: 100% !important; }
+          .admin-page main > div > div:first-child > div select { width: 100% !important; }
           .modal-inner { width: 100% !important; max-width: 100% !important; min-height: 100vh !important; max-height: 100vh !important; border-radius: 0 !important; padding: 24px 16px !important; }
           footer > div > div:first-child { grid-template-columns: repeat(2,1fr) !important; gap: 24px !important; }
           .page-content { padding: 24px 16px !important; }
@@ -339,6 +344,11 @@ export default function App() {
           nav > div { gap: 8px !important; }
           .tracking-page input { font-size: 14px !important; }
           .modal-inner { padding: 20px 14px !important; }
+          .admin-order-detail { grid-template-columns: 1fr !important; }
+          .admin-analytics-grid { grid-template-columns: 1fr !important; }
+          .admin-sidebar .sidebar-label { display: none !important; }
+          .admin-sidebar > div { padding: 10px 8px !important; font-size: 11px !important; }
+          .admin-sidebar > div > span:first-child { font-size: 18px !important; }
         }
       `}</style>
 
@@ -1448,15 +1458,13 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
     <div style={{ display: "flex", minHeight: "100vh" }} className="admin-page">
       <aside className="admin-sidebar" style={{ width: 220, background: "#1a1a1a", color: "#fff", padding: "28px 0", flexShrink: 0, position: "sticky", top: 0, height: "100vh", overflowY: "auto" }}>
         <div className="hide-mobile" style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontWeight: 700, letterSpacing: 2, padding: "0 24px 28px", borderBottom: "1px solid #2a2a2a", marginBottom: 12 }}>LUXEDROP</div>
-        <div style={{ padding: "0 12px" }}>
-          {tabs.map(t => (
-            <div key={t} onClick={() => setAdminTab(t)} style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", borderRadius: 8, marginBottom: 2, background: adminTab === t ? "rgba(139,102,68,0.15)" : "transparent", color: adminTab === t ? "#8b6644" : "#aaa", fontWeight: adminTab === t ? 700 : 400, display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontSize: 16 }}>{SIDEBAR_ICONS[t]}</span>
-              <span style={{ textTransform: "capitalize" }}>{t}</span>
-              {t === "orders" && orders.length > 0 && <span style={{ marginLeft: "auto", background: "#8b6644", color: "#fff", borderRadius: 10, padding: "1px 8px", fontSize: 11, fontWeight: 700 }}>{orders.length}</span>}
-            </div>
-          ))}
-        </div>
+        {tabs.map(t => (
+          <div key={t} onClick={() => setAdminTab(t)} style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", background: adminTab === t ? "rgba(139,102,68,0.15)" : "transparent", color: adminTab === t ? "#8b6644" : "#aaa", fontWeight: adminTab === t ? 700 : 400, display: "flex", alignItems: "center", gap: 10, borderRight: adminTab === t ? "3px solid #8b6644" : "3px solid transparent" }}>
+            <span style={{ fontSize: 16 }}>{SIDEBAR_ICONS[t]}</span>
+            <span className="sidebar-label" style={{ textTransform: "capitalize" }}>{t}</span>
+            {t === "orders" && orders.length > 0 && <span style={{ marginLeft: "auto", background: "#8b6644", color: "#fff", borderRadius: 10, padding: "1px 8px", fontSize: 11, fontWeight: 700 }}>{orders.length}</span>}
+          </div>
+        ))}
         <div className="hide-mobile" onClick={() => nav("home")} style={{ padding: "13px 24px", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#aaa", cursor: "pointer", marginTop: 20 }}>&#x2190; Back to Store</div>
       </aside>
       <main style={{ flex: 1, padding: 32, background: "#f8f5f0", overflowY: "auto", minHeight: "100vh" }}>
@@ -1622,7 +1630,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
                         {showDetail && (
                           <tr style={{ borderBottom: "1px solid #f0ede8", background: "#faf8f5" }}>
                             <td colSpan={8} style={{ padding: "0 16px 20px" }}>
-                              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, padding: 16 }}>
+                              <div className="admin-order-detail" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, padding: 16 }}>
                                 <div>
                                   <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, letterSpacing: 1, color: "#8b6644", fontWeight: 700, marginBottom: 8 }}>CUSTOMER</div>
                                   <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, lineHeight: 1.7 }}>
@@ -1766,7 +1774,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
                 </div>
               ))}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+            <div className="admin-analytics-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
               <div style={{ background: "#fff", borderRadius: 16, padding: 24 }}>
                 <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 20 }}>Best Selling Products</h3>
                 {bestSellers.slice(0, 8).map((p, i) => (
