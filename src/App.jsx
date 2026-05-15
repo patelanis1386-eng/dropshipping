@@ -389,7 +389,7 @@ function Toast({ msg, type }) {
 }
 
 function HomePage({ products, reviews, categories, nav, addCart, toggleWish, wishlist, setSearchQ, newsletter, setNewsletter, newsletterDone, setNewsletterDone, showToast }) {
-  const featured = products.filter(p => ["Best Seller", "Editor's Pick", "Top Rated"].includes(p.badge))
+  const featured = products.filter(p => ["Best Seller", "Editor's Pick", "Top Rated", "New Arrival"].includes(p.badge))
   const trending = products.filter(p => ["Trending", "Hot Deal"].includes(p.badge))
 
   return (
