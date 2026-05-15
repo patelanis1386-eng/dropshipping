@@ -1211,7 +1211,14 @@ function AdminPage({ products, setProducts, orders, banner, setBanner, adminTab,
     }
   }
 
-  const del = async (id) => { if (confirm("Delete this product?")) { await deleteProduct(id); window.location.reload() } }
+  const del = async (id) => {
+    if (!confirm("Delete this product?")) return
+    writeLocalProducts(readLocalProducts().filter(p => p.id !== id))
+    setProducts(prev => prev.filter(p => p.id !== id))
+    if (!id?.startsWith("local-")) {
+      deleteProduct(id).catch(() => {})
+    }
+  }
 
   const uploadImg = async (e) => {
     const file = e.target.files[0]; if (!file) return
