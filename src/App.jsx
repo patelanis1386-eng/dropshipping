@@ -377,9 +377,8 @@ export default function App() {
           .modal-inner { padding: 20px 14px !important; }
           .admin-order-detail { grid-template-columns: 1fr !important; }
           .admin-analytics-grid { grid-template-columns: 1fr !important; }
-          .admin-sidebar .sidebar-label { display: none !important; }
+          .admin-sidebar .sidebar-icon { display: none !important; }
           .admin-sidebar > div { padding: 10px 8px !important; font-size: 11px !important; }
-          .admin-sidebar > div > span:first-child { font-size: 18px !important; }
         }
       `}</style>
 
@@ -1502,7 +1501,7 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
         <div className="hide-mobile" style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontWeight: 700, letterSpacing: 2, padding: "0 24px 28px", borderBottom: "1px solid #2a2a2a", marginBottom: 12 }}>LUXEDROP</div>
         {tabs.map(t => (
           <div key={t} onClick={() => setAdminTab(t)} style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", background: adminTab === t ? "rgba(139,102,68,0.15)" : "transparent", color: adminTab === t ? "#8b6644" : "#aaa", fontWeight: adminTab === t ? 700 : 400, display: "flex", alignItems: "center", gap: 10, borderRight: adminTab === t ? "3px solid #8b6644" : "3px solid transparent" }}>
-            <span style={{ fontSize: 16 }}>{SIDEBAR_ICONS[t]}</span>
+            <span className="sidebar-icon" style={{ fontSize: 16 }}>{SIDEBAR_ICONS[t]}</span>
             <span className="sidebar-label" style={{ textTransform: "capitalize" }}>{t}</span>
             {t === "orders" && orders.length > 0 && <span style={{ marginLeft: "auto", background: "#8b6644", color: "#fff", borderRadius: 10, padding: "1px 8px", fontSize: 11, fontWeight: 700 }}>{orders.length}</span>}
           </div>
