@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react"
-import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers, getBanner, updateBanner, getProductCategories, addProductCategory, deleteProductCategory, getNextOrderNumber, getOrderByOrderNumber, updateOrderTracking, getSavedAddress, saveUserAddress, getShippingSettings, updateShippingSettings } from "./firebase"
+import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers, getBanner, updateBanner, getProductCategories, addProductCategory, deleteProductCategory, getNextOrderNumber, getOrderByOrderNumber, updateOrderTracking, getSavedAddress, saveUserAddress, getShippingSettings, updateShippingSettings, getUserCart, saveUserCart, getUserWishlist, saveUserWishlist } from "./firebase"
 import { SEED_REVIEWS, SEED_CATEGORIES, fmt, disc } from "./data"
 import { addDoc, collection, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore"
 
 const Stars = ({ n }) => "\u2605".repeat(Math.floor(n)) + (n % 1 >= 0.5 ? "\u00BD" : "") + "\u25A0".repeat(5 - Math.ceil(n))
 const LOCAL_PRODUCTS_KEY = "luxedrop_local_products"
+const CART_KEY = "luxedrop_cart"
+const WISHLIST_KEY = "luxedrop_wishlist"
 
 const readLocalProducts = () => {
   if (typeof localStorage === "undefined") return []
@@ -31,8 +33,8 @@ const mergeProducts = (...groups) => {
 
 export default function App() {
   const [page, setPage] = useState("home")
-  const [cart, setCart] = useState([])
-  const [wishlist, setWishlist] = useState([])
+  const [cart, setCart] = useState(() => { try { return JSON.parse(localStorage.getItem(CART_KEY) || "[]") } catch { return [] } })
+  const [wishlist, setWishlist] = useState(() => { try { return JSON.parse(localStorage.getItem(WISHLIST_KEY) || "[]") } catch { return [] } })
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [user, setUser] = useState(null)
   const [toast, setToast] = useState(null)
@@ -95,8 +97,6 @@ export default function App() {
 
   const handleLogout = async () => {
     await logOut()
-    setCart([])
-    setWishlist([])
     setOrders([])
     showToast("Signed out")
   }
@@ -123,6 +123,35 @@ export default function App() {
     if (!user) { setOrders([]); return }
     getOrders().then(setOrders).catch(() => setOrders([]))
   }, [user])
+
+  useEffect(() => { localStorage.setItem(CART_KEY, JSON.stringify(cart)) }, [cart])
+  useEffect(() => { localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist)) }, [wishlist])
+
+  const firestoreLoaded = useRef(false)
+  useEffect(() => {
+    if (!user?.uid) { firestoreLoaded.current = false; return }
+    firestoreLoaded.current = false
+    ;(async () => {
+      try {
+        const [fcart, fwish] = await Promise.all([getUserCart(user.uid), getUserWishlist(user.uid)])
+        if (fcart && fcart.length > 0) setCart(fcart)
+        if (fwish && fwish.length > 0) setWishlist(fwish)
+      } catch (_) {}
+      firestoreLoaded.current = true
+    })()
+  }, [user?.uid])
+
+  useEffect(() => {
+    if (!user?.uid || !firestoreLoaded.current) return
+    const t = setTimeout(() => saveUserCart(user.uid, cart).catch(() => {}), 500)
+    return () => clearTimeout(t)
+  }, [cart, user?.uid])
+
+  useEffect(() => {
+    if (!user?.uid || !firestoreLoaded.current) return
+    const t = setTimeout(() => saveUserWishlist(user.uid, wishlist).catch(() => {}), 500)
+    return () => clearTimeout(t)
+  }, [wishlist, user?.uid])
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type })

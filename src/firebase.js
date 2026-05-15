@@ -277,3 +277,23 @@ export const getSavedAddress = async (uid) => {
 export const saveUserAddress = async (uid, address) => {
   await withTimeout(setDoc(doc(db, "users", uid), { savedAddress: address, updatedAt: serverTimestamp() }, { merge: true }))
 }
+
+export const saveUserCart = async (uid, cart) => {
+  await withTimeout(setDoc(doc(db, "users", uid), { cart, updatedAt: serverTimestamp() }, { merge: true }))
+}
+
+export const getUserCart = async (uid) => {
+  const snap = await getDoc(doc(db, "users", uid))
+  if (!snap.exists()) return null
+  return snap.data().cart || null
+}
+
+export const saveUserWishlist = async (uid, wishlist) => {
+  await withTimeout(setDoc(doc(db, "users", uid), { wishlist, updatedAt: serverTimestamp() }, { merge: true }))
+}
+
+export const getUserWishlist = async (uid) => {
+  const snap = await getDoc(doc(db, "users", uid))
+  if (!snap.exists()) return null
+  return snap.data().wishlist || null
+}
