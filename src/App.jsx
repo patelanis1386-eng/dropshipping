@@ -1438,33 +1438,25 @@ function AdminPage({ products, setProducts, orders, setOrders, shipping, setShip
   }
 
   const handleDeleteOrder = async (o) => {
-    if (!confirm(`Delete order ${o.orderNumber || o.id?.slice(0, 8)}? This cannot be undone.`)) return
+    if (!confirm(`Delete order ${o.orderNumber || o.id?.slice(0, 8)} from admin?`)) return
     try {
       await deleteOrder(o.id)
-      if (o.userId && o.userId !== "guest") {
-        try { const uo = await getUserOrders(o.userId); if (uo) { const upd = uo.filter(x => x.id !== o.id); await saveUserOrders(o.userId, upd) } } catch (_) {}
-      }
       setOrders(prev => prev.filter(order => order.id !== o.id))
-      showToast("Order deleted")
+      showToast("Order removed from admin")
     } catch (e) {
       showToast("Failed to delete order", "info")
     }
   }
 
   const handleDeleteCustomerOrders = async (customerEmail) => {
-    if (!confirm(`Delete all orders for ${customerEmail}? This cannot be undone.`)) return
+    if (!confirm(`Remove all orders for ${customerEmail} from admin?`)) return
     const customerOrders = orders.filter(o => o.email === customerEmail)
     try {
       await Promise.all(customerOrders.map(o => deleteOrder(o.id)))
-      for (const o of customerOrders) {
-        if (o.userId && o.userId !== "guest") {
-          try { const uo = await getUserOrders(o.userId); if (uo) { const upd = uo.filter(x => x.id !== o.id); await saveUserOrders(o.userId, upd) } } catch (_) {}
-        }
-      }
       setOrders(prev => prev.filter(o => o.email !== customerEmail))
-      showToast(`Deleted ${customerOrders.length} order(s) for ${customerEmail}`)
+      showToast(`Removed ${customerOrders.length} order(s) for ${customerEmail}`)
     } catch (e) {
-      showToast("Failed to delete customer orders", "info")
+      showToast("Failed to remove customer orders", "info")
     }
   }
 
