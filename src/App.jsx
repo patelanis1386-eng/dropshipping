@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers, getBanner, updateBanner } from "./firebase"
+import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers, getBanner, updateBanner, getProductCategories, addProductCategory, deleteProductCategory } from "./firebase"
 import { SEED_REVIEWS, SEED_CATEGORIES, fmt, disc } from "./data"
 import { addDoc, collection, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore"
 
@@ -51,6 +51,7 @@ export default function App() {
   const [reviews, setReviews] = useState(SEED_REVIEWS)
   const [categories, setCategories] = useState(SEED_CATEGORIES)
   const [banner, setBanner] = useState(null)
+  const [productCategories, setProductCategories] = useState(["fashion", "electronics", "beauty", "home"])
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (fbUser) => {
@@ -103,11 +104,12 @@ export default function App() {
     const load = async () => {
       const localProducts = readLocalProducts()
       try {
-        const [fp, fr, fc, fb] = await Promise.all([getProducts(), getReviews(), getCategories(), getBanner()])
+        const [fp, fr, fc, fb, fpc] = await Promise.all([getProducts(), getReviews(), getCategories(), getBanner(), getProductCategories()])
         setProducts(mergeProducts(localProducts, fp))
         if (fr.length) setReviews(fr)
         if (fc.length) setCategories(fc)
         if (fb) setBanner(fb)
+        if (fpc.length) setProductCategories(fpc.map(c => c.name))
       } catch (_) {
         setProducts(localProducts)
       }
@@ -270,7 +272,7 @@ export default function App() {
 
       <main>
         {page === "home"     && <HomePage products={products} reviews={reviews} categories={categories} banner={banner} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} setSearchQ={setSearchQ} newsletter={newsletter} setNewsletter={setNewsletter} newsletterDone={newsletterDone} setNewsletterDone={setNewsletterDone} showToast={showToast} />}
-        {page === "shop"     && <ShopPage products={filteredProducts} allProducts={products} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} catFilter={catFilter} setCatFilter={setCatFilter} searchQ={searchQ} setSearchQ={setSearchQ} sortBy={sortBy} setSortBy={setSortBy} />}
+        {page === "shop"     && <ShopPage products={filteredProducts} allProducts={products} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} catFilter={catFilter} setCatFilter={setCatFilter} searchQ={searchQ} setSearchQ={setSearchQ} sortBy={sortBy} setSortBy={setSortBy} productCategories={productCategories} />}
         {page === "product"  && <ProductPage product={selectedProduct} nav={nav} addCart={addCart} toggleWish={toggleWish} wishlist={wishlist} products={products} reviews={reviews} showToast={showToast} />}
         {page === "cart"     && <CartPage cart={cart} setCart={setCart} removeCart={removeCart} cartTotal={cartTotal} nav={nav} />}
         {page === "checkout" && <CheckoutPage cart={cart} cartTotal={cartTotal} payMethod={payMethod} setPayMethod={setPayMethod} nav={nav} showToast={showToast} setCart={setCart} user={user} orders={orders} setOrders={setOrders} />}
@@ -278,7 +280,7 @@ export default function App() {
         {page === "auth"     && <AuthPage setUser={setUser} authMode={authMode} setAuthMode={setAuthMode} nav={nav} showToast={showToast} signUp={signUp} signIn={signIn} resetPassword={resetPassword} signInWithGoogle={signInWithGoogle} signInAsGuest={signInAsGuest} />}
         {page === "orders"   && <OrdersPage orders={orders} nav={nav} user={user} />}
         {page === "tracking" && <TrackingPage nav={nav} />}
-        {page === "admin"    && user?.isAdmin && <AdminPage products={products} setProducts={setProducts} orders={orders} banner={banner} setBanner={setBanner} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} showToast={showToast} />}
+        {page === "admin"    && user?.isAdmin && <AdminPage products={products} setProducts={setProducts} orders={orders} banner={banner} setBanner={setBanner} productCategories={productCategories} setProductCategories={setProductCategories} adminTab={adminTab} setAdminTab={setAdminTab} nav={nav} showToast={showToast} />}
         {page === "about"    && <StaticPage title="About Us" nav={nav}><AboutContent /></StaticPage>}
         {page === "contact"  && <StaticPage title="Contact Us" nav={nav}><ContactContent showToast={showToast} /></StaticPage>}
         {page === "privacy"  && <StaticPage title="Privacy Policy" nav={nav}><PrivacyContent /></StaticPage>}
@@ -548,7 +550,7 @@ function ProductCard({ product: p, nav, addCart, toggleWish, wishlist }) {
   )
 }
 
-function ShopPage({ products, allProducts, nav, addCart, toggleWish, wishlist, catFilter, setCatFilter, searchQ, setSearchQ, sortBy, setSortBy }) {
+function ShopPage({ products, allProducts, nav, addCart, toggleWish, wishlist, catFilter, setCatFilter, searchQ, setSearchQ, sortBy, setSortBy, productCategories }) {
   return (
     <div className="shop-page" style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 24px" }}>
       <h1 style={{ fontSize: 36, fontWeight: 600, marginBottom: 8 }}>All Products</h1>
@@ -556,7 +558,7 @@ function ShopPage({ products, allProducts, nav, addCart, toggleWish, wishlist, c
       <div style={{ display: "flex", gap: 24 }} className="mobile-col">
         <aside style={{ width: 200, flexShrink: 0 }} className="hide-mobile">
           <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, letterSpacing: 1, marginBottom: 14, color: "#767676" }}>CATEGORIES</div>
-          {["all", "fashion", "electronics", "beauty", "home"].map(cat => (
+          {["all", ...productCategories].map(cat => (
             <div key={cat} onClick={() => setCatFilter(cat)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, padding: "8px 12px", borderRadius: 8, cursor: "pointer", background: catFilter === cat ? "#8b6644" : "transparent", color: catFilter === cat ? "#fff" : "#555", fontWeight: catFilter === cat ? 600 : 400, marginBottom: 4, textTransform: "capitalize" }}>{cat}</div>
           ))}
         </aside>
@@ -570,7 +572,7 @@ function ShopPage({ products, allProducts, nav, addCart, toggleWish, wishlist, c
               <option value="rating">Top Rated</option>
             </select>
             <div style={{ display: "flex", gap: 6 }} className="hide-mobile">
-              {["all", "fashion", "electronics", "beauty", "home"].map(cat => (
+              {["all", ...productCategories].map(cat => (
                 <button key={cat} onClick={() => setCatFilter(cat)} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, padding: "6px 14px", borderRadius: 20, border: "none", cursor: "pointer", background: catFilter === cat ? "#8b6644" : "#f0ede8", color: catFilter === cat ? "#fff" : "#555", fontWeight: 600 }}>{cat}</button>
               ))}
             </div>
@@ -1134,13 +1136,14 @@ function TrackingPage({ nav }) {
   )
 }
 
-function AdminPage({ products, setProducts, orders, banner, setBanner, adminTab, setAdminTab, nav, showToast }) {
-  const tabs = ["dashboard", "products", "orders", "customers", "analytics"]
+function AdminPage({ products, setProducts, orders, banner, setBanner, productCategories, setProductCategories, adminTab, setAdminTab, nav, showToast }) {
+  const tabs = ["dashboard", "products", "orders", "categories", "customers", "analytics"]
   const [showForm, setShowForm] = useState(false)
   const [editProd, setEditProd] = useState(null)
-  const [form, setForm] = useState({ name: "", category: "electronics", price: "", original: "", stock: "", desc: "", img: "", badge: "New Arrival" })
+  const [form, setForm] = useState({ name: "", category: (productCategories?.[0] || "electronics"), price: "", original: "", stock: "", desc: "", img: "", badge: "New Arrival" })
   const [customers, setCustomers] = useState([])
   const [subs, setSubs] = useState([])
+  const [catInput, setCatInput] = useState("")
   const [uploading, setUploading] = useState(false)
   const [savingProduct, setSavingProduct] = useState(false)
   const [productError, setProductError] = useState("")
@@ -1240,7 +1243,7 @@ function AdminPage({ products, setProducts, orders, banner, setBanner, adminTab,
         <div className="hide-mobile" style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontWeight: 700, letterSpacing: 2, padding: "0 24px 28px", borderBottom: "1px solid #2a2a2a", marginBottom: 12 }}>LUXEDROP &#x25A0; ADMIN</div>
         {tabs.map(t => (
           <div key={t} onClick={() => setAdminTab(t)} style={{ padding: "13px 24px", fontFamily: "'Jost',sans-serif", fontSize: 13, cursor: "pointer", background: adminTab === t ? "rgba(255,255,255,0.08)" : "transparent", color: adminTab === t ? "#8b6644" : "#aaa", fontWeight: adminTab === t ? 600 : 400, borderLeft: adminTab === t ? "3px solid #8b6644" : "3px solid transparent" }} className={adminTab === t ? "active" : ""}>
-            {{ "dashboard": "\u25A0 Dashboard", "products": "\u25A0 Products", "orders": "\u25A0 Orders", "customers": "\u25A0 Customers", "analytics": "\u25A0 Analytics" } [t]}
+            {{ "dashboard": "\u25A0 Dashboard", "products": "\u25A0 Products", "orders": "\u25A0 Orders", "categories": "\u25A0 Categories", "customers": "\u25A0 Customers", "analytics": "\u25A0 Analytics" } [t]}
           </div>
         ))}
         <div className="hide-mobile" onClick={() => nav("home")} style={{ padding: "13px 24px", fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#aaa", cursor: "pointer", marginTop: 20 }}>&#x2190; Back to Store</div>
@@ -1376,6 +1379,42 @@ function AdminPage({ products, setProducts, orders, banner, setBanner, adminTab,
             </div>
           </div>
         )}
+        {adminTab === "categories" && (
+          <div className="fade-in">
+            <h2 style={{ fontSize: 28, fontWeight: 600, marginBottom: 24 }}>Product Categories</h2>
+            <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
+              <input value={catInput} onChange={e => setCatInput(e.target.value)} placeholder="New category name" style={{ flex: 1, padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none", textTransform: "lowercase" }} />
+              <button onClick={async () => {
+                const name = catInput.trim().toLowerCase()
+                if (!name) return
+                if (productCategories.includes(name)) return showToast("Category already exists", "info")
+                try {
+                  await addProductCategory({ name })
+                  setProductCategories(prev => [...prev, name])
+                  setCatInput("")
+                  showToast("Category added!")
+                } catch (e) { showToast("Failed to add category", "info") }
+              }} style={{ background: "#8b6644", color: "#fff", border: "none", padding: "10px 24px", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Add</button>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              {productCategories.map(cat => (
+                <div key={cat} style={{ background: "#fff", borderRadius: 12, padding: "12px 18px", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                  <span style={{ fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, textTransform: "capitalize" }}>{cat}</span>
+                  <button onClick={async () => {
+                    if (!confirm(`Delete category "${cat}"?`)) return
+                    try {
+                      const cats = await getProductCategories()
+                      const found = cats.find(c => c.name === cat)
+                      if (found) await deleteProductCategory(found.id)
+                      setProductCategories(prev => prev.filter(c => c !== cat))
+                      showToast(`Category "${cat}" deleted`)
+                    } catch (e) { showToast("Failed to delete category", "info") }
+                  }} style={{ background: "#fef2f2", color: "#dc2626", border: "none", padding: "4px 12px", borderRadius: 6, fontFamily: "'Jost',sans-serif", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>Delete</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {adminTab === "customers" && (
           <div className="fade-in">
             <h2 style={{ fontSize: 28, fontWeight: 600, marginBottom: 24 }}>Customers ({customers.length})</h2>
@@ -1452,7 +1491,7 @@ function AdminPage({ products, setProducts, orders, banner, setBanner, adminTab,
           <div style={{ marginBottom: 12 }}>
             <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#666", display: "block", marginBottom: 4 }}>Category</label>
             <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none", background: "#fff" }}>
-              {["electronics", "fashion", "beauty", "home"].map(c => <option key={c} value={c}>{c}</option>)}
+              {(productCategories.length ? productCategories : ["electronics", "fashion", "beauty", "home"]).map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div style={{ marginBottom: 12 }}>

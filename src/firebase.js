@@ -215,6 +215,20 @@ export const updateBanner = async (data) => {
   await withTimeout(setDoc(doc(db, "settings", "banner"), { ...data, updatedAt: serverTimestamp() }, { merge: true }))
 }
 
+export const getProductCategories = async () => {
+  const snap = await getDocs(collection(db, "product_categories"))
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+}
+
+export const addProductCategory = async (cat) => {
+  const ref = await addDoc(collection(db, "product_categories"), { ...cat, createdAt: serverTimestamp() })
+  return ref.id
+}
+
+export const deleteProductCategory = async (id) => {
+  await deleteDoc(doc(db, "product_categories", id))
+}
+
 export const getUsers = async () => {
   const snap = await getDocs(collection(db, "users"))
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
