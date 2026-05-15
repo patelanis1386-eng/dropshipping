@@ -258,8 +258,15 @@ export default function App() {
         .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.1); }
         .hover-btn { transition: all 0.2s; cursor: pointer; }
         .hover-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-        .nav-link { cursor: pointer; transition: color 0.2s; }
-        .nav-link:hover { color: #a67a54; }
+        .nav-link { cursor: pointer; transition: color 0.2s, transform 0.2s; position: relative; }
+        .nav-link:hover { color: #a67a54; transform: translateY(-1px); }
+        .nav-link::after { content: ""; position: absolute; bottom: -2px; left: 50%; width: 0; height: 2px; background: #a67a54; transition: all 0.25s; transform: translateX(-50%); }
+        .nav-link:hover::after { width: 100%; }
+        .nav-link:active { transform: scale(0.95); }
+        @media (max-width: 900px) {
+          .nav-link::after { display: none; }
+          .nav-link:active { transform: scale(0.92); color: #a67a54; }
+        }
         .product-card:hover .product-overlay { opacity: 1 !important; }
         input:focus, select:focus, textarea:focus { outline: 2px solid #a67a54; outline-offset: 1px; }
         .brand-accent { color: #a67a54; }
