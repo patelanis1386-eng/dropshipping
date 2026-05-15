@@ -59,7 +59,7 @@ export default function App() {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (fbUser) => {
       if (fbUser) {
-        setUser({ name: fbUser.displayName || fbUser.email.split("@")[0], email: fbUser.email })
+        setUser({ uid: fbUser.uid, name: fbUser.displayName || fbUser.email.split("@")[0], email: fbUser.email })
       } else {
         setUser(null)
       }
