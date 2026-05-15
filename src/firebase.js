@@ -170,11 +170,16 @@ export const updateOrderStatus = async (id, status) => {
 }
 
 export const getNextOrderNumber = async () => {
-  const ref = doc(db, "settings", "orderCounter")
-  const snap = await getDoc(ref)
-  const next = (snap.exists() ? snap.data().count : 1000) + 1
-  await setDoc(ref, { count: next }, { merge: true })
-  return "ORD-" + next
+  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ"
+  const digits = "0123456789"
+  let chars = []
+  for (let i = 0; i < 4; i++) chars.push(letters[Math.floor(Math.random() * letters.length)])
+  for (let i = 0; i < 6; i++) chars.push(digits[Math.floor(Math.random() * digits.length)])
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [chars[i], chars[j]] = [chars[j], chars[i]]
+  }
+  return chars.join("")
 }
 
 export const getOrderByOrderNumber = async (orderNumber) => {

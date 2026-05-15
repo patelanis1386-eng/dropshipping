@@ -1239,7 +1239,7 @@ function TrackingPage({ nav }) {
     setTracked(null)
     try {
       const val = orderId.trim().toUpperCase()
-      const order = val.startsWith("ORD-") ? await getOrderByOrderNumber(val) : null
+      const order = val.length === 10 ? await getOrderByOrderNumber(val) : null
       if (order) {
         setTracked(order)
       } else {
@@ -1256,7 +1256,7 @@ function TrackingPage({ nav }) {
       <h1 style={{ fontSize: 36, fontWeight: 600, marginBottom: 8, textAlign: "center" }}>Track Your Order</h1>
       <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676", textAlign: "center", marginBottom: 40 }}>Enter your order number to get real-time tracking updates</p>
       <div style={{ display: "flex", gap: 12, marginBottom: 40 }}>
-        <input value={orderId} onChange={e => setOrderId(e.target.value)} onKeyDown={e => e.key === "Enter" && track()} placeholder="Enter order number (e.g. ORD-1001)" style={{ flex: 1, padding: "12px 18px", border: "1px solid #e0d8ce", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />
+        <input value={orderId} onChange={e => setOrderId(e.target.value)} onKeyDown={e => e.key === "Enter" && track()} placeholder="Enter 10-digit order number (e.g. AX3K9M2P1Q)" style={{ flex: 1, padding: "12px 18px", border: "1px solid #e0d8ce", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />
         <button onClick={track} className="hover-btn" style={{ background: "#8b6644", color: "#fff", border: "none", padding: "14px 28px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>{loading ? "Loading..." : "Track"}</button>
       </div>
       {notFound && (
