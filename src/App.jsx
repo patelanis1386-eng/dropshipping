@@ -840,7 +840,7 @@ function CartPage({ cart, setCart, removeCart, cartTotal, nav, shipping }) {
   )
 }
 
-function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast, setCart, user, shipping }) {
+function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast, setCart, user, shipping, setOrders }) {
   const INDIAN_STATES = ["Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu & Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"]
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", city: "", state: "", pincode: "" })
@@ -860,7 +860,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
     try {
       const orderNumber = await getNextOrderNumber()
       if (user?.uid) saveUserAddress(user.uid, { name: form.name, email: form.email, phone: form.phone, address: form.address, city: form.city, state: form.state, pincode: form.pincode }).catch(() => {})
-      await createOrder({
+      const orderId = await createOrder({
         orderNumber,
         userId: user?.uid || "guest",
         customerName: form.name,
@@ -883,6 +883,7 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
           { label: "Delivered", done: false, date: "" },
         ],
       })
+      setOrders(prev => [{ id: orderId, orderNumber, userId: user?.uid || "guest", customerName: form.name, email: form.email, phone: form.phone, address: `${form.address}, ${form.city}, ${form.state}, ${form.pincode}, India`, items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })), total, status: "Processing", paymentMethod: payMethod, trackingNumber: "", carrier: "", estimatedDelivery: "", trackingSteps: [{ label: "Order Placed", done: true, date: today }, { label: "Processing", done: false, date: "" }, { label: "Shipped", done: false, date: "" }, { label: "In Transit", done: false, date: "" }, { label: "Out for Delivery", done: false, date: "" }, { label: "Delivered", done: false, date: "" }] }, ...prev])
       setCart([])
       showToast("Order placed successfully! Your order number is " + orderNumber)
       nav("orders")
@@ -1185,8 +1186,8 @@ function OrdersPage({ orders, nav, user }) {
         <div key={o.id} style={{ background: "#fff", borderRadius: 16, padding: 24, marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
             <div>
-              <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 16 }}>{o.id?.slice(0, 12)}</div>
-              <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", marginTop: 4 }}>{(o.date || "Just now")} &middot; {(o.items?.length || o.items || 0)} items &middot; {typeof o.total === "number" ? fmt(o.total) : o.total}</div>
+              <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 16 }}>{o.orderNumber || o.id?.slice(0, 12)}</div>
+              <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", marginTop: 4 }}>{(o.date || "Just now")} &middot; {(o.items?.length || 0)} items &middot; {typeof o.total === "number" ? fmt(o.total) : o.total}</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <span style={{ background: STATUS_COLOR[o.status] + "22", color: STATUS_COLOR[o.status], fontFamily: "'Jost',sans-serif", fontSize: 12, fontWeight: 700, padding: "4px 14px", borderRadius: 20 }}>{o.status}</span>
