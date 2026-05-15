@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers, getBanner, updateBanner, getProductCategories, addProductCategory, deleteProductCategory } from "./firebase"
+import { auth, db, onAuthStateChanged, signUp, signIn, logOut, resetPassword, signInWithGoogle, signInAsGuest, getProducts, getProductById, addProduct, updateProduct, deleteProduct, getOrders, createOrder, updateOrderStatus, getReviews, addReview, subscribeNewsletter, getCategories, getUsers, getNewsletterSubscribers, getBanner, updateBanner, getProductCategories, addProductCategory, deleteProductCategory, getNextOrderNumber, getOrderByOrderNumber, updateOrderTracking } from "./firebase"
 import { SEED_REVIEWS, SEED_CATEGORIES, fmt, disc } from "./data"
 import { addDoc, collection, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore"
 
@@ -775,12 +775,15 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
   const [placing, setPlacing] = useState(false)
   const upd = (k, v) => setForm(prev => ({ ...prev, [k]: v }))
   const total = cartTotal + cartTotal * 0.08
+  const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })
 
   const placeOrder = async () => {
     if (!form.name || !form.email || !form.address) return showToast("Please fill all fields", "info")
     setPlacing(true)
     try {
+      const orderNumber = await getNextOrderNumber()
       await createOrder({
+        orderNumber,
         userId: user?.email || "guest",
         customerName: form.name,
         email: form.email,
@@ -789,10 +792,20 @@ function CheckoutPage({ cart, cartTotal, payMethod, setPayMethod, nav, showToast
         total,
         status: "Processing",
         paymentMethod: payMethod,
-        tracking: "PROCESSING",
+        trackingNumber: "",
+        carrier: "",
+        estimatedDelivery: "",
+        trackingSteps: [
+          { label: "Order Placed", done: true, date: today },
+          { label: "Processing", done: false, date: "" },
+          { label: "Shipped", done: false, date: "" },
+          { label: "In Transit", done: false, date: "" },
+          { label: "Out for Delivery", done: false, date: "" },
+          { label: "Delivered", done: false, date: "" },
+        ],
       })
       setCart([])
-      showToast("Order placed successfully!")
+      showToast("Order placed successfully! Your order number is " + orderNumber)
       nav("orders")
     } catch (e) {
       showToast("Failed to place order. Try again.", "info")
@@ -1086,50 +1099,74 @@ function OrdersPage({ orders, nav, user }) {
 function TrackingPage({ nav }) {
   const [orderId, setOrderId] = useState("")
   const [tracked, setTracked] = useState(null)
-  const track = () => {
-    if (!orderId) return
-    setTracked({
-      id: orderId || "ORD-9820", status: "In Transit", eta: "May 17, 2026", steps: [
-        { label: "Order Placed", done: true, date: "May 12" },
-        { label: "Processing", done: true, date: "May 12" },
-        { label: "Shipped", done: true, date: "May 13" },
-        { label: "In Transit", done: true, date: "May 14" },
-        { label: "Out for Delivery", done: false, date: "May 17 (Est.)" },
-        { label: "Delivered", done: false, date: "" },
-      ]
-    })
+  const [loading, setLoading] = useState(false)
+  const [notFound, setNotFound] = useState(false)
+  const track = async () => {
+    if (!orderId.trim()) return
+    setLoading(true)
+    setNotFound(false)
+    setTracked(null)
+    try {
+      const val = orderId.trim().toUpperCase()
+      const order = val.startsWith("ORD-") ? await getOrderByOrderNumber(val) : null
+      if (order) {
+        setTracked(order)
+      } else {
+        setNotFound(true)
+      }
+    } catch (e) {
+      setNotFound(true)
+    }
+    setLoading(false)
   }
+  const STATUS_COLOR = { Delivered: "#10b981", Shipped: "#3b82f6", "In Transit": "#8b5cf6", Processing: "#f59e0b" }
   return (
     <div className="tracking-page" style={{ maxWidth: 700, margin: "0 auto", padding: "60px 24px" }}>
       <h1 style={{ fontSize: 36, fontWeight: 600, marginBottom: 8, textAlign: "center" }}>Track Your Order</h1>
-      <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676", textAlign: "center", marginBottom: 40 }}>Enter your order ID to get real-time tracking updates</p>
+      <p style={{ fontFamily: "'Jost',sans-serif", color: "#767676", textAlign: "center", marginBottom: 40 }}>Enter your order number to get real-time tracking updates</p>
       <div style={{ display: "flex", gap: 12, marginBottom: 40 }}>
-        <input value={orderId} onChange={e => setOrderId(e.target.value)} placeholder="Enter Order ID (e.g. ORD-9820)" style={{ flex: 1, padding: "12px 18px", border: "1px solid #e0d8ce", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />
-        <button onClick={track} className="hover-btn" style={{ background: "#8b6644", color: "#fff", border: "none", padding: "14px 28px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Track</button>
+        <input value={orderId} onChange={e => setOrderId(e.target.value)} onKeyDown={e => e.key === "Enter" && track()} placeholder="Enter order number (e.g. ORD-1001)" style={{ flex: 1, padding: "12px 18px", border: "1px solid #e0d8ce", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontSize: 14, outline: "none" }} />
+        <button onClick={track} className="hover-btn" style={{ background: "#8b6644", color: "#fff", border: "none", padding: "14px 28px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>{loading ? "Loading..." : "Track"}</button>
       </div>
+      {notFound && (
+        <div style={{ background: "#fff7ed", border: "1px solid #fed7aa", color: "#9a3412", borderRadius: 12, padding: "24px 28px", textAlign: "center", fontFamily: "'Jost',sans-serif" }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>&#x1F50D;</div>
+          <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>Order Not Found</div>
+          <div style={{ fontSize: 14, color: "#c2410c" }}>No order found with that number. Please check and try again.</div>
+        </div>
+      )}
       {tracked && (
         <div style={{ background: "#fff", borderRadius: 20, padding: 32, boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }} className="fade-in">
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
             <div>
-              <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 18 }}>{tracked.id}</div>
-              <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#767676" }}>Estimated Delivery: {tracked.eta}</div>
+              <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 18 }}>{tracked.orderNumber || tracked.id?.slice(0, 10)}</div>
+              <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: "#767676" }}>{tracked.customerName || tracked.email}</div>
+              {tracked.estimatedDelivery && <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", marginTop: 4 }}>Estimated Delivery: {tracked.estimatedDelivery}</div>}
             </div>
-            <span style={{ background: "#dbeafe", color: "#3b82f6", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 700, padding: "4px 16px", borderRadius: 20 }}>{tracked.status}</span>
+            <div style={{ textAlign: "right" }}>
+              <span style={{ background: (STATUS_COLOR[tracked.status] || "#f59e0b") + "22", color: STATUS_COLOR[tracked.status] || "#f59e0b", fontFamily: "'Jost',sans-serif", fontSize: 13, fontWeight: 700, padding: "4px 16px", borderRadius: 20 }}>{tracked.status}</span>
+              {tracked.trackingNumber && <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#767676", marginTop: 6 }}>Tracking #: {tracked.trackingNumber}{tracked.carrier ? " (" + tracked.carrier + ")" : ""}</div>}
+            </div>
           </div>
-          <div style={{ position: "relative" }}>
-            {tracked.steps.map((step, i) => (
-              <div key={step.label} style={{ display: "flex", gap: 20, marginBottom: 24 }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                   <div style={{ width: 32, height: 32, borderRadius: "50%", background: step.done ? "#8b6644" : "#e0d8ce", display: "flex", alignItems: "center", justifyContent: "center", color: step.done ? "#fff" : "#555", fontWeight: 700, fontSize: 14, fontFamily: "'Jost',sans-serif" }}>{step.done ? "\u2713" : i + 1}</div>
-                  {i < tracked.steps.length - 1 && <div style={{ width: 2, flex: 1, background: step.done ? "#8b6644" : "#f0ede8", minHeight: 24 }} />}
+          {(tracked.trackingSteps || []).length > 0 && (
+            <div style={{ position: "relative", marginTop: 8 }}>
+              {(tracked.trackingSteps || []).map((step, i) => (
+                <div key={step.label} style={{ display: "flex", gap: 20, marginBottom: 24 }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: step.done ? "#8b6644" : "#e0d8ce", display: "flex", alignItems: "center", justifyContent: "center", color: step.done ? "#fff" : "#555", fontWeight: 700, fontSize: 14, fontFamily: "'Jost',sans-serif" }}>{step.done ? "\u2713" : i + 1}</div>
+                    {i < tracked.trackingSteps.length - 1 && <div style={{ width: 2, flex: 1, background: step.done ? "#8b6644" : "#f0ede8", minHeight: 24 }} />}
+                  </div>
+                  <div style={{ paddingTop: 4 }}>
+                    <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: step.done ? 600 : 400, color: step.done ? "#1a1a1a" : "#767676", fontSize: 14 }}>{step.label}</div>
+                    {step.date && <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676" }}>{step.date}</div>}
+                  </div>
                 </div>
-                <div style={{ paddingTop: 4 }}>
-                  <div style={{ fontFamily: "'Jost',sans-serif", fontWeight: step.done ? 600 : 400, color: step.done ? "#1a1a1a" : "#767676", fontSize: 14 }}>{step.label}</div>
-                  {step.date && <div style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676" }}>{step.date}</div>}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+          {(tracked.trackingSteps || []).length === 0 && (
+            <div style={{ fontFamily: "'Jost',sans-serif", color: "#767676", textAlign: "center", padding: 20, fontSize: 14 }}>Tracking details not yet available for this order.</div>
+          )}
         </div>
       )}
     </div>
@@ -1147,6 +1184,8 @@ function AdminPage({ products, setProducts, orders, banner, setBanner, productCa
   const [uploading, setUploading] = useState(false)
   const [savingProduct, setSavingProduct] = useState(false)
   const [productError, setProductError] = useState("")
+  const [trackModalOrder, setTrackModalOrder] = useState(null)
+  const [trackForm, setTrackForm] = useState({ trackingNumber: "", carrier: "", estimatedDelivery: "", steps: [] })
 
   useEffect(() => {
     if (adminTab === "customers") { getUsers().then(setCustomers).catch(() => {}); getNewsletterSubscribers().then(setSubs).catch(() => {}) }
@@ -1359,7 +1398,7 @@ function AdminPage({ products, setProducts, orders, banner, setBanner, productCa
                 <tbody>
                   {orders.map(o => (
                     <tr key={o.id} style={{ borderBottom: "1px solid #f8f5f0" }}>
-                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 13 }}>{o.id?.slice(0, 8)}...</td>
+                      <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 13 }}>{o.orderNumber || o.id?.slice(0, 8) + "..."}</td>
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", color: "#767676", fontSize: 13 }}>{o.customerName || o.email || "Guest"}</td>
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontSize: 13 }}>{o.items?.length || 0}</td>
                       <td style={{ padding: "12px 16px", fontFamily: "'Jost',sans-serif", fontWeight: 700, fontSize: 13 }}>{fmt(o.total)}</td>
@@ -1367,9 +1406,12 @@ function AdminPage({ products, setProducts, orders, banner, setBanner, productCa
                         <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 20, background: o.status === "Delivered" ? "#d1fae5" : o.status === "Shipped" ? "#dbeafe" : "#fef3c7", color: o.status === "Delivered" ? "#10b981" : o.status === "Shipped" ? "#3b82f6" : "#f59e0b" }}>{o.status}</span>
                       </td>
                       <td style={{ padding: "12px 16px" }}>
-                        <select value={o.status} onChange={async e => { await updateOrderStatus(o.id, e.target.value); window.location.reload() }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, padding: "4px 8px", borderRadius: 6, border: "1px solid #e0d8ce", background: "#fff", cursor: "pointer" }}>
-                          {["Processing", "Shipped", "Delivered"].map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
+                        <div style={{ display: "flex", gap: 6, flexDirection: "column" }}>
+                          <select value={o.status} onChange={async e => { await updateOrderStatus(o.id, e.target.value); showToast("Status updated") }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, padding: "4px 8px", borderRadius: 6, border: "1px solid #e0d8ce", background: "#fff", cursor: "pointer" }}>
+                            {["Processing", "Shipped", "Delivered"].map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                          <button onClick={() => { setTrackForm({ trackingNumber: o.trackingNumber || "", carrier: o.carrier || "", estimatedDelivery: o.estimatedDelivery || "", steps: (o.trackingSteps || []).map(s => ({ ...s })) }); setTrackModalOrder(o) }} style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: "#3b82f6", background: "#eff6ff", border: "none", padding: "4px 10px", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>Tracking</button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1518,6 +1560,48 @@ function AdminPage({ products, setProducts, orders, banner, setBanner, productCa
               {productError}
             </div>
           )}
+        </div>
+      </div>
+    )}
+    {trackModalOrder && (
+      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }} onClick={() => setTrackModalOrder(null)}>
+        <div style={{ background: "#fff", borderRadius: 20, padding: 32, width: "90%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+          <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>Tracking — {trackModalOrder.orderNumber || trackModalOrder.id?.slice(0, 8)}</h3>
+          <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: "#767676", marginBottom: 20 }}>{trackModalOrder.customerName || trackModalOrder.email}</p>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Tracking Number</label>
+            <input value={trackForm.trackingNumber} onChange={e => setTrackForm(p => ({ ...p, trackingNumber: e.target.value }))} placeholder="e.g. 1Z999AA10123456784" style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none" }} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+            <div>
+              <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Carrier</label>
+              <input value={trackForm.carrier} onChange={e => setTrackForm(p => ({ ...p, carrier: e.target.value }))} placeholder="e.g. India Post" style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none" }} />
+            </div>
+            <div>
+              <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Est. Delivery</label>
+              <input value={trackForm.estimatedDelivery} onChange={e => setTrackForm(p => ({ ...p, estimatedDelivery: e.target.value }))} placeholder="e.g. May 25" style={{ width: "100%", padding: "10px 14px", border: "1px solid #e0d8ce", borderRadius: 8, fontFamily: "'Jost',sans-serif", fontSize: 13, outline: "none" }} />
+            </div>
+          </div>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: "#666", display: "block", marginBottom: 8 }}>Tracking Steps</label>
+            {trackForm.steps.map((step, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <input type="checkbox" checked={step.done} onChange={e => { const s = [...trackForm.steps]; s[i] = { ...s[i], done: e.target.checked }; if (e.target.checked && !s[i].date) s[i].date = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }); setTrackForm(p => ({ ...p, steps: s })) }} style={{ width: 16, height: 16 }} />
+                <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, flex: 1, color: step.done ? "#1a1a1a" : "#767676", fontWeight: step.done ? 600 : 400 }}>{step.label}</span>
+                <input value={step.date || ""} onChange={e => { const s = [...trackForm.steps]; s[i] = { ...s[i], date: e.target.value }; setTrackForm(p => ({ ...p, steps: s })) }} placeholder="Date" style={{ width: 100, padding: "6px 10px", border: "1px solid #e0d8ce", borderRadius: 6, fontFamily: "'Jost',sans-serif", fontSize: 12, outline: "none" }} />
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 12 }}>
+            <button onClick={() => setTrackModalOrder(null)} style={{ flex: 1, background: "#f0ede8", color: "#555", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
+            <button onClick={async () => {
+              try {
+                await updateOrderTracking(trackModalOrder.id, { trackingNumber: trackForm.trackingNumber, carrier: trackForm.carrier, estimatedDelivery: trackForm.estimatedDelivery, trackingSteps: trackForm.steps })
+                showToast("Tracking updated!")
+                setTrackModalOrder(null)
+              } catch (e) { showToast("Failed to save tracking", "info") }
+            }} className="hover-btn" style={{ flex: 1, background: "#8b6644", color: "#fff", border: "none", padding: "12px", borderRadius: 10, fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Save Tracking</button>
+          </div>
         </div>
       </div>
     )}

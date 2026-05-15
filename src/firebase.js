@@ -169,6 +169,26 @@ export const updateOrderStatus = async (id, status) => {
   await updateDoc(doc(db, "orders", id), { status })
 }
 
+export const getNextOrderNumber = async () => {
+  const ref = doc(db, "settings", "orderCounter")
+  const snap = await getDoc(ref)
+  const next = (snap.exists() ? snap.data().count : 1000) + 1
+  await setDoc(ref, { count: next }, { merge: true })
+  return "ORD-" + next
+}
+
+export const getOrderByOrderNumber = async (orderNumber) => {
+  const q = query(collection(db, "orders"), where("orderNumber", "==", orderNumber), limit(1))
+  const snap = await getDocs(q)
+  if (snap.empty) return null
+  const d = snap.docs[0]
+  return { id: d.id, ...d.data() }
+}
+
+export const updateOrderTracking = async (id, data) => {
+  await updateDoc(doc(db, "orders", id), data)
+}
+
 export const getReviews = async () => {
   const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"))
   const snap = await getDocs(q)
